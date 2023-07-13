@@ -8,6 +8,9 @@ concurrency:
 jobs:
   build:
     uses: cloud-cli/workflows/.github/workflows/docker-ghcr-build.yml@main
+    permissions:
+      contents: read
+      packages: write
     with:
       name: aifn-run/aifn-run
       baseImage: cloud-cli/node:latest

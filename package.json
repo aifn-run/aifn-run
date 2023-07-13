@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "aifn-run",
   "private": true,
   "type": "module",
   "prettier": "@cloud-cli/prettier-config",
