@@ -24,6 +24,7 @@
 <script setup>
 import { useAuth } from "./composables/useAuth";
 import { useRouter } from "./composables/useRouter";
+import { computed } from "vue";
 
 const { topPages } = useRouter();
 const { isLoggedIn } = useAuth();
