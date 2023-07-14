@@ -4,8 +4,8 @@ import Settings from "../components/settings/Settings.vue";
 
 const topPages = [
   {
-    path: "/api",
-    name: "API",
+    path: "/docs",
+    name: "Docs",
     component: ApiDocs,
   },
   {
