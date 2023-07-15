@@ -27,7 +27,7 @@
         <button v-if="isLoggedIn" @click="showProfile()">
           <span
             class="pt-1 font-bold text-3xl text-center text-white bg-gray-800 border border-white rounded-full inline-block w-12 h-12"
-            >{{ profile.displayName.charAt(0) }}</span
+            >{{ profile && profile.displayName.charAt(0) }}</span
           >
         </button>
       </div>
@@ -45,7 +45,7 @@ import { useRouter } from "./composables/useRouter";
 import { computed } from "vue";
 
 const { topPages, router } = useRouter();
-const { isLoggedIn, signIn } = useAuth();
+const { isLoggedIn, profile, signIn } = useAuth();
 const links = computed(() =>
   topPages.filter((page) => !page.protected || isLoggedIn.value)
 );
