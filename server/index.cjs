@@ -104,7 +104,7 @@ function getFunctionCode(req, res) {
   res.end(code.trim());
 }
 
-async function createFunction(req, res) {
+async function saveFunction(uid, req, res) {
   const buffer = readBody(req);
 
   try {
@@ -115,9 +115,8 @@ async function createFunction(req, res) {
       res.end("Invalid input: p");
       return;
     }
-
-    const uid = crypto.randomUUID();
-    const payload = { p: body.p, model: body.model };
+    const { p, model, name } = body;
+    const payload = { p, model, name };
     await fn.set(uid, payload);
     res.writeHead(200);
     res.end(JSON.stringify({ uid }));
@@ -197,7 +196,11 @@ module.exports = function (req, res, next) {
   }
 
   if (method === "POST" && (url === "/fn" || url === "/fn/")) {
-    return createFunction(req, res);
+    return saveFunction(crypto.randomUUID(), req, res);
+  }
+
+  if (method === "PUT" && url.startsWith("/fn/") && uuidRe.test(url.slice(4))) {
+    return saveFunction(url.slice(4), req, res);
   }
 
   if (method === "POST" && url.startsWith("/run/")) {

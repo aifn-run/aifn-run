@@ -4,6 +4,11 @@ import Settings from "../components/settings/Settings.vue";
 
 const topPages = [
   {
+    path: "/",
+    name: "Getting Started",
+    component: ApiDocs,
+  },
+  {
     path: "/docs",
     name: "Docs",
     component: ApiDocs,
