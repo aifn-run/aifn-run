@@ -1,5 +1,6 @@
 const baseUrl = process.env.STORE_URL;
 const apiKey = process.env.API_KEY;
+const apiUrl = process.env.API_URL;
 const fetchOptions = { mode: "cors" };
 const fetchHeaders = { headers: { "content-type": "application/json" } };
 const idIsMissingError = new Error("Id is missing");
@@ -134,11 +135,8 @@ function replaceMarkers(text, input) {
 
 async function fetchCompletion(functionPrompt, input) {
   return new Promise((resolve, reject) => {
-    const remote = request(
-      "https://api.openai.com/v1/chat/completions",
-      completionOptions
-    );
-
+    const remote = request(apiUrl, completionOptions);
+    const content = replaceMarkers(functionPrompt, input);
     const payload = {
       model: process.env.API_MODEL,
       messages: [
@@ -147,12 +145,23 @@ async function fetchCompletion(functionPrompt, input) {
           content:
             "You are a helpful assistant. Don't explain and be very brief.",
         },
-        { role: "user", content: replaceMarkers(functionPrompt, input) },
+        { role: "user", content },
       ],
     };
 
+    remote.on("error", (e) => {
+      console.log(e);
+      reject();
+    });
+
     remote.on("response", (ai) => {
       const buffer = readBody(ai);
+
+      if (ai.statusCode !== 200) {
+        console.log(ai.statusCode, ai.statusMessage, buffer);
+        return reject();
+      }
+
       const json = JSON.parse(buffer);
 
       resolve(json.choices[0].message.content);
