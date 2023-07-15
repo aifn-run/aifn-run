@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import ApiDocs from "../components/api/ApiDocs.vue";
+import Me from "../components/user/Me.vue";
 import Settings from "../components/settings/Settings.vue";
 
 const topPages = [
@@ -21,7 +22,15 @@ const topPages = [
   },
 ];
 
-const routes = [...topPages];
+const routes = [
+  ...topPages,
+  {
+    path: "/me",
+    name: "Me",
+    protected: true,
+    component: Me,
+  },
+];
 
 export const router = createRouter({
   history: createWebHashHistory("/"),

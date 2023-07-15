@@ -11,7 +11,7 @@
           v-for="(route, index) of links"
           :key="route.path"
           :to="route.path"
-          class="font-bold px-4 py-2 rounded shadow-lg border text-white"
+          class="font-bold px-4 py-2 shadow-lg border text-white"
           :class="[
             index === 0 && 'rounded-l',
             index === links.length - 1 && 'rounded-r',
@@ -21,7 +21,15 @@
         >
       </nav>
       <div>
-        <span class="material-icons text-4xl text-white">account_circle</span>
+        <button v-if="!isLoggedIn" @click="signIn()">
+          <span class="material-icons text-4xl text-white">account_circle</span>
+        </button>
+        <button v-if="isLoggedIn" @click="showProfile()">
+          <span
+            class="pt-1 font-bold text-3xl text-center text-white bg-gray-800 border border-white rounded-full inline-block w-12 h-12"
+            >{{ profile.displayName.charAt(0) }}</span
+          >
+        </button>
       </div>
     </div>
 
@@ -36,9 +44,13 @@ import { useAuth } from "./composables/useAuth";
 import { useRouter } from "./composables/useRouter";
 import { computed } from "vue";
 
-const { topPages } = useRouter();
-const { isLoggedIn } = useAuth();
+const { topPages, router } = useRouter();
+const { isLoggedIn, signIn } = useAuth();
 const links = computed(() =>
   topPages.filter((page) => !page.protected || isLoggedIn.value)
 );
+
+function showProfile() {
+  router.push("/me");
+}
 </script>

@@ -2,16 +2,19 @@ import * as auth from "https://auth.aifn.run/auth.js";
 import { onMounted, ref } from "vue";
 
 const isLoggedIn = ref(false);
+const profile = ref({});
 
 export function useAuth() {
-  onMounted(async () => {
+  const refresh = async () => {
     try {
-      await auth.getProfile();
+      profile.value = await auth.getProfile();
       isLoggedIn.value = true;
     } catch {
       isLoggedIn.value = false;
     }
-  });
+  };
 
-  return { ...auth, isLoggedIn };
+  onMounted(refresh);
+
+  return { ...auth, isLoggedIn, profile, refresh };
 }
