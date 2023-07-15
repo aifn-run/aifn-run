@@ -1,4 +1,5 @@
 const baseUrl = process.env.STORE_URL;
+const apiKey = process.env.API_KEY;
 const fetchOptions = { mode: "cors" };
 const fetchHeaders = { headers: { "content-type": "application/json" } };
 const idIsMissingError = new Error("Id is missing");
