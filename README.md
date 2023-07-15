@@ -63,7 +63,7 @@ console.log(await loremIpsum({ length: 100 }));
 
 Request:
 ```json
-{ "inputs": { "lenght": "100" } }
+{ "inputs": { "length": "100" } }
 ```
 
 Response:

@@ -175,8 +175,9 @@ async function runFunction(req, res) {
   try {
     const item = await fn.get(uid);
     const input = await readBody(req);
+    // TODO catch exceptions
     const json = JSON.parse(input);
-    const message = fetchCompletion(item.p, json);
+    const message = fetchCompletion(item.p, json.inputs);
 
     res.end(message);
   } catch (error) {
@@ -204,7 +205,3 @@ module.exports = function (req, res, next) {
 
   next();
 };
-
-function init() {}
-
-init();
