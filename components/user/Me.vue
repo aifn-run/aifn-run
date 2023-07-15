@@ -1,6 +1,8 @@
 <template>
-  <div class="h-full flex items-center justify-center">
-    <div class="bg-white rounded-xl mx-auto p-8 border shadow-lg">
+  <div class="h-screen flex items-center justify-center">
+    <div
+      class="bg-white rounded-xl mx-auto p-8 border shadow-lg w-1/2 text-black"
+    >
       <figure>
         <img
           class="w-24 h-24 rounded-full mx-auto"
