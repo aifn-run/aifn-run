@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mx-auto container p-8">
     <main></main>
     <aside>
       <nav>
