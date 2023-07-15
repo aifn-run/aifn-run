@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "prettier": "@cloud-cli/prettier-config",
+  "main": "./server/index.cjs",
   "dependencies": {
     "vue-router": "^4.2.1"
   }
