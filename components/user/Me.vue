@@ -1,6 +1,7 @@
 <template>
   <div class="h-screen flex items-center justify-center">
     <div
+      v-if="isLoggedIn"
       class="bg-white rounded-xl mx-auto p-8 border shadow-lg w-1/2 text-black"
     >
       <figure>
@@ -29,5 +30,5 @@
 <script setup>
 import { useAuth } from "../../composables/useAuth";
 
-const { profile, signOut } = useAuth();
+const { profile, isLoggedIn, signOut } = useAuth();
 </script>

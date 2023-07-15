@@ -16,5 +16,10 @@ export function useAuth() {
 
   onMounted(refresh);
 
-  return { ...auth, isLoggedIn, profile, refresh };
+  const signOut = async () => {
+    await auth.signOut();
+    isLoggedIn.value = false;
+  };
+
+  return { ...auth, signOut, isLoggedIn, profile, refresh };
 }
