@@ -1,5 +1,5 @@
 <template>
-  <div class="flex space-x-8" ref="page">
+  <div class="space-x-8" ref="page">
     <main>
       <h1 class="text-2xl font-bold mb-6">Javascript API</h1>
 
