@@ -1,0 +1,60 @@
+<template>
+  <article>
+    <section>
+      <h2 class="text-2xl font-bold">How to start</h2>
+      <p>Import the library in your code</p>
+      <CodeBlock>
+        import ai from 'https://aifn.run/ai.mjs'
+      </CodeBlock>
+
+      <p>Create an AI function:</p>
+      <div class="font-mono my-4 p-2 border border-gray-400 rounded-lg w-full mb-4" v-hjs>
+        const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
+      </div>
+
+      <p>And use the new function like any other:</p>
+      <div class="font-mono my-4 p-2 border border-gray-400 rounded-lg w-full mb-4" v-hjs>
+        const paragraph = await lorem({ count: 100 });
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-bold">Try it</h2>
+      <textarea class="font-mono p-2 border border-gray-400 rounded-lg w-full h-20 mb-4" v-model="code"></textarea>
+      <div class="text-center">
+        <button @click="run()" class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-2 px-4">Run</button>
+      </div>
+
+      <div v-if="output" class="font-mono p-2 border border-gray-400 rounded-lg w-full h-20 mb-4">{{ output }}</div>
+    </section>
+  </article>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import CodeBlock from "./CodeBlock.vue";
+
+const initialSnippet = `
+import ai from 'https://aifn.run/ai.mjs'
+
+async function runExample() {
+  const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
+  const paragraph = await lorem({ count: 100 });
+}
+
+runExample.then(console.log);
+`;
+
+const code = ref(initialSnippet.trim());
+const output = ref('');
+
+function run() {
+  const script = document.createElement('script');
+  script.setAttribute('data-aifn', '');
+  document.head.querySelectorAll('script[data-aifn]').forEach(s => s.remove());
+  script.innerText = code.value;
+  document.head.appendChild(script);
+}
+
+console.log = (text) => output.value = text;
+</script>

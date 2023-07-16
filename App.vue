@@ -17,7 +17,10 @@
             index === links.length - 1 && 'rounded-r',
           ]"
           active-class="bg-gray-200 text-gray-900"
-          >{{ route.name }}</router-link
+          >
+          <span class="material-icons md:hidden">{{ route.icon }}</span>
+          <span class="hidden md:inline">{{ route.name }}</span>
+          </router-link
         >
       </nav>
       <div>
