@@ -1,7 +1,7 @@
 <template>
   <article>
     <section>
-      <h1 class="text-3xl font-bold pb-4">AI &mdash; as a function</h1>
+      <h1 class="text-3xl font-bold pb-4">AI as a function</h1>
       <h2 class="text-2xl font-bold mt-8 mb-4">Introduction</h2>
       <p>
         <strong>ai.fn() is a service to use AI chat completions as a regular Javascript function</strong> in any

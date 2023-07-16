@@ -20,5 +20,13 @@
       gtag('js', new Date());
       gtag('config', 'G-Q1WFHNM1L8');
     </script>
+    <script type="module">
+      import { getConsent } from 'https://gdpr.jsfn.run/index.js';
+
+      async function f() {
+        document.body.innerHTML += await getConsent('', { color:'white', bgColor:'#111827' });
+      }
+      f();
+      </script>
   </body>
 </html>
