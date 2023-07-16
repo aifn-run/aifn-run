@@ -20,12 +20,14 @@
 
     <section>
       <h2 class="text-2xl font-bold">Try it</h2>
-      <textarea class="font-mono p-2 border border-gray-400 rounded-lg w-full h-20 mb-4" v-model="code"></textarea>
+
+      <textarea class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full mb-4" v-model="code"></textarea>
+
       <div class="text-center">
-        <button @click="run()" class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-2 px-4">Run</button>
+        <button @click="run()" class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded">Run</button>
       </div>
 
-      <div v-if="output" class="font-mono p-2 border border-gray-400 rounded-lg w-full h-20 mb-4">{{ output }}</div>
+      <div v-if="output" class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full mb-4">{{ output }}</div>
     </section>
   </article>
 </template>
@@ -51,6 +53,7 @@ const output = ref('');
 function run() {
   const script = document.createElement('script');
   script.setAttribute('data-aifn', '');
+  script.setAttribute('type', 'module');
   document.head.querySelectorAll('script[data-aifn]').forEach(s => s.remove());
   script.innerText = code.value;
   document.head.appendChild(script);
