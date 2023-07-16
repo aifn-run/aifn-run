@@ -1,5 +1,5 @@
 <template>
-  <article>
+  <article class="mx-auto container p-">
     <section>
       <h2 class="text-2xl font-bold">How to start</h2>
       <p>Import the library in your code</p>
@@ -8,14 +8,14 @@
       </CodeBlock>
 
       <p>Create an AI function:</p>
-      <div class="font-mono my-4 p-2 border border-gray-400 rounded-lg w-full mb-4" v-hjs>
+      <CodeBlock>
         const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
-      </div>
+      </CodeBlock>
 
       <p>And use the new function like any other:</p>
-      <div class="font-mono my-4 p-2 border border-gray-400 rounded-lg w-full mb-4" v-hjs>
+      <CodeBlock>
         const paragraph = await lorem({ count: 100 });
-      </div>
+      </CodeBlock>
     </section>
 
     <section>

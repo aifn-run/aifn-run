@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { highlight } from 'https://highlight.jsfn.run/index.js';
 
 const code = ref(null);

@@ -9,7 +9,7 @@
         const g = await ai.fn({ p: 'text for prompt', model: 'gpt-4' })
       </CodeBlock>
 
-      <h2 id="use" class="text-lg mb-4">Create a function</h2>
+      <h2 id="use" class="text-lg mb-4">Use an AI function</h2>
       <CodeBlock lang="javascript">
         const result = await f('input for AI to process');
       </CodeBlock>
@@ -17,7 +17,7 @@
     <aside class="w-1/4">
       <nav class="flex flex-col">
         <a href="#" class="px-4 py-2 text-underline" v-nav="'create'">Create a function</a>
-        <a href="#" class="px-4 py-2 text-underline" v-nav="'use'">Create a function</a>
+        <a href="#" class="px-4 py-2 text-underline" v-nav="'use'">Use an AI function</a>
       </nav>
     </aside>
   </div>
