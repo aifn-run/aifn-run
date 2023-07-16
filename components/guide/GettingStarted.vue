@@ -24,15 +24,19 @@
       <h2 class="text-2xl font-bold mb-4 mt-8">How to start (web)</h2>
       <p class="mb-4">For web pages, import the library as a module:</p>
       <CodeBlock>
-        <pre v-pre>
-import ai from 'https://aifn.run/ai.mjs';
+        <pre v-pre>import ai from 'https://aifn.run/ai.mjs';
 
-// Create an AI function
-const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
+async function main() {
+  // Create an AI function
+  const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
 
-// And use the new function like any other:
-const paragraph = await lorem({ count: 100 });</pre
-        >
+  // And use the new function like any other:
+  const paragraph = await lorem({ count: 100 });
+
+  console.log(paragraph);
+}
+
+main();</pre>
       </CodeBlock>
 
       <h2 class="text-2xl font-bold mb-4 mt-8">How to start (Node.js)</h2>
@@ -41,8 +45,7 @@ const paragraph = await lorem({ count: 100 });</pre
         way the web API works:
       </p>
       <CodeBlock>
-        <pre v-pre>
-import ai from '@aifn/client';
+        <pre v-pre>import ai from '@aifn/client';
 
 async function main() {
   const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
