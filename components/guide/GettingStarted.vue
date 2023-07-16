@@ -52,7 +52,7 @@ main();</pre
     </section>
 
     <section>
-      <h2 class="text-2xl font-bold my-4">Try it</h2>
+      <h2 class="text-2xl font-bold mb-4 mt-8">Try it</h2>
 
       <textarea
         class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full h-half mb-4"
@@ -90,10 +90,10 @@ import CodeBlock from './CodeBlock.vue';
 const running = ref(false);
 const initialSnippet = `
 // create an AI function
-const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
+const lorem = await ai.fn('Create a lorem ipsum paragraph with at most {count} words');
 
 // use the function to get an AI response
-const paragraph = await lorem({ count: 100 });
+const paragraph = await lorem({ count: 10 });
 
 console.log(paragraph);
 `;
