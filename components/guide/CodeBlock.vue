@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { hightlight } from 'https://highlight.jsfn.run/index.js';
+import { highlight } from 'https://highlight.jsfn.run/index.js';
 
 const code = ref(null);
 const props = defineProps({
@@ -14,7 +14,7 @@ const props = defineProps({
 
 let embed = '1';
 onMounted(async () => {
-  code.innerHTML = await hightlight(code.textContent.trim(), { language: props.lang, embed });
+  code.innerHTML = await highlight(code.textContent.trim(), { language: props.lang, embed });
   embed = '';
 });
 </script>
