@@ -1,5 +1,5 @@
-import * as auth from "https://auth.aifn.run/auth.js";
-import { onMounted, ref } from "vue";
+import * as auth from 'https://auth.aifn.run/auth.js';
+import { onMounted, ref } from 'vue';
 
 const isLoggedIn = ref(false);
 const profile = ref({});

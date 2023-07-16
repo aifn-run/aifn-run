@@ -1,1 +1,1 @@
-const authHost = "https://auth.aifn.run/";
+const authHost = 'https://auth.aifn.run/';

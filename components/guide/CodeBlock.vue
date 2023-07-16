@@ -10,8 +10,8 @@ import { highlight } from 'https://highlight.jsfn.run/index.js';
 
 const code = ref(null);
 const props = defineProps({
-  lang: { type: String, default: 'javascript' }
-})
+  lang: { type: String, default: 'javascript' },
+});
 
 let isEmbedded = true;
 onMounted(async () => {

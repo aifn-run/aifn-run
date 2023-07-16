@@ -1,24 +1,24 @@
 const baseUrl = process.env.STORE_URL;
 const apiKey = process.env.API_KEY;
 const apiUrl = process.env.API_URL;
-const fetchOptions = { mode: "cors" };
-const fetchHeaders = { headers: { "content-type": "application/json" } };
-const idIsMissingError = new Error("Id is missing");
-const { request } = require("https");
-const crypto = require("crypto");
+const fetchOptions = { mode: 'cors' };
+const fetchHeaders = { headers: { 'content-type': 'application/json' } };
+const idIsMissingError = new Error('Id is missing');
+const { request } = require('https');
+const crypto = require('crypto');
 const uuidRe = /^.{8}-.{4}-.{4}-.{4}-.{12}$/;
 const completionOptions = {
-  method: "POST",
+  method: 'POST',
   headers: {
-    "Content-Type": "application/json",
-    Authorization: "Bearer " + apiKey,
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer ' + apiKey,
   },
 };
 
 class Resource {
   constructor(name) {
     if (!name) {
-      throw new Error("Resource name is missing");
+      throw new Error('Resource name is missing');
     }
 
     this.resourceUrl = new URL(`${name}/`, baseUrl).toString();
@@ -34,7 +34,7 @@ class Resource {
     return [];
   }
 
-  async get(id = "") {
+  async get(id = '') {
     if (!id) {
       throw idIsMissingError;
     }
@@ -45,13 +45,13 @@ class Resource {
     return x.json();
   }
 
-  async remove(id = "") {
+  async remove(id = '') {
     if (!id) {
       throw idIsMissingError;
     }
 
     const url = new URL(id, this.resourceUrl);
-    const res = await fetch(url, { ...fetchOptions, method: "DELETE" });
+    const res = await fetch(url, { ...fetchOptions, method: 'DELETE' });
 
     return res.ok;
   }
@@ -61,7 +61,7 @@ class Resource {
     const res = await fetch(url, {
       ...fetchOptions,
       ...fetchHeaders,
-      method: "PUT",
+      method: 'PUT',
       body: JSON.stringify(payload),
     });
 
@@ -73,33 +73,33 @@ class Resource {
   }
 }
 
-const fn = new Resource("fn");
+const fn = new Resource('fn');
 
 function readBody(stream) {
   return new Promise((resolve) => {
     const a = [];
-    stream.on("data", (c) => a.push(c));
-    stream.on("end", () => {
-      const buffer = Buffer.concat(a).toString("utf-8");
+    stream.on('data', (c) => a.push(c));
+    stream.on('end', () => {
+      const buffer = Buffer.concat(a).toString('utf-8');
       resolve(buffer);
     });
   });
 }
 
 function getFunctionCode(req, res) {
-  const uid = req.url.replace("/fn/", "");
+  const uid = req.url.replace('/fn/', '');
 
   if (!uid || !uuidRe.test(uid)) {
-    res.writeHead(400).end("Invalid UID");
+    res.writeHead(400).end('Invalid UID');
   }
 
   const code = `import ai from 'https://aifn.run/ai.js'; export default (inputs) => ai.call('${uid}', inputs);`;
 
   res.writeHead(200, {
-    "Content-Type": "text/javascript",
-    "Content-Length": code.length,
-    "Cache-Control": "max-age=604800, must-revalidate",
-    "Access-Control-Allow-Origin": "*",
+    'Content-Type': 'text/javascript',
+    'Content-Length': code.length,
+    'Cache-Control': 'max-age=604800, must-revalidate',
+    'Access-Control-Allow-Origin': '*',
   });
 
   res.end(code.trim());
@@ -113,7 +113,7 @@ async function saveFunction(uid, req, res) {
 
     if (!body.p) {
       res.writeHead(400);
-      res.end("Invalid input: p");
+      res.end('Invalid input: p');
       return;
     }
     const { p, model, name } = body;
@@ -123,14 +123,14 @@ async function saveFunction(uid, req, res) {
     res.end(JSON.stringify({ uid }));
   } catch (error) {
     res.writeHead(500);
-    res.end("Oh, snafu!");
+    res.end('Oh, snafu!');
     console.log(buffer);
     console.log(error);
   }
 }
 
 function replaceMarkers(text, input) {
-  return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim() || ""]);
+  return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim() || '']);
 }
 
 async function fetchCompletion(functionPrompt, input) {
@@ -141,20 +141,19 @@ async function fetchCompletion(functionPrompt, input) {
       model: process.env.API_MODEL,
       messages: [
         {
-          role: "system",
-          content:
-            "You are a helpful assistant. Don't explain and be very brief.",
+          role: 'system',
+          content: "You are a helpful assistant. Don't explain and be very brief.",
         },
-        { role: "user", content },
+        { role: 'user', content },
       ],
     };
 
-    remote.on("error", (e) => {
+    remote.on('error', (e) => {
       console.log(e);
       reject();
     });
 
-    remote.on("response", async (ai) => {
+    remote.on('response', async (ai) => {
       const buffer = await readBody(ai);
 
       if (ai.statusCode !== 200) {
@@ -173,11 +172,11 @@ async function fetchCompletion(functionPrompt, input) {
 }
 
 async function runFunction(req, res) {
-  const uid = req.url.replace("/run/", "");
+  const uid = req.url.replace('/run/', '');
 
   if (!uid || !uuidRe.test(uid)) {
     res.writeHead(400);
-    res.end("Invalid uuid");
+    res.end('Invalid uuid');
     return;
   }
 
@@ -191,7 +190,7 @@ async function runFunction(req, res) {
     res.end(message);
   } catch (error) {
     res.writeHead(500);
-    res.end("Oh, shoot!");
+    res.end('Oh, shoot!');
     console.log(buffer);
     console.log(error);
   }
@@ -200,19 +199,19 @@ async function runFunction(req, res) {
 module.exports = function (req, res, next) {
   const { url, method } = req;
 
-  if (url.startsWith("/fn/") && method === "GET") {
+  if (url.startsWith('/fn/') && method === 'GET') {
     return getFunctionCode(req, res);
   }
 
-  if (method === "POST" && (url === "/fn" || url === "/fn/")) {
+  if (method === 'POST' && (url === '/fn' || url === '/fn/')) {
     return saveFunction(crypto.randomUUID(), req, res);
   }
 
-  if (method === "PUT" && url.startsWith("/fn/") && uuidRe.test(url.slice(4))) {
+  if (method === 'PUT' && url.startsWith('/fn/') && uuidRe.test(url.slice(4))) {
     return saveFunction(url.slice(4), req, res);
   }
 
-  if (method === "POST" && url.startsWith("/run/")) {
+  if (method === 'POST' && url.startsWith('/run/')) {
     return runFunction(req, res);
   }
 

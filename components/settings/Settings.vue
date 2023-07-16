@@ -1,13 +1,9 @@
 <template>
-  <div class="container mx-auto py-8">
+  <div>
     <h1 class="text-2xl font-bold mb-6">Settings</h1>
     <form>
       <div class="mb-4" v-for="setting in settingList">
-        <label
-          :for="setting.key"
-          class="block uppercase text-xs font-medium text-gray-700"
-          >{{ setting.label }}</label
-        >
+        <label :for="setting.key" class="block uppercase text-xs font-medium text-gray-700">{{ setting.label }}</label>
         <input
           :id="setting.key"
           v-model="setting.ref.value"
@@ -20,19 +16,19 @@
 </template>
 
 <script setup>
-import { watch, ref } from "vue";
-import { useProperty } from "../../composables/useProperty";
+import { watch, ref } from 'vue';
+import { useProperty } from '../../composables/useProperty';
 
 const properties = [];
 const settingList = properties.map((key) => {
-  const label = key.replace(/[A-Z]{1}/g, (c) => " " + c);
+  const label = key.replace(/[A-Z]{1}/g, (c) => ' ' + c);
   const [current, setProperty] = useProperty(key);
   const reference = ref(current.value);
 
   watch(() => reference.value, setProperty);
   watch(
     () => current.value,
-    (v) => (reference.value = v)
+    (v) => (reference.value = v),
   );
 
   return { ref: reference, label, key };
