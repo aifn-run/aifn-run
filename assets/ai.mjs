@@ -15,7 +15,11 @@ const config = {};
  */
 async function fn(fnOptions) {
   const body = typeof fnOptions === 'string' ? { p: fnOptions } : fnOptions;
-  const create = await fetch("/fn", { method: "POST", body: JSON.stringify(body) });
+  const create = await fetch("/fn", {
+    method: "POST",
+    headers: { 'Authorization': config.key || '' },
+    body: JSON.stringify(body)
+  });
 
   if (!create.ok) {
     throw new Error(create.status);
@@ -27,14 +31,13 @@ async function fn(fnOptions) {
 }
 
 async function configure(key) {
-  const c = await fetch("https://aifn.run/conf/" + key);
-  const conf = await c.json();
-  Object.assign(config, conf);
+  config.key = key;
 }
 
 async function call(uid, inputs) {
   const call = await fetch("/run/" + uid, {
     method: "POST",
+    headers: { 'Authorization': config.key || '' },
     body: JSON.stringify(inputs),
   });
 
