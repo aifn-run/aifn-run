@@ -3,12 +3,23 @@
     <section>
       <h1 class="text-3xl font-bold pb-4">ai.fn() -- AI as a function</h1>
       <h2 class="text-2xl font-bold mb-4">Introduction</h2>
-      <p><strong>ai.fn()</strong> is a service to use AI chat completions as a regular Javascript function in any project, for both browser and Node.JS.</p>
+      <p>
+        <strong>ai.fn()</strong> is a service to use AI chat completions as a regular Javascript function in any
+        project, for both browser and Node.JS.
+      </p>
 
       <h2 class="text-2xl font-bold my-4">But why?</h2>
-      <p class="mb-4">ChatBots and AI integrations via REST API's have their own boilerplate and set up, which has to be done over and over again.</p>
-      <p class="mb-4">Javascript already offers the tools we need to make that easier: async/await combined with ES module imports.</p>
-      <p class="mb-4">Not only that, with AI completions we can achieve many tasks using simple prompts, encapsulated as Javascript functions.</p>
+      <p class="mb-4">
+        ChatBots and AI integrations via REST API's have their own boilerplate and set up, which has to be done over and
+        over again.
+      </p>
+      <p class="mb-4">
+        Javascript already offers the tools we need to make that easier: async/await combined with ES module imports.
+      </p>
+      <p class="mb-4">
+        Not only that, with AI completions we can achieve many tasks using simple prompts, encapsulated as Javascript
+        functions.
+      </p>
 
       <h2 class="text-2xl font-bold my-4">How to start (web)</h2>
       <p class="mb-4">For web pages, import the library in your code:</p>
@@ -34,8 +45,8 @@ async function main() {
   console.log(paragraph);
 }
 
-main();
-        </pre>
+main();</pre
+        >
       </CodeBlock>
     </section>
 
@@ -43,20 +54,28 @@ main();
       <h2 class="text-2xl font-bold my-4">Try it</h2>
 
       <textarea
-        class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full h-40 mb-4"
+        class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full h-half mb-4"
         v-model="code"
       ></textarea>
 
-      <div class="text-center">
+      <div>
         <button
+          :disabled="running"
           @click="run()"
-          class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded"
+          class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex mx-auto"
         >
-          Run
+          <span class="material-icons" :class="running && 'animate-spin'">{{
+            running ? 'refresh' : 'play_arrow'
+          }}</span>
+          <span>Run</span>
         </button>
       </div>
 
-      <div v-if="output" class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full mb-4">
+      <div
+        v-if="output || running"
+        class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full mb-4"
+      >
+        <span class="material-icons animate-spin" v-if="running">autorenew</span>
         {{ output }}
       </div>
     </section>
@@ -67,33 +86,39 @@ main();
 import { ref } from 'vue';
 import CodeBlock from './CodeBlock.vue';
 
+const running = ref(false);
 const initialSnippet = `
-import ai from 'https://aifn.run/ai.mjs'
+// create an AI function
+const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
 
-async function runExample() {
-  const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
-  const paragraph = await lorem({ count: 100 });
-  console.log(paragraph)
-}
+// use the function to get an AI response
+const paragraph = await lorem({ count: 100 });
 
-try {
-  runExample();
-} catch (e) {
-  console.log(e)
-}
+console.log(paragraph);
 `;
 
 const code = ref(initialSnippet.trim());
 const output = ref('');
 
-function run() {
-  const script = document.createElement('script');
-  script.setAttribute('data-aifn', '');
-  script.setAttribute('type', 'module');
-  document.head.querySelectorAll('script[data-aifn]').forEach((s) => s.remove());
-  script.textContent = code.value;
-  document.head.appendChild(script);
+async function run() {
+  output.value = '';
+  const fn = Function(`async function runExample() { ${code.value}; }
+  return runExample()`);
+
+  running.value = true;
+
+  try {
+    await fn();
+  } finally {
+    running.value = false;
+  }
 }
 
-console.log = (text) => (output.value = text);
+console.log = (text) => (output.value += text);
 </script>
+
+<style scoped>
+.h-half {
+  height: 50vh;
+}
+</style>

@@ -38,6 +38,9 @@
 import { useAuth } from './composables/useAuth';
 import { useRouter } from './composables/useRouter';
 import { computed } from 'vue';
+import ai from 'https://aifn.run/ai.mjs'
+
+window.ai = ai;
 
 const { topPages, router } = useRouter();
 const { isLoggedIn, profile, signIn } = useAuth();
