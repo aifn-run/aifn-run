@@ -25,16 +25,16 @@
       <p class="mb-4">Then use the module in the same way the web API works:</p>
       <CodeBlock>
         <pre v-pre>
-          import ai from '@aifn/client';
+import ai from '@aifn/client';
 
-          async function main() {
-            const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
-            const paragraph = await lorem({ count: 100 });
+async function main() {
+  const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
+  const paragraph = await lorem({ count: 100 });
 
-            console.log(paragraph);
-          }
+  console.log(paragraph);
+}
 
-          main();
+main();
         </pre>
       </CodeBlock>
     </section>
