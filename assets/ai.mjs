@@ -15,10 +15,10 @@ const config = {};
  */
 async function fn(fnOptions) {
   const body = typeof fnOptions === 'string' ? { p: fnOptions } : fnOptions;
-  const create = await fetch("/fn", {
-    method: "POST",
-    headers: { 'Authorization': config.key || '' },
-    body: JSON.stringify(body)
+  const create = await fetch('/fn', {
+    method: 'POST',
+    headers: { Authorization: config.key || '' },
+    body: JSON.stringify(body),
   });
 
   if (!create.ok) {
@@ -35,10 +35,10 @@ async function configure(key) {
 }
 
 async function call(uid, inputs) {
-  const call = await fetch("/run/" + uid, {
-    method: "POST",
-    headers: { 'Authorization': config.key || '' },
-    body: JSON.stringify(inputs),
+  const call = await fetch('/run/' + uid, {
+    method: 'POST',
+    headers: { Authorization: config.key || '' },
+    body: JSON.stringify({ inputs }),
   });
 
   if (!call.ok) {

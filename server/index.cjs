@@ -183,6 +183,7 @@ async function runFunction(req, res) {
   try {
     const item = await fn.get(uid);
     const input = await readBody(req);
+    console.log(input, item.p, json.inputs);
     // TODO catch exceptions
     const json = JSON.parse(input);
     const message = fetchCompletion(item.p, json.inputs);
@@ -191,7 +192,6 @@ async function runFunction(req, res) {
   } catch (error) {
     res.writeHead(500);
     res.end('Oh, shoot!');
-    console.log(buffer);
     console.log(error);
   }
 }
