@@ -1,7 +1,7 @@
 <template>
-  <article class="mx-auto container p-">
+  <article class="mx-auto container py-8">
     <section>
-      <h2 class="text-2xl font-bold">How to start</h2>
+      <h2 class="text-2xl font-bold mb-6">How to start</h2>
       <p>Import the library in your code</p>
       <CodeBlock>
         import ai from 'https://aifn.run/ai.mjs'
@@ -19,7 +19,7 @@
     </section>
 
     <section>
-      <h2 class="text-2xl font-bold">Try it</h2>
+      <h2 class="text-2xl font-bold mb-6">Try it</h2>
 
       <textarea class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full mb-4" v-model="code"></textarea>
 

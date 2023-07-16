@@ -15,7 +15,7 @@ const props = defineProps({
 
 let embed = '1';
 onMounted(async () => {
-  code.innerHTML = await highlight(code.textContent.trim(), { language: props.lang, embed });
+  code.value.innerHTML = await highlight(code.value.textContent.trim(), { language: props.lang, embed });
   embed = '';
 });
 </script>
