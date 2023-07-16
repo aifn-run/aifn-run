@@ -142,7 +142,7 @@ async function saveFunction(uid, req, res) {
     if (list.length) {
       uid = list[0].uid;
     } else {
-      const payload = { p, model, name, hash };
+      const payload = { p, model, name, hash, uid };
       await fn.set(uid, payload);
     }
 
