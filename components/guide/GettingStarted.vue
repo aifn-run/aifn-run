@@ -1,14 +1,14 @@
 <template>
   <article>
     <section>
-      <h1 class="text-3xl font-bold pb-4">ai.fn() -- AI as a function</h1>
-      <h2 class="text-2xl font-bold mb-4">Introduction</h2>
+      <h1 class="text-3xl font-bold pb-4">ai.fn() &mdash; AI as a function</h1>
+      <h2 class="text-2xl font-bold mt-8 mb-4">Introduction</h2>
       <p>
         <strong>ai.fn()</strong> is a service to use AI chat completions as a regular Javascript function in any
         project, for both browser and Node.JS.
       </p>
 
-      <h2 class="text-2xl font-bold my-4">But why?</h2>
+      <h2 class="text-2xl font-bold mb-4 mt-8">But why?</h2>
       <p class="mb-4">
         ChatBots and AI integrations via REST API's have their own boilerplate and set up, which has to be done over and
         over again.
@@ -21,19 +21,20 @@
         functions.
       </p>
 
-      <h2 class="text-2xl font-bold my-4">How to start (web)</h2>
-      <p class="mb-4">For web pages, import the library in your code:</p>
-      <CodeBlock>import ai from 'https://aifn.run/ai.mjs'</CodeBlock>
+      <h2 class="text-2xl font-bold mb-4 mt-8">How to start (web)</h2>
+      <p class="mb-4">For web pages, import the library as a module:</p>
+      <CodeBlock>
+        <pre v-pre>import ai from 'https://aifn.run/ai.mjs';
 
-      <p class="mb-4">Create an AI function:</p>
-      <CodeBlock>const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');</CodeBlock>
+// Create an AI function
+const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
 
-      <p class="mb-4">And use the new function like any other:</p>
-      <CodeBlock>const paragraph = await lorem({ count: 100 });</CodeBlock>
+// And use the new function like any other:
+const paragraph = await lorem({ count: 100 });</pre>
+      </CodeBlock>
 
-      <h2 class="text-2xl font-bold my-4">How to start (Node.js)</h2>
-      <p class="mb-4">For server-side, install `npm i @aifn/client`.</p>
-      <p class="mb-4">Then use the module in the same way the web API works:</p>
+      <h2 class="text-2xl font-bold mb-4 mt-8">How to start (Node.js)</h2>
+      <p class="mb-4">For server-side, install <code class="py-1 px-2 bg-gray-800">@aifn/client</code> and use the module in the same way the web API works:</p>
       <CodeBlock>
         <pre v-pre>
 import ai from '@aifn/client';

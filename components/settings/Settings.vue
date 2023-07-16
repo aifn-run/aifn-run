@@ -2,7 +2,7 @@
   <div>
     <h1 class="text-2xl font-bold mb-6">Settings</h1>
     <form>
-      <div class="mb-4" v-for="setting in settingList">
+      <div class="mb-4" v-for="setting of settingList">
         <label :for="setting.key" class="block uppercase text-xs font-medium text-gray-700">{{ setting.label }}</label>
         <input
           :id="setting.key"

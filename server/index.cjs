@@ -2,6 +2,7 @@ const baseUrl = process.env.STORE_URL;
 const apiKey = process.env.API_KEY;
 const apiUrl = process.env.API_URL;
 const apiModel = process.env.API_MODEL;
+const authUrl = process.env.AUTH_URL;
 const fetchOptions = { mode: 'cors' };
 const fetchHeaders = { headers: { 'content-type': 'application/json' } };
 const idIsMissingError = new Error('Id is missing');
@@ -88,6 +89,16 @@ class Resource {
 }
 
 const fn = new Resource('fn');
+const settings = new Resource('settings');
+const history = new Resource('history');
+const logs = new Resource('log');
+
+function log(...args) {
+  const time = Date.now();
+  const body = args.map(String);
+  const uid = crypto.randomUUID();
+  logs.set(uid, { uid, time, body: args.length > 1 ? body : body[0] });
+}
 
 function readBody(stream) {
   return new Promise((resolve) => {
@@ -97,6 +108,20 @@ function readBody(stream) {
       const buffer = Buffer.concat(a).toString('utf-8');
       resolve(buffer);
     });
+  });
+}
+
+function getProfile(cookie) {
+  return new Promise((resolve, reject) => {
+    const r = request(authUrl, { headers: { cookie } });
+
+    r.on('response', async (res) => {
+      if (res.statusCode !== 200) return reject();
+      const profile = JSON.parse(await readBody());
+      resolve(profile);
+    });
+    r.on('error', reject);
+    r.end();
   });
 }
 
@@ -151,8 +176,7 @@ async function saveFunction(uid, req, res) {
   } catch (error) {
     res.writeHead(500);
     res.end('Oh, snafu!');
-    console.log(buffer);
-    console.log(error);
+    log(buffer, error);
   }
 }
 
@@ -167,16 +191,13 @@ async function fetchCompletion(functionPrompt, input, model) {
     const payload = {
       model,
       messages: [
-        {
-          role: 'system',
-          content: "You are a helpful assistant. Don't explain and be very brief.",
-        },
+        { role: 'system', content: systemMessage },
         { role: 'user', content },
       ],
     };
 
-    remote.on('error', (e) => {
-      console.log(e);
+    remote.on('error', (error) => {
+      log(input, model, error);
       reject();
     });
 
@@ -184,13 +205,15 @@ async function fetchCompletion(functionPrompt, input, model) {
       const buffer = await readBody(ai);
 
       if (ai.statusCode !== 200) {
-        console.log(ai.statusCode, ai.statusMessage, buffer);
-        return reject();
+        reject();
+        log(`${ai.statusCode}: ${ai.statusMessage}`, buffer);
+        return;
       }
 
       const json = JSON.parse(buffer);
-
-      resolve(json.choices[0].message.content);
+      const text = json.choices[0].message.content;
+      resolve(text);
+      history.set(crypto.randomInt(), { uid, input: content, output: text });
     });
 
     remote.write(JSON.stringify(payload));
@@ -210,16 +233,39 @@ async function runFunction(req, res) {
   try {
     const item = await fn.get(uid);
     const input = await readBody(req);
-    console.log(input, item);
-    // TODO catch exceptions
+    log(input, item);
     const json = JSON.parse(input);
     const message = await fetchCompletion(item.p, json.inputs, item.model || apiModel);
-
     res.end(message);
   } catch (error) {
     res.writeHead(500);
     res.end('Oh, shoot!');
-    console.log(error);
+    log(uid, error);
+  }
+}
+
+async function getSettings(req, res) {
+  try {
+    const profile = await getProfile(req.headers.cookie);
+    return settings.get(profile.id);
+  } catch (error) {
+    res.writeHead(500);
+    res.end('Ah, crackers!');
+  }
+}
+
+async function saveSettings(req, res) {
+  const buffer = await readBody(req);
+
+  try {
+    const body = JSON.parse(buffer);
+    const profile = await getProfile(req.headers.cookie);
+    const userId = profile.id;
+    settings.set(userId, body);
+  } catch (error) {
+    res.writeHead(500);
+    res.end('Ah, crackers!');
+    log(buffer, error);
   }
 }
 
@@ -240,6 +286,11 @@ module.exports = function (req, res, next) {
 
   if (method === 'POST' && url.startsWith('/run/')) {
     return runFunction(req, res);
+  }
+
+  if (url === '/settings') {
+    method === 'GET' && getSettings(req, res);
+    method === 'PUT' && saveSettings(req, res);
   }
 
   next();
