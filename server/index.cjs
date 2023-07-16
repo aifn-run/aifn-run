@@ -210,10 +210,10 @@ async function runFunction(req, res) {
   try {
     const item = await fn.get(uid);
     const input = await readBody(req);
-    console.log(input, item.p);
+    console.log(input, item);
     // TODO catch exceptions
     const json = JSON.parse(input);
-    const message = fetchCompletion(item.p, json.inputs, item.model || apiModel);
+    const message = await fetchCompletion(item.p, json.inputs, item.model || apiModel);
 
     res.end(message);
   } catch (error) {
