@@ -10,11 +10,12 @@ const config = {};
 /**
  * Create a new AI function
  *
- * @param {FnOptions} fnOptions
+ * @param {FnOptions|String} fnOptions
  * @returns {function(Record<string,string> inputs): Promise<string>}   AI powered async function
  */
 async function fn(fnOptions) {
-  const create = await fetch("/fn", { method: "POST", body: JSON(fnOptions) });
+  const body = typeof fnOptions === 'string' ? { p: fnOptions } : fnOptions;
+  const create = await fetch("/fn", { method: "POST", body: JSON.stringify(body) });
 
   if (!create.ok) {
     throw new Error(create.status);
