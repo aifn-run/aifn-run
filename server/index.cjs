@@ -3,6 +3,8 @@ const apiKey = process.env.API_KEY;
 const apiUrl = process.env.API_URL;
 const apiModel = process.env.API_MODEL;
 const authUrl = process.env.AUTH_URL;
+const systemMessage = process.env.SYSTEM_MESSAGE;
+
 const fetchOptions = { mode: 'cors' };
 const fetchHeaders = { headers: { 'content-type': 'application/json' } };
 const idIsMissingError = new Error('Id is missing');
