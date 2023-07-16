@@ -1,6 +1,7 @@
 const baseUrl = process.env.STORE_URL;
 const apiKey = process.env.API_KEY;
 const apiUrl = process.env.API_URL;
+const apiModel = process.env.API_MODEL;
 const fetchOptions = { mode: 'cors' };
 const fetchHeaders = { headers: { 'content-type': 'application/json' } };
 const idIsMissingError = new Error('Id is missing');
@@ -24,14 +25,27 @@ class Resource {
     this.resourceUrl = new URL(`${name}/`, baseUrl).toString();
   }
 
-  async list() {
+  async list(filters = null) {
     const res = await fetch(this.resourceUrl, fetchOptions);
 
-    if (res.ok) {
-      return res.json();
+    if (!res.ok) {
+      return [];
     }
 
-    return [];
+    const all = await res.json();
+    if (!filters) {
+      return all;
+    }
+
+    const f = Object.entries(filters);
+    let filtered = all;
+
+    while (filtered.length && f.length) {
+      const [key, value] = f.shift();
+      filtered = filtered.filter((next) => next[key] == value);
+    }
+
+    return filtered;
   }
 
   async get(id = '') {
@@ -116,9 +130,22 @@ async function saveFunction(uid, req, res) {
       res.end('Invalid input: p');
       return;
     }
-    const { p, model, name } = body;
-    const payload = { p, model, name };
-    await fn.set(uid, payload);
+
+    const { p, model = '', name = '' } = body;
+    const hash = crypto
+      .createHash('sha256')
+      .update(p + model + name)
+      .digest('hex');
+
+    const list = await fn.list({ hash });
+
+    if (list.length) {
+      uid = list[0].uid;
+    } else {
+      const payload = { p, model, name, hash };
+      await fn.set(uid, payload);
+    }
+
     res.writeHead(200);
     res.end(JSON.stringify({ uid }));
   } catch (error) {
@@ -133,12 +160,12 @@ function replaceMarkers(text, input) {
   return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim() || '']);
 }
 
-async function fetchCompletion(functionPrompt, input) {
+async function fetchCompletion(functionPrompt, input, model) {
   return new Promise((resolve, reject) => {
     const remote = request(apiUrl, completionOptions);
     const content = replaceMarkers(functionPrompt, input);
     const payload = {
-      model: process.env.API_MODEL,
+      model,
       messages: [
         {
           role: 'system',
@@ -183,10 +210,10 @@ async function runFunction(req, res) {
   try {
     const item = await fn.get(uid);
     const input = await readBody(req);
-    console.log(input, item.p, json.inputs);
+    console.log(input, item.p);
     // TODO catch exceptions
     const json = JSON.parse(input);
-    const message = fetchCompletion(item.p, json.inputs);
+    const message = fetchCompletion(item.p, json.inputs, item.model || apiModel);
 
     res.end(message);
   } catch (error) {
