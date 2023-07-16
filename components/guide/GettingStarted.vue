@@ -23,17 +23,19 @@
       <h2 class="text-2xl font-bold my-4">How to start (Node.js)</h2>
       <p class="mb-4">For server-side, install `npm i @aifn/client`.</p>
       <p class="mb-4">Then use the module in the same way the web API works:</p>
-      <CodeBlock v-pre>
-        import ai from '@aifn/client';
+      <CodeBlock>
+        <pre v-pre>
+          import ai from '@aifn/client';
 
-        async function main() {
-          const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
-          const paragraph = await lorem({ count: 100 });
+          async function main() {
+            const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
+            const paragraph = await lorem({ count: 100 });
 
-          console.log(paragraph);
-        }
+            console.log(paragraph);
+          }
 
-        main();
+          main();
+        </pre>
       </CodeBlock>
     </section>
 

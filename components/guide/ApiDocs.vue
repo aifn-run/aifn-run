@@ -4,12 +4,14 @@
       <h1 class="text-2xl font-bold mb-6">Javascript API</h1>
 
       <h2 id="create" class="text-lg my-4">Create a function</h2>
-      <CodeBlock v-pre>
-        // with just a prompt
-        const f = await ai.fn('text for prompt');
+      <CodeBlock>
+        <pre v-pre>
+          // with just a prompt
+          const f = await ai.fn('text for prompt');
 
-        // with a prompt and a name
-        const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });
+          // with a prompt and a name
+          const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });
+        </pre>
       </CodeBlock>
 
       <h2 id="use" class="text-lg my-4">Use an AI function</h2>

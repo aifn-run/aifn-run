@@ -17,6 +17,7 @@ let isEmbedded = true;
 onMounted(async () => {
   const embed = isEmbedded ? '1' : '';
   isEmbedded = false;
-  code.value.innerHTML = await highlight(code.value.textContent.trim(), { language: props.lang, embed });
+  const node = code.value.querySelector('pre') || code.value;
+  node.innerHTML = await highlight(node.textContent.trim(), { language: props.lang, embed });
 });
 </script>
