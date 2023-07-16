@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-screen h-screen flex flex-col overflow-hidden bg-gray-900 text-white"
+    class="w-screen h-screen flex flex-col bg-gray-900 text-white"
   >
     <div
       class="flex justify-between items-center border-b border-black bg-gray-700 space-x-12 shadow-lg p-4"
@@ -36,7 +36,7 @@
       </div>
     </div>
 
-    <div>
+    <div class="overflow-y-scroll">
       <router-view></router-view>
     </div>
   </div>

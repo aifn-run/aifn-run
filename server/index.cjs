@@ -106,7 +106,7 @@ function getFunctionCode(req, res) {
 }
 
 async function saveFunction(uid, req, res) {
-  const buffer = readBody(req);
+  const buffer = await readBody(req);
 
   try {
     const body = JSON.parse(buffer);
@@ -154,8 +154,8 @@ async function fetchCompletion(functionPrompt, input) {
       reject();
     });
 
-    remote.on("response", (ai) => {
-      const buffer = readBody(ai);
+    remote.on("response", async (ai) => {
+      const buffer = await readBody(ai);
 
       if (ai.statusCode !== 200) {
         console.log(ai.statusCode, ai.statusMessage, buffer);

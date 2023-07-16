@@ -1,5 +1,5 @@
 <template>
-  <div class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full mb-4" ref="code">
+  <div class="font-mono my-4 p-4 bg-gray-100 text-gray-900 rounded" ref="code">
     <slot></slot>
   </div>
 </template>
@@ -13,9 +13,10 @@ const props = defineProps({
   lang: { type: String, default: 'javascript' }
 })
 
-let embed = '1';
+let isEmbedded = true;
 onMounted(async () => {
+  const embed = isEmbedded ? '1' : '';
+  isEmbedded = false;
   code.value.innerHTML = await highlight(code.value.textContent.trim(), { language: props.lang, embed });
-  embed = '';
 });
 </script>

@@ -1,7 +1,7 @@
 <template>
   <article class="mx-auto container py-8">
     <section>
-      <h2 class="text-2xl font-bold mb-6">How to start</h2>
+      <h2 class="text-2xl font-bold mb-4">How to start</h2>
       <p>Import the library in your code</p>
       <CodeBlock>
         import ai from 'https://aifn.run/ai.mjs'
@@ -19,9 +19,9 @@
     </section>
 
     <section>
-      <h2 class="text-2xl font-bold mb-6">Try it</h2>
+      <h2 class="text-2xl font-bold my-4">Try it</h2>
 
-      <textarea class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full mb-4" v-model="code"></textarea>
+      <textarea class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full h-40 mb-4" v-model="code"></textarea>
 
       <div class="text-center">
         <button @click="run()" class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded">Run</button>
@@ -42,9 +42,14 @@ import ai from 'https://aifn.run/ai.mjs'
 async function runExample() {
   const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
   const paragraph = await lorem({ count: 100 });
+  console.log(paragraph)
 }
 
-runExample.then(console.log);
+try {
+  runExample();
+} catch (e) {
+  console.log(e)
+}
 `;
 
 const code = ref(initialSnippet.trim());
@@ -55,7 +60,7 @@ function run() {
   script.setAttribute('data-aifn', '');
   script.setAttribute('type', 'module');
   document.head.querySelectorAll('script[data-aifn]').forEach(s => s.remove());
-  script.innerText = code.value;
+  script.textContent = code.value;
   document.head.appendChild(script);
 }
 
