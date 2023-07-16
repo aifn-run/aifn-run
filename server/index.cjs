@@ -97,6 +97,7 @@ function log(...args) {
   const time = Date.now();
   const body = args.map(String);
   const uid = crypto.randomUUID();
+  console.log(...args);
   logs.set(uid, { uid, time, body: args.length > 1 ? body : body[0] });
 }
 
@@ -237,6 +238,7 @@ async function runFunction(req, res) {
     const json = JSON.parse(input);
     const message = await fetchCompletion(item.p, json.inputs, item.model || apiModel);
     res.end(message);
+    log(message);
   } catch (error) {
     res.writeHead(500);
     res.end('Oh, shoot!');
@@ -289,8 +291,8 @@ module.exports = function (req, res, next) {
   }
 
   if (url === '/settings') {
-    method === 'GET' && getSettings(req, res);
-    method === 'PUT' && saveSettings(req, res);
+    if (method === 'GET') return getSettings(req, res);
+    if (method === 'PUT') return saveSettings(req, res);
   }
 
   next();

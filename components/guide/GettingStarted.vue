@@ -36,8 +36,7 @@ const paragraph = await lorem({ count: 100 });</pre>
       <h2 class="text-2xl font-bold mb-4 mt-8">How to start (Node.js)</h2>
       <p class="mb-4">For server-side, install <code class="py-1 px-2 bg-gray-800">@aifn/client</code> and use the module in the same way the web API works:</p>
       <CodeBlock>
-        <pre v-pre>
-import ai from '@aifn/client';
+        <pre v-pre>import ai from '@aifn/client';
 
 async function main() {
   const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
