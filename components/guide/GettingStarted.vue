@@ -24,19 +24,25 @@
       <h2 class="text-2xl font-bold mb-4 mt-8">How to start (web)</h2>
       <p class="mb-4">For web pages, import the library as a module:</p>
       <CodeBlock>
-        <pre v-pre>import ai from 'https://aifn.run/ai.mjs';
+        <pre v-pre>
+import ai from 'https://aifn.run/ai.mjs';
 
 // Create an AI function
 const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
 
 // And use the new function like any other:
-const paragraph = await lorem({ count: 100 });</pre>
+const paragraph = await lorem({ count: 100 });</pre
+        >
       </CodeBlock>
 
       <h2 class="text-2xl font-bold mb-4 mt-8">How to start (Node.js)</h2>
-      <p class="mb-4">For server-side, install <code class="py-1 px-2 bg-gray-800">@aifn/client</code> and use the module in the same way the web API works:</p>
+      <p class="mb-4">
+        For server-side, install <code class="py-1 px-2 bg-gray-800">@aifn/client</code> and use the module in the same
+        way the web API works:
+      </p>
       <CodeBlock>
-        <pre v-pre>import ai from '@aifn/client';
+        <pre v-pre>
+import ai from '@aifn/client';
 
 async function main() {
   const lorem = await ai.fn('Create a lorem ipsum paragraph with {count} words');
@@ -58,6 +64,14 @@ main();</pre
         v-model="code"
       ></textarea>
 
+      <div
+        v-if="output || running"
+        class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full mb-4"
+      >
+        <span class="material-icons animate-spin" v-if="running">autorenew</span>
+        {{ output }}
+      </div>
+
       <div>
         <button
           :disabled="running"
@@ -69,14 +83,6 @@ main();</pre
           }}</span>
           <span>Run</span>
         </button>
-      </div>
-
-      <div
-        v-if="output || running"
-        class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full mb-4"
-      >
-        <span class="material-icons animate-spin" v-if="running">autorenew</span>
-        {{ output }}
       </div>
     </section>
   </article>

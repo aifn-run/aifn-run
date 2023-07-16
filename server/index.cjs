@@ -97,10 +97,9 @@ const logs = new Resource('log');
 
 function log(...args) {
   const time = Date.now();
-  const body = args.map(String);
   const uid = crypto.randomUUID();
   console.log(...args);
-  logs.set(uid, { uid, time, body: args.length > 1 ? body : body[0] });
+  logs.set(uid, { uid, time, body: args.length > 1 ? args : args[0] });
 }
 
 function readBody(stream) {
