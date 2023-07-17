@@ -1,6 +1,6 @@
-# AI prompts as a Javascript service
+# AI as a function
 
-Integrate AI with code like any other function
+Integrate AI with your code like any other function:
 
 ```ts
 import ai from 'https://aifn.run/ai.mjs'
@@ -23,7 +23,7 @@ In a single module, all the code required to call an API, get a JSON, find the m
 
 `Async Functions` in Javascript, along with `ES Modules`, are widely supported by browsers and can also be easily used in Node.
 
-What if we could use what the language already provides us, to integrate AI into regular JS code?
+Why don't we use the features already provides to us, and integrate AI into regular JS code?
 
 ## Usage
 
@@ -41,7 +41,7 @@ import ai from 'https://aifn.run/ai.mjs';
 
 Request:
 ```json
-{ "p": "Print a Lorem Ipsum paragraph with {length} words" }
+{ "p": "Print a Lorem Ipsum paragraph with at most {length} words" }
 ```
 
 Response:
@@ -56,14 +56,14 @@ Get a Javascript module with the code to call a function
 ```ts
 import loremIpsum from 'https://aifn.run/fn/[uid].js';
 
-console.log(await loremIpsum({ length: 100 }));
+console.log(await loremIpsum({ length: 20 }));
 ```
 
 ### `POST /run/[uid]`
 
 Request:
 ```json
-{ "inputs": { "length": "100" } }
+{ "inputs": { "length": "20" } }
 ```
 
 Response:
