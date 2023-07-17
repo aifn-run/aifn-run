@@ -186,7 +186,10 @@ function replaceMarkers(text, input) {
   return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim() || '']);
 }
 
-async function fetchCompletion(functionPrompt, input, model) {
+async function fetchCompletion(fn, input, model) {
+  const functionPrompt = fn.p;
+  const uid = fn.uid;
+
   return new Promise((resolve, reject) => {
     const remote = request(apiUrl, completionOptions);
     const content = replaceMarkers(functionPrompt, input);
@@ -237,7 +240,7 @@ async function runFunction(req, res) {
     const input = await readBody(req);
     log(input, item);
     const json = JSON.parse(input);
-    const message = await fetchCompletion(item.p, json.inputs, item.model || apiModel);
+    const message = await fetchCompletion(item, json.inputs, item.model || apiModel);
     res.end(message);
     log(message);
   } catch (error) {
