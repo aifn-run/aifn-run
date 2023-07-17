@@ -215,7 +215,7 @@ async function fetchCompletion(functionPrompt, input, model) {
       const json = JSON.parse(buffer);
       const text = json.choices[0].message.content;
       resolve(text);
-      history.set(crypto.randomInt(Number.MAX_SAFE_INTEGER), { uid, input: content, output: text });
+      history.set(crypto.randomUUID(), { uid, input: content, output: text });
     });
 
     remote.write(JSON.stringify(payload));
