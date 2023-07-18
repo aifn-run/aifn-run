@@ -94,6 +94,11 @@ const fn = new Resource('fn');
 const settings = new Resource('settings');
 const history = new Resource('history');
 const logs = new Resource('log');
+const errors = new Resource('log');
+
+function onError(error) {
+  errors.set(Date.now(), error);
+}
 
 function log(...args) {
   const time = Date.now();
@@ -178,6 +183,7 @@ async function saveFunction(uid, req, res) {
   } catch (error) {
     res.writeHead(500);
     res.end('Oh, snafu!');
+    onError(error)
     log(buffer, error);
   }
 }
@@ -203,6 +209,7 @@ async function fetchCompletion(fn, input, model) {
 
     remote.on('error', (error) => {
       log(input, model, error);
+      onError(error);
       reject();
     });
 
@@ -246,6 +253,7 @@ async function runFunction(req, res) {
   } catch (error) {
     res.writeHead(500);
     res.end('Oh, shoot!');
+    onError(error);
     log(uid, error);
   }
 }
@@ -257,6 +265,7 @@ async function getSettings(req, res) {
   } catch (error) {
     res.writeHead(500);
     res.end('Ah, crackers!');
+    onError(error);
   }
 }
 
@@ -271,6 +280,7 @@ async function saveSettings(req, res) {
   } catch (error) {
     res.writeHead(500);
     res.end('Ah, crackers!');
+    onError(error)
     log(buffer, error);
   }
 }
