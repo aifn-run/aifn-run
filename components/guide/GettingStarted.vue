@@ -10,14 +10,15 @@
 
       <h2 class="text-2xl font-bold mb-4 mt-8">But why?</h2>
       <p class="mb-4">
-        ChatBots and AI services have their own boilerplate to set up. It has to be done over and
+        ChatBots and AI services are all the rage these days!
+        But they always have a boilerplate to set up. It has to be done over and
         over again.
       </p>
       <p class="mb-4">
         Javascript already offers the tools we need to make that easier: async/await combined with ES module imports.
       </p>
       <p class="mb-4">
-        Forget all that! Complete tasks using simple prompts, encapsulated as Javascript
+        Or... You can forget all that and complete tasks using simple prompts, encapsulated as Javascript
         functions.
       </p>
 

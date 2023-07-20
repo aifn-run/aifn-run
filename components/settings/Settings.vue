@@ -19,7 +19,7 @@
 import { watch, ref } from 'vue';
 import { useProperty } from '../../composables/useProperty';
 
-const properties = [];
+const properties = ['gptApiKey'];
 const settingList = properties.map((key) => {
   const label = key.replace(/[A-Z]{1}/g, (c) => ' ' + c);
   const [current, setProperty] = useProperty(key);
