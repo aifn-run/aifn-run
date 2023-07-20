@@ -11,15 +11,12 @@
       <h2 class="text-2xl font-bold mb-4 mt-8">But why?</h2>
       <p class="mb-4">
         ChatBots and AI services are all the rage these days!
-        But they always have a boilerplate to set up. It has to be done over and
-        over again.
       </p>
       <p class="mb-4">
-        Javascript already offers the tools we need to make that easier: async/await combined with ES module imports.
+        And Javascript offers the tools we need to turn AI into code: "async/await' combined with "ES module imports".
       </p>
       <p class="mb-4">
-        Or... You can forget all that and complete tasks using simple prompts, encapsulated as Javascript
-        functions.
+        Combining these two, we can complete tasks using AI and async functions.
       </p>
 
       <h2 class="text-2xl font-bold mb-4 mt-8">How to start (web)</h2>
@@ -43,7 +40,7 @@ main();</pre>
       <h2 class="text-2xl font-bold mb-4 mt-8">How to start (Node.js)</h2>
       <p class="mb-4">
         For server-side, install <code class="py-1 px-2 bg-gray-800">@aifn/client</code> and use the module in the same
-        way the web API works:
+        way. This is more useful if you want to create an API or hide your prompts:
       </p>
       <CodeBlock>
         <pre v-pre>import ai from '@aifn/client';
