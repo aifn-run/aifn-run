@@ -26,13 +26,8 @@
       gtag('config', 'G-Q1WFHNM1L8');
     </script>
     <script type="module">
-      import { getConsent } from 'https://gdpr.jsfn.run/index.js';
-      async function f(d,c) {
-        c = d.createElement('div');
-        c.innerHTML = await getConsent('', { color:'white', bgColor:'#111827' });
-        d.body.append(c);
-      }
-      f(document);
+      import getConsent from 'https://gdpr.jsfn.run/index.js';
+      getConsent('', { color:'white', bgColor:'#111827' });
       </script>
   </body>
 </html>
