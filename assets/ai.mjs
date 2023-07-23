@@ -14,10 +14,15 @@ const config = {};
  * @returns {function(Record<string,string> inputs): Promise<string>}   AI powered async function
  */
 async function fn(fnOptions) {
-  const body = typeof fnOptions === 'string' ? { p: fnOptions } : fnOptions;
-  const create = await fetch('/fn', {
-    method: 'POST',
-    headers: { Authorization: config.key || '' },
+  const uid = await create(fnOptions);
+  return (inputs) => call(uid, inputs);
+}
+
+async function create(fnOptions) {
+  const body = typeof fnOptions === "string" ? { p: fnOptions } : fnOptions;
+  const create = await fetch("/fn", {
+    method: "POST",
+    headers: { Authorization: config.key || "" },
     body: JSON.stringify(body),
   });
 
@@ -27,7 +32,22 @@ async function fn(fnOptions) {
 
   const { uid } = await create.json();
 
-  return (inputs) => call(uid, inputs);
+  return uid;
+}
+
+async function update(uid, fnOptions) {
+  const body = typeof fnOptions === "string" ? { p: fnOptions } : fnOptions;
+  const request = await fetch("/fn/" + uid, {
+    method: "PUT",
+    headers: { Authorization: config.key || "" },
+    body: JSON.stringify(body),
+  });
+
+  if (!request.ok) {
+    throw new Error(request.status);
+  }
+
+  return uid;
 }
 
 async function configure(key) {
@@ -35,17 +55,17 @@ async function configure(key) {
 }
 
 async function call(uid, inputs) {
-  const call = await fetch('/run/' + uid, {
-    method: 'POST',
-    headers: { Authorization: config.key || '' },
+  const request = await fetch("/run/" + uid, {
+    method: "POST",
+    headers: { Authorization: config.key || "" },
     body: JSON.stringify({ inputs }),
   });
 
-  if (!call.ok) {
-    throw new Error(call.status);
+  if (!request.ok) {
+    throw new Error(request.status);
   }
 
-  return await call.text();
+  return await request.text();
 }
 
-export default { fn, call, configure };
+export default { fn, call, configure, create, update };
