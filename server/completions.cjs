@@ -20,7 +20,7 @@ function replaceMarkers(text, input) {
   return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim() || ""]);
 }
 
-module.exports = async function fetchCompletion(fn, input, model) {
+module.exports = async function fetchCompletion(fn, input) {
   const functionPrompt = fn.p;
   const uid = fn.uid;
   const model = fn.model || apiModel;

@@ -2,10 +2,19 @@
   <div>
     <h1 class="text-2xl font-bold mb-6">My Functions</h1>
     <div class="flex my-4 border border-gray-200 rounded-lg">
-      <div class="w-3/4"></div>
+      <div class="w-3/4">
+        <textarea
+          class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full h-half mb-4"
+          v-model="code"
+        ></textarea>
+      </div>
       <div class="w-1/4 bg-gray-100">
         <ul>
-          <li v-for="fn of functions">{{ fn.name || fn.uid }}</li>
+          <li v-for="fn of functions">
+            <a href="#" @click.prevent="loadItem(fn)">{{
+              fn.name || fn.uid
+            }}</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -35,7 +44,7 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useSettings } from "../../composables/useSettings";
 
 // function debounce(func, delay) {
@@ -49,14 +58,23 @@ import { useSettings } from "../../composables/useSettings";
 //   };
 // }
 
-const { settings, load, save } = useSettings();
+const { settings, load: loadSettings, save } = useSettings();
 const properties = ["gptApiKey"];
+const functions = ref([]);
+
+function loadFunctions() {
+  const req = await fetch("/fn", { credentials: "include" });
+  const list = await req.json();
+
+  functions.value = list;
+}
 
 function onChange(key, value) {
   settings.value[key] = value;
 }
 
-onMounted(load);
+onMounted(loadSettings);
+onMounted(loadFunctions);
 
 const settingList = properties.map((key) => {
   const label = key.replace(/[A-Z]{1}/g, (c) => " " + c);
