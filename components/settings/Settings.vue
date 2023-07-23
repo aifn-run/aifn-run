@@ -62,7 +62,7 @@ const { settings, load: loadSettings, save } = useSettings();
 const properties = ["gptApiKey"];
 const functions = ref([]);
 
-function loadFunctions() {
+async function loadFunctions() {
   const req = await fetch("/fn", { credentials: "include" });
   const list = await req.json();
 
