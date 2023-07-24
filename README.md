@@ -1,6 +1,6 @@
 # AI as a function
 
-Integrate AI with your code like any other function:
+Integrate AI with your code like any other function, no build steps required!
 
 ```ts
 import ai from 'https://aifn.run/ai.mjs'
@@ -18,18 +18,15 @@ console.log(await removeVerbsFromText('The brown fox jumps over the lazy dog.'))
 
 ## Motivation
 
-Calling AI generation API's still needs boilerplate.
-In a single module, all the code required to call an API, get a JSON, find the message and print it out is abstracted away.
+`Async Functions` and `ES Modules` are widely supported by browsers and can also be used to mix AI and Javascript.
 
-`Async Functions` in Javascript, along with `ES Modules`, are widely supported by browsers and can also be easily used in Node.
-
-Why don't we use the features already provides to us, and integrate AI into regular JS code?
+One-off AI completions can help with many simples tasks, from content generation to text edition, moderation, and anything in between.
 
 ## Usage
 
-First, to [aifn.run](https://aifn.run) to get your API KEY.
+First, go to [aifn.run](https://aifn.run) and sign in to get an API KEY.
 
-Next, just import the module in your project and start using it!
+Next, just import the module via https in a project and start using it!
 
 ```ts
 import ai from 'https://aifn.run/ai.mjs';
@@ -39,6 +36,8 @@ import ai from 'https://aifn.run/ai.mjs';
 
 ### `POST /fn`
 
+Create a function
+
 Request:
 ```json
 { "p": "Print a Lorem Ipsum paragraph with at most {length} words" }
@@ -46,10 +45,19 @@ Request:
 
 Response:
 ```json
-{ "uid": "unique-function-id" }
+{ "uid": "function-id" }
 ```
 
-### `GET /fn/[uid].js`
+### `PUT /fn/:uid`
+
+Update a function
+
+Request:
+```json
+{ "p": "Print a Lorem Ipsum paragraph with at most {length} words and only lowercase words" }
+```
+
+### `GET /fn/:uid.js`
 
 Get a Javascript module with the code to call a function
 
@@ -61,6 +69,8 @@ console.log(await loremIpsum({ length: 20 }));
 
 ### `POST /run/[uid]`
 
+Run a function using a function ID
+
 Request:
 ```json
 { "inputs": { "length": "20" } }
@@ -70,3 +80,7 @@ Response:
 ```text
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae sagittis lorem. Fusce auctor euismod arcu...
 ```
+
+### `GET /fn`
+
+List all functions associated with an account (requires log in first)

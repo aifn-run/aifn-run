@@ -1,3 +1,4 @@
+const { randomUUID } = require("crypto");
 const Resource = require("./resource.cjs");
 
 const logs = new Resource("log");
