@@ -1,4 +1,4 @@
-const { randomUUID } = require("crypto");
+const { createHash, randomUUID } = require("crypto");
 const { request } = require("https");
 const Resource = require("./resource.cjs");
 const fetchCompletion = require("./completions.cjs");
@@ -78,8 +78,7 @@ async function saveFunction(uid, req, res) {
     }
 
     const { p, model = "", name = "" } = body;
-    const hash = crypto
-      .createHash("sha256")
+    const hash = createHash("sha256")
       .update(p + model + name + oid)
       .digest("hex");
 
