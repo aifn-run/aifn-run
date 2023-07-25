@@ -22,7 +22,7 @@
         <button v-if="isLoggedIn" @click="showProfile()">
           <span
             class="pt-1 font-bold text-3xl text-center text-white bg-gray-800 border border-white rounded-full inline-block w-12 h-12"
-            >{{ profile && profile.displayName.charAt(0) }}</span
+            >{{ profile && profile.name.charAt(0) }}</span
           >
         </button>
       </div>
