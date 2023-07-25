@@ -46,6 +46,13 @@ function getFunctionCode(req, res) {
   res.end(code.trim());
 }
 
+async function getFunction(req, res) {
+  const uid = req.url.slice(4);
+  const fn = functions.get(uid);
+  const { p, model, name } = fn;
+  res.send({ p, model, name, uid });
+}
+
 async function saveFunction(uid, req, res) {
   let profile = { id: "" };
 
@@ -157,20 +164,32 @@ async function saveSettings(req, res) {
 }
 
 module.exports = function (req, res, next) {
-  const { url, method } = req;
+  const { method } = req;
+  const url = req.url.replace(/\/$/, "");
 
-  if (url === "/fn" || url === "/fn/") {
+  if (url === "/fn") {
     if (method === "POST") return saveFunction(randomUUID(), req, res);
     if (method === "GET") return listFunctions(req, res);
   }
 
-  if (method === "PUT" && url.startsWith("/fn/") && uuidRe.test(url.slice(4))) {
-    return saveFunction(url.slice(4), req, res);
+  if (url.startsWith("/fn")) {
+    if (method === "PUT" && uuidRe.test(url.slice(4))) {
+      return saveFunction(url.slice(4), req, res);
+    }
+
+    if (method !== "GET") {
+      return next();
+    }
+
+    if (url.endsWith(".js")) {
+      return getFunctionCode(req, res);
+    }
+
+    return getFunction(req, res);
   }
 
-  if (url.startsWith("/run/")) {
-    if (method === "GET") return getFunctionCode(req, res);
-    if (method === "POST") return runFunction(req, res);
+  if (url.startsWith("/run/") && method === "POST") {
+    return runFunction(req, res);
   }
 
   if (url === "/settings") {
