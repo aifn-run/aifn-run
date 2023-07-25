@@ -51,11 +51,20 @@
               >{{ fn.name || fn.uid }}</a
             >
           </li>
+
+          <li>
+            <a
+              href="#"
+              class="text-sm px-4 py-2 block border-gray-200 border-b overflow-ellipsis overflow-hidden whitespace-nowrap"
+              @click.prevent="editItem({})"
+              >New function...</a
+            >
+          </li>
         </ul>
       </div>
     </div>
     <hr class="my-8" />
-    <form @submit.prevent="save()">
+    <form @submit.prevent="save()" v-if="settingList.length">
       <div class="mb-4" v-for="setting of settingList">
         <label
           :for="setting.key"
@@ -97,8 +106,6 @@ import { useFunctions } from "../../composables/useFunctions";
 
 const { settings, load: loadSettings, save } = useSettings();
 const { listFunctions, saveFunction } = useFunctions();
-// const properties = ["gptApiKey"];
-const properties = [];
 const functions = ref([]);
 const fn = ref({});
 
@@ -123,6 +130,8 @@ function onChange(key, value) {
 onMounted(loadSettings);
 onMounted(loadFunctions);
 
+// const properties = ["gptApiKey"];
+const properties = [];
 const settingList = properties.map((key) => {
   const label = key.replace(/[A-Z]{1}/g, (c) => " " + c);
   return { label, key };

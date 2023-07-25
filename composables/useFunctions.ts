@@ -6,8 +6,9 @@ export function useFunctions() {
 
   const saveFunction = async (f) => {
     const { uid, p, name } = f;
+    const url = uid ? "/fn/" + uid : "/fn";
 
-    await fetch("/fn/" + uid, {
+    await fetch(url, {
       method: "PUT",
       credentials: "include",
       body: JSON.stringify({ p, name }),
