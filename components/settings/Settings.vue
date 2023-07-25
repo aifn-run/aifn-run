@@ -41,6 +41,15 @@
             {{ fn.uid ? "Save" : "Create" }}
           </button>
         </div>
+        <hr class="my-4" />
+        <p class="text-sm">Use this function as a module:</p>
+        <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800">
+          <span class="hljs-keyword">import</span>
+          {{ fn.name }}
+          <span class="hljs-keyword">from</span>
+          <span class="hljs-string">'https://aifn.run/fn/{{ fn.uid }}.js'</span
+          >;
+        </div>
       </form>
       <div class="w-1/4 bg-gray-600 border-gray-200 border-l">
         <ul>
