@@ -1,5 +1,6 @@
 const { randomUUID } = require("crypto");
 const { request } = require("https");
+const { readBody, log, onError } = require("./utils.cjs");
 
 const apiUrl = process.env.API_URL;
 const apiKey = process.env.API_KEY;
@@ -15,7 +16,7 @@ const completionOptions = {
 };
 
 const Resource = require("./resource.cjs");
-const history = new Resource("history");
+const queryHistory = new Resource("history");
 
 function replaceMarkers(text, input) {
   return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim() || ""]);
@@ -56,7 +57,7 @@ async function fetchCompletion(fn, input) {
       const text = json.choices[0].message.content;
       resolve(text);
 
-      history.set(randomUUID(), { uid, input: content, output: text });
+      queryHistory.set(randomUUID(), { uid, input: content, output: text });
     });
 
     remote.write(JSON.stringify(payload));

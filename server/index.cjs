@@ -1,7 +1,7 @@
 const { createHash, randomUUID } = require("crypto");
 const Resource = require("./resource.cjs");
 const { fetchCompletion } = require("./completions.cjs");
-const { getProfile } = require("./auth.cjs");
+const { getProfile } = require("./auth.ts/index.js");
 const { readBody, log, onError } = require("./utils.cjs");
 
 const uuidRe = /^.{8}-.{4}-.{4}-.{4}-.{12}$/;
@@ -123,8 +123,8 @@ async function listFunctions(req, res) {
 async function getSettings(req, res) {
   try {
     const profile = await getProfile(req.headers.cookie);
-    const settings = await settings.get(profile.id);
-    res.writeHead(200).end(JSON.stringify(settings || {}));
+    const value = await settings.get(profile.id);
+    res.writeHead(200).end(JSON.stringify(value || {}));
   } catch (error) {
     res.writeHead(500).end("Ah, crackers!");
     onError(error);
