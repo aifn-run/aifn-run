@@ -49,6 +49,11 @@ function getFunctionCode(req, res) {
 async function getFunction(req, res) {
   const uid = req.url.slice(4);
   const fn = await functions.get(uid);
+
+  if (!fn) {
+    return res.writeHead(404).end("Function not found");
+  }
+
   console.log(fn);
   const { p, model, name } = fn;
   res.writeHead(200).end(JSON.stringify({ p, model, name, uid }));

@@ -1,12 +1,12 @@
 const baseUrl = process.env.STORE_URL;
-const fetchOptions = { mode: 'cors' };
-const fetchHeaders = { headers: { 'content-type': 'application/json' } };
-const idIsMissingError = new Error('Id is missing');
+const fetchOptions = { mode: "cors" };
+const fetchHeaders = { headers: { "content-type": "application/json" } };
+const idIsMissingError = new Error("Id is missing");
 
 module.exports = class Resource {
   constructor(name) {
     if (!name) {
-      throw new Error('Resource name is missing');
+      throw new Error("Resource name is missing");
     }
 
     this.resourceUrl = new URL(`${name}/`, baseUrl).toString();
@@ -35,7 +35,7 @@ module.exports = class Resource {
     return filtered;
   }
 
-  async get(id = '') {
+  async get(id = "") {
     if (!id) {
       throw idIsMissingError;
     }
@@ -43,16 +43,20 @@ module.exports = class Resource {
     const url = new URL(id, this.resourceUrl);
     const x = await fetch(url, fetchOptions);
 
+    if (!x) {
+      return null;
+    }
+
     return x.json();
   }
 
-  async remove(id = '') {
+  async remove(id = "") {
     if (!id) {
       throw idIsMissingError;
     }
 
     const url = new URL(id, this.resourceUrl);
-    const res = await fetch(url, { ...fetchOptions, method: 'DELETE' });
+    const res = await fetch(url, { ...fetchOptions, method: "DELETE" });
 
     return res.ok;
   }
@@ -62,7 +66,7 @@ module.exports = class Resource {
     const res = await fetch(url, {
       ...fetchOptions,
       ...fetchHeaders,
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(payload),
     });
 
@@ -72,4 +76,4 @@ module.exports = class Resource {
 
     throw new Error(res.status);
   }
-}
+};
