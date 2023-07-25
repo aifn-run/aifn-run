@@ -1,7 +1,7 @@
 const { createHash, randomUUID } = require("crypto");
 const Resource = require("./resource.cjs");
 const { fetchCompletion } = require("./completions.cjs");
-const { getProfile } = require("./auth.ts/index.js");
+const { getProfile } = require("./auth.cjs");
 const { readBody, log, onError } = require("./utils.cjs");
 
 const uuidRe = /^.{8}-.{4}-.{4}-.{4}-.{12}$/;
