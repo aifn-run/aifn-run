@@ -28,7 +28,7 @@ function getProfile(cookie) {
 }
 
 function getFunctionCode(req, res) {
-  const uid = req.url.replace("/fn/", "");
+  const uid = req.url.replace("/fn/", "").replace(".js", "");
 
   if (!uid || !uuidRe.test(uid)) {
     res.writeHead(400).end("Invalid UID");
@@ -50,7 +50,7 @@ async function getFunction(req, res) {
   const uid = req.url.slice(4);
   const fn = functions.get(uid);
   const { p, model, name } = fn;
-  res.send({ p, model, name, uid });
+  res.writeHead(200).end(JSON.stringify({ p, model, name, uid }));
 }
 
 async function saveFunction(uid, req, res) {
