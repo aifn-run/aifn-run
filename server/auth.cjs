@@ -2,7 +2,7 @@ const { request } = require("https");
 
 const authUrl = process.env.AUTH_URL;
 
-export function getProfile(cookie) {
+function getProfile(cookie) {
   return new Promise((resolve, reject) => {
     const r = request(authUrl, { headers: { cookie } });
 
@@ -18,3 +18,5 @@ export function getProfile(cookie) {
     r.end();
   });
 }
+
+module.exports = { getProfile };

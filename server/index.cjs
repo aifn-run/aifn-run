@@ -1,5 +1,4 @@
 const { createHash, randomUUID } = require("crypto");
-const { request } = require("https");
 const Resource = require("./resource.cjs");
 const { fetchCompletion } = require("./completions.cjs");
 const { getProfile } = require("./auth.cjs");
