@@ -1,17 +1,24 @@
 <template>
   <div class="w-screen h-screen flex flex-col bg-gray-900 text-white">
-    <div class="flex justify-between items-center border-b border-black bg-gray-700 space-x-12 shadow-lg p-4">
-      <h1 class="text-xl font-bold text-white"><router-link to="/">ai.fn()</router-link></h1>
+    <div
+      class="flex justify-between items-center border-b border-black bg-gray-700 space-x-2 shadow-lg p-4"
+    >
+      <h1 class="text-xl font-bold text-white">
+        <router-link to="/">ai.fn()</router-link>
+      </h1>
       <nav class="py-2 flex-1 flex justify-center" :data-length="links.length">
         <router-link
           v-for="(route, index) of links"
           :key="route.path"
           :to="route.path"
-          class="font-bold px-4 py-2 shadow-lg border text-white"
-          :class="[index === 0 && 'rounded-l', index === links.length - 1 && 'rounded-r']"
+          class="font-bold md:px-4 p-2 shadow-lg border text-white"
+          :class="[
+            index === 0 && 'rounded-l',
+            index === links.length - 1 && 'rounded-r',
+          ]"
           active-class="bg-gray-200 text-gray-900"
         >
-          <span class="material-icons md:hidden">{{ route.icon }}</span>
+          <span class="material-icons md:hidden text-lg">{{ route.icon }}</span>
           <span class="hidden md:inline">{{ route.name }}</span>
         </router-link>
       </nav>
@@ -35,18 +42,20 @@
 </template>
 
 <script setup>
-import { useAuth } from './composables/useAuth';
-import { useRouter } from './composables/useRouter';
-import { computed } from 'vue';
-import ai from 'https://aifn.run/ai.mjs';
+import { useAuth } from "./composables/useAuth";
+import { useRouter } from "./composables/useRouter";
+import { computed } from "vue";
+import ai from "https://aifn.run/ai.mjs";
 
 window.ai = ai;
 
 const { topPages, router } = useRouter();
 const { isLoggedIn, profile, signIn } = useAuth();
-const links = computed(() => topPages.filter((page) => !page.protected || isLoggedIn.value));
+const links = computed(() =>
+  topPages.filter((page) => !page.protected || isLoggedIn.value)
+);
 
 function showProfile() {
-  router.push('/me');
+  router.push("/me");
 }
 </script>
