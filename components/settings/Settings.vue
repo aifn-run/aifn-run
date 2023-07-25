@@ -35,6 +35,7 @@
         <div class="text-right">
           <button
             class="border border-white px-4 py-2 rounded-md"
+            :disabled="busy"
             type="submit"
           >
             {{ fn.uid ? "Save" : "Create" }}
@@ -108,6 +109,7 @@ const { settings, load: loadSettings, save } = useSettings();
 const { listFunctions, saveFunction } = useFunctions();
 const functions = ref([]);
 const fn = ref({});
+const busy = ref(false);
 
 async function loadFunctions() {
   functions.value = await listFunctions();
@@ -125,7 +127,12 @@ async function saveItem() {
     return;
   }
 
+  busy.value = true;
+
   await saveFunction({ uid, p, name });
+  await loadFunctions();
+
+  busy.false = true;
 }
 
 function onChange(key, value) {

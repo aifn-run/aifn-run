@@ -9,7 +9,7 @@ export function useFunctions() {
     const url = uid ? "/fn/" + uid : "/fn";
 
     await fetch(url, {
-      method: "PUT",
+      method: uid ? "PUT" : "POST",
       credentials: "include",
       body: JSON.stringify({ p, name }),
     });
