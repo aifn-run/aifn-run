@@ -6,21 +6,21 @@
         <div class="mb-4">
           <label
             for="fnName"
-            class="block uppercase text-xs font-medium text-gray-100"
-            >Name</label
-          >
+            class="block uppercase text-xs font-medium text-gray-100 mb-2"
+            >Name
+          </label>
           <input
             id="fnName"
             v-model="fn.name"
             type="text"
-            class="mt-1 p-2 block w-full rounded-md border border-gray-300 shadow-sm text-gray-700 font-bold"
+            class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full mb-4"
           />
         </div>
         <div class="mb-4">
           <label
             for="fnBody"
-            class="block uppercase text-xs font-medium text-gray-100"
-            >Instruction</label
+            class="block uppercase text-xs font-medium text-gray-100 mb-2"
+            >Instruction (required)</label
           >
 
           <textarea
@@ -37,7 +37,7 @@
             class="border border-white px-4 py-2 rounded-md"
             type="submit"
           >
-            Save
+            {{ fn.uid ? "Save" : "Create" }}
           </button>
         </div>
       </form>
@@ -120,6 +120,11 @@ async function editItem(item) {
 
 async function saveItem() {
   const { uid, p, name } = fn.value;
+
+  if (!p) {
+    return;
+  }
+
   await saveFunction({ uid, p, name });
 }
 
