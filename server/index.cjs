@@ -73,8 +73,7 @@ async function saveFunction(uid, req, res) {
     const body = JSON.parse(buffer);
 
     if (!body.p) {
-      res.writeHead(400);
-      res.end("Invalid input: p");
+      res.writeHead(400).end("Invalid input: p");
       return;
     }
 
@@ -93,11 +92,9 @@ async function saveFunction(uid, req, res) {
       await functions.set(uid, payload);
     }
 
-    res.writeHead(200);
-    res.end(JSON.stringify({ uid }));
+    res.writeHead(200).end(JSON.stringify({ uid }));
   } catch (error) {
-    res.writeHead(500);
-    res.end("Oh, snafu!");
+    res.writeHead(500).end("Oh, snafu!");
     onError(error);
     log(buffer, error);
   }
@@ -109,8 +106,7 @@ async function runFunction(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (!uid || !uuidRe.test(uid)) {
-    res.writeHead(400);
-    res.end("Invalid uuid");
+    res.writeHead(400).end("Invalid uuid");
     return;
   }
 
@@ -123,8 +119,7 @@ async function runFunction(req, res) {
     res.end(message);
     log(message);
   } catch (error) {
-    res.writeHead(500);
-    res.end("Oh, shoot!");
+    res.writeHead(500).end("Oh, shoot!");
     onError(error);
     log(uid, error);
   }
@@ -147,10 +142,10 @@ async function listFunctions(req, res) {
 async function getSettings(req, res) {
   try {
     const profile = await getProfile(req.headers.cookie);
-    return settings.get(profile.id);
+    const settings = await settings.get(profile.id);
+    res.writeHead(200).end(JSON.stringify(settings || {}));
   } catch (error) {
-    res.writeHead(500);
-    res.end("Ah, crackers!");
+    res.writeHead(500).end("Ah, crackers!");
     onError(error);
   }
 }
@@ -162,10 +157,9 @@ async function saveSettings(req, res) {
     const body = JSON.parse(buffer);
     const profile = await getProfile(req.headers.cookie);
     const userId = profile.id;
-    settings.set(userId, body);
+    await settings.set(userId, body);
   } catch (error) {
-    res.writeHead(500);
-    res.end("Ah, crackers!");
+    res.writeHead(500).end("Dayum!");
     onError(error);
     log(buffer, error);
   }
