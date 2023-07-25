@@ -16,7 +16,7 @@ function getFunctionCode(req, res) {
     res.writeHead(400).end("Invalid UID");
   }
 
-  const code = `import ai from 'https://aifn.run/ai.js';export default (inputs) => ai.call('${uid}', inputs);`;
+  const code = `import ai from 'https://aifn.run/ai.mjs';export default (inputs) => ai.call('${uid}', inputs);`;
 
   res.writeHead(200, {
     "Content-Type": "text/javascript",
