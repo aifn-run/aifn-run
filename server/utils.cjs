@@ -8,7 +8,10 @@ function onError(error) {
   errors.set(Date.now(), error);
 }
 
+const logEnabled = !!process.env.DEBUG;
 function log(...args) {
+  if (!logEnabled) return;
+
   const time = Date.now();
   const uid = randomUUID();
   console.log(...args);

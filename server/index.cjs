@@ -49,6 +49,7 @@ function getFunctionCode(req, res) {
 async function getFunction(req, res) {
   const uid = req.url.slice(4);
   const fn = functions.get(uid);
+  console.log(fn);
   const { p, model, name } = fn;
   res.writeHead(200).end(JSON.stringify({ p, model, name, uid }));
 }
@@ -99,6 +100,8 @@ async function saveFunction(uid, req, res) {
 
 async function runFunction(req, res) {
   const uid = req.url.replace("/run/", "");
+
+  res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (!uid || !uuidRe.test(uid)) {
     res.writeHead(400);
