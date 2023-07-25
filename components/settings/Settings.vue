@@ -1,24 +1,60 @@
 <template>
   <div>
     <h1 class="text-2xl font-bold mb-6">My Functions</h1>
-    <div class="flex my-4 border border-gray-200 rounded-lg">
-      <div class="w-3/4">
-        <textarea
-          class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full h-half mb-4"
-          v-model="code"
-        ></textarea>
-      </div>
-      <div class="w-1/4 bg-gray-100">
+    <div class="flex my-8 border border-gray-200 rounded-lg overflow-hidden">
+      <form class="w-3/4 p-4" @submit.prevent="saveItem()">
+        <div class="mb-4">
+          <label
+            for="fnName"
+            class="block uppercase text-xs font-medium text-gray-100"
+            >Name</label
+          >
+          <input
+            id="fnName"
+            v-model="fn.name"
+            type="text"
+            class="mt-1 p-2 block w-full rounded-md border border-gray-300 shadow-sm text-gray-700 font-bold"
+          />
+        </div>
+        <div class="mb-4">
+          <label
+            for="fnBody"
+            class="block uppercase text-xs font-medium text-gray-100"
+            >Instruction</label
+          >
+
+          <textarea
+            id="fnBody"
+            class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full h-half mb-4"
+            v-model="fn.p"
+          ></textarea>
+          <p class="text-sm">
+            Tip: use curly brackets to create input {placeholders}.
+          </p>
+        </div>
+        <div class="text-right">
+          <button
+            class="border border-white px-4 py-2 rounded-md"
+            type="submit"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+      <div class="w-1/4 bg-gray-600 border-gray-200 border-l">
         <ul>
           <li v-for="fn of functions">
-            <a href="#" @click.prevent="loadItem(fn)">{{
-              fn.name || fn.uid
-            }}</a>
+            <a
+              href="#"
+              class="text-sm px-4 py-2 block border-gray-200 border-b overflow-ellipsis overflow-hidden whitespace-nowrap"
+              @click.prevent="editItem(fn)"
+              >{{ fn.name || fn.uid }}</a
+            >
           </li>
         </ul>
       </div>
     </div>
-    <hr />
+    <hr class="my-8" />
     <form @submit.prevent="save()">
       <div class="mb-4" v-for="setting of settingList">
         <label
@@ -35,7 +71,7 @@
         />
       </div>
       <div class="text-right">
-        <button class="border border-white px-4 py-2" type="submit">
+        <button class="border border-white px-4 py-2 rounded-md" type="submit">
           Save
         </button>
       </div>
@@ -46,6 +82,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useSettings } from "../../composables/useSettings";
+import { useFunctions } from "../../composables/useFunctions";
 
 // function debounce(func, delay) {
 //   let timeoutId;
@@ -59,14 +96,24 @@ import { useSettings } from "../../composables/useSettings";
 // }
 
 const { settings, load: loadSettings, save } = useSettings();
-const properties = ["gptApiKey"];
+const { listFunctions, saveFunction } = useFunctions();
+// const properties = ["gptApiKey"];
+const properties = [];
 const functions = ref([]);
+const fn = ref({});
 
 async function loadFunctions() {
-  const req = await fetch("/fn", { credentials: "include" });
-  const list = await req.json();
+  functions.value = await listFunctions();
+}
 
-  functions.value = list;
+async function editItem(item) {
+  const { uid, p, name } = item;
+  fn.value = { uid, p, name };
+}
+
+async function saveItem() {
+  const { uid, p, name } = fn.value;
+  await saveFunction({ uid, p, name });
 }
 
 function onChange(key, value) {
