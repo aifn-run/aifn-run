@@ -1,4 +1,5 @@
 const { randomUUID } = require("crypto");
+const { request } = require("https");
 
 const apiUrl = process.env.API_URL;
 const apiKey = process.env.API_KEY;
@@ -20,7 +21,7 @@ function replaceMarkers(text, input) {
   return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim() || ""]);
 }
 
-module.exports = async function fetchCompletion(fn, input) {
+async function fetchCompletion(fn, input) {
   const functionPrompt = fn.p;
   const uid = fn.uid;
   const model = fn.model || apiModel;
@@ -61,4 +62,6 @@ module.exports = async function fetchCompletion(fn, input) {
     remote.write(JSON.stringify(payload));
     remote.end();
   });
-};
+}
+
+module.exports = { fetchCompletion };

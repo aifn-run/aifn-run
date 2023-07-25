@@ -1,31 +1,14 @@
 const { createHash, randomUUID } = require("crypto");
 const { request } = require("https");
 const Resource = require("./resource.cjs");
-const fetchCompletion = require("./completions.cjs");
+const { fetchCompletion } = require("./completions.cjs");
+const { getProfile } = require("./auth.cjs");
 const { readBody, log, onError } = require("./utils.cjs");
 
-const authUrl = process.env.AUTH_URL;
 const uuidRe = /^.{8}-.{4}-.{4}-.{4}-.{12}$/;
 
 const functions = new Resource("fn");
 const settings = new Resource("settings");
-
-function getProfile(cookie) {
-  return new Promise((resolve, reject) => {
-    const r = request(authUrl, { headers: { cookie } });
-
-    r.on("error", reject);
-    r.on("response", async (res) => {
-      if (res.statusCode !== 200) {
-        return reject();
-      }
-
-      const profile = JSON.parse(await readBody(res));
-      resolve(profile);
-    });
-    r.end();
-  });
-}
 
 function getFunctionCode(req, res) {
   const uid = req.url.replace("/fn/", "").replace(".js", "");
