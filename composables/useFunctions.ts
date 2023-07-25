@@ -4,15 +4,19 @@ export function useFunctions() {
     return await req.json();
   };
 
-  const saveFunction = async (f) => {
-    const { uid, p, name } = f;
+  const saveFunction = async (fn) => {
+    const { uid, p, name } = fn;
     const url = uid ? "/fn/" + uid : "/fn";
 
-    await fetch(url, {
+    const request = await fetch(url, {
       method: uid ? "PUT" : "POST",
       credentials: "include",
       body: JSON.stringify({ p, name }),
     });
+
+    const response = await request.json();
+
+    return response.uid;
   };
 
   return { listFunctions, saveFunction };
