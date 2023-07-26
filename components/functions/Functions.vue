@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold mb-6">My Functions</h1>
     <div class="flex my-8 border border-gray-200 rounded-lg overflow-hidden">
       <div class="w-3/4 p-4 flex items-center justify-center" v-if="!fn">
-        <div class="text-center">
+        <div class="text-center my-24">
           <span class="material-icons text-4xl block mb-8">functions</span>
           <span class="text-2xl">Select a function or create a new one</span>
         </div>
@@ -49,9 +49,7 @@
             :disabled="busy || !fn.p"
             type="submit"
           >
-            <span v-if="busy" class="material-icons animate-spin'"
-              >refresh</span
-            >
+            <span v-if="busy" class="material-icons animate-spin">refresh</span>
             <span>{{ fn.uid ? "Save" : "Create" }}</span>
           </button>
         </form>
