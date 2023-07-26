@@ -94,7 +94,7 @@ async function runFunction(req, res) {
   try {
     const fn = await functions.get(uid);
     const rawInputs = await readBody(req);
-    log(input, fn);
+    log(rawInputs, fn);
     const input = parseInputs(rawInputs);
     const message = await fetchCompletion(fn, input);
     res.end(message);
