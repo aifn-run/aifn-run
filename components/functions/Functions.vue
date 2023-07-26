@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">My Functions</h1>
+    <h1 class="text-2xl font-bold mb-6">Your Functions</h1>
     <div class="flex my-8 border border-gray-200 rounded-lg overflow-hidden">
       <div class="w-3/4 p-4 flex items-center justify-center" v-if="!fn">
         <div class="text-center my-24">
@@ -82,10 +82,13 @@
             </p>
           </div>
           <div
-            v-if="output.length"
+            v-if="output.length || running"
             class="font-mono my-4 p-2 bg-gray-800 rounded-md"
           >
-            <div class="mb-2 border-gray-400 border-b" v-for="next of output">
+            <div
+              class="mb-2 border-gray-400 border-b whitespace-pre-wrap"
+              v-for="next of output"
+            >
               {{ next }}
             </div>
 
@@ -129,41 +132,19 @@
         </ul>
       </div>
     </div>
-    <hr class="my-8" />
-    <form @submit.prevent="save()" v-if="settingList.length">
-      <div class="mb-4" v-for="setting of settingList">
-        <label
-          :for="setting.key"
-          class="block uppercase text-xs font-medium text-gray-100"
-          >{{ setting.label }}</label
-        >
-        <input
-          :id="setting.key"
-          :value="settings[setting.key]"
-          @change="onChange(setting.key, $event.target.value)"
-          type="text"
-          class="mt-1 p-2 block w-full rounded-md border border-gray-300 shadow-sm text-gray-700 font-bold"
-        />
-      </div>
-      <div class="text-right">
-        <button class="border border-white px-4 py-2 rounded-md" type="submit">
-          Save
-        </button>
-      </div>
-    </form>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { useSettings } from "../../composables/useSettings";
 import { useFunctions } from "../../composables/useFunctions";
+import { useProperty } from "../../composables/useProperty";
 
-const { settings, load: loadSettings, save } = useSettings();
 const { listFunctions, saveFunction } = useFunctions();
 const functions = ref([]);
 const fn = ref(null);
 const busy = ref(false);
+const [model] = useProperty("defaultModel");
 
 async function loadFunctions() {
   functions.value = await listFunctions();
@@ -188,7 +169,13 @@ async function saveItem() {
   busy.value = true;
 
   try {
-    const newId = await saveFunction({ uid, p, name });
+    const body = { uid, p, name, model: undefined };
+
+    if (model.value) {
+      body.model = model.value;
+    }
+
+    const newId = await saveFunction(body);
     await loadFunctions();
     fn.value.uid = newId;
   } finally {
@@ -232,16 +219,9 @@ function onChange(key, value) {
   settings.value[key] = value;
 }
 
-onMounted(loadSettings);
 onMounted(loadFunctions);
-
-// const properties = ["gptApiKey"];
-const properties = [];
-const settingList = properties.map((key) => {
-  const label = key.replace(/[A-Z]{1}/g, (c) => " " + c);
-  return { label, key };
-});
 </script>
+
 <style scoped>
 .h-half {
   height: 50vh;
