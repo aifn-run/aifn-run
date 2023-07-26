@@ -40,11 +40,11 @@
         <div class="text-right">
           <button
             class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex ml-auto"
-            :disabled="busy || !fnInput.trim()"
+            :disabled="busy || !fn.p.trim()"
             type="submit"
           >
             <span class="material-icons" :class="busy && 'animate-spin'">{{
-              running ? "refresh" : "done"
+              busy ? "refresh" : "done"
             }}</span>
             <span>{{ fn.uid ? "Save" : "Create" }}</span>
           </button>
@@ -184,7 +184,7 @@ async function saveItem() {
     await loadFunctions();
     fn.value.uid = newId;
   } finally {
-    busy.false = true;
+    busy.false = false;
   }
 }
 
