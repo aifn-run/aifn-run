@@ -5,13 +5,13 @@ export function useFunctions() {
   };
 
   const saveFunction = async (fn) => {
-    const { uid, p, name } = fn;
+    const { uid, p, name, model } = fn;
     const url = uid ? "/fn/" + uid : "/fn";
 
     const request = await fetch(url, {
       method: uid ? "PUT" : "POST",
       credentials: "include",
-      body: JSON.stringify({ p, name }),
+      body: JSON.stringify({ p, name, model }),
     });
 
     const response = await request.json();
