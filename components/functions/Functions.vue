@@ -2,42 +2,48 @@
   <div>
     <h1 class="text-2xl font-bold mb-6">My Functions</h1>
     <div class="flex my-8 border border-gray-200 rounded-lg overflow-hidden">
-      <form class="w-3/4 p-4" @submit.prevent="saveItem()">
-        <div class="mb-4">
-          <label
-            for="fnName"
-            class="block uppercase text-xs font-medium text-gray-100"
-            >Name
-          </label>
-          <input
-            id="fnName"
-            v-model="fn.name"
-            type="text"
-            class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full mb-4"
-          />
+      <div class="w-3/4 p-4 flex items-center justify-center" v-if="!fn">
+        <div class="text-center">
+          <span class="material-icons text-4xl block mb-8">functions</span>
+          <span class="text-2xl">Select a function or create a new one</span>
         </div>
-        <div class="mb-4">
-          <label
-            for="fnBody"
-            class="block uppercase text-xs font-medium text-gray-100"
-            >Instruction (required)</label
-          >
+      </div>
+      <div class="w-3/4 p-4" v-else>
+        <form @submit.prevent="saveItem()">
+          <div class="mb-4">
+            <label
+              for="fnName"
+              class="block uppercase text-xs font-medium text-gray-100"
+              >Name
+            </label>
+            <input
+              id="fnName"
+              v-model="fn.name"
+              type="text"
+              class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full mb-4"
+            />
+          </div>
+          <div class="mb-4">
+            <label
+              for="fnBody"
+              class="block uppercase text-xs font-medium text-gray-100"
+              >Instruction (required)</label
+            >
 
-          <textarea
-            id="fnBody"
-            class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full h-40 mb-4"
-            v-model="fn.p"
-          ></textarea>
-          <p class="text-sm">
-            Tip: you can use curly brackets to create input {placeholders}. The
-            function input will be an object to replace in the text.
-          </p>
-          <p class="text-sm">
-            If the function input is just text, it will be appended to the
-            function prompt instead.
-          </p>
-        </div>
-        <div class="text-right">
+            <textarea
+              id="fnBody"
+              class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full h-40 mb-4"
+              v-model="fn.p"
+            ></textarea>
+            <p class="text-sm">
+              Tip: you can use curly brackets to create input {placeholders}.
+              The function input will be an object to replace in the text.
+            </p>
+            <p class="text-sm">
+              If the function input is just text, it will be appended to the
+              function prompt instead.
+            </p>
+          </div>
           <button
             class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex ml-auto"
             :disabled="busy || !fn.p"
@@ -48,7 +54,7 @@
             >
             <span>{{ fn.uid ? "Save" : "Create" }}</span>
           </button>
-        </div>
+        </form>
         <template v-if="fn.uid">
           <hr class="my-8" />
           <p class="text-sm mb-2">Use this function as a module:</p>
@@ -102,7 +108,7 @@
             </button>
           </div>
         </template>
-      </form>
+      </div>
       <div class="w-1/4 bg-gray-600 border-gray-200 border-l">
         <ul class="h-max-half overflow-y-scroll">
           <li v-for="fn of functions">
@@ -158,7 +164,7 @@ import { useFunctions } from "../../composables/useFunctions";
 const { settings, load: loadSettings, save } = useSettings();
 const { listFunctions, saveFunction } = useFunctions();
 const functions = ref([]);
-const fn = ref({});
+const fn = ref(null);
 const busy = ref(false);
 
 async function loadFunctions() {
@@ -171,6 +177,10 @@ async function editItem(item) {
 }
 
 async function saveItem() {
+  if (!fn.value) {
+    return;
+  }
+
   const { uid, p, name } = fn.value;
 
   if (!String(p).trim()) {
