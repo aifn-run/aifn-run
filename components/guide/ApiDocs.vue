@@ -14,6 +14,36 @@ const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });</pre>
 
       <h2 id="use" class="text-lg my-4">Use an AI function</h2>
       <CodeBlock>const result = await f('input for AI to process');</CodeBlock>
+      <h2>HTTP API</h2>
+<h3><code>POST /fn</code></h3>
+<p>Create a function</p>
+<p>Request:</p>
+<pre><code class="language-json">{ &quot;p&quot;: &quot;Print a Lorem Ipsum paragraph with at most {length} words&quot; }
+</code></pre>
+<p>Response:</p>
+<pre><code class="language-json">{ &quot;uid&quot;: &quot;function-id&quot; }
+</code></pre>
+<h3><code>PUT /fn/:uid</code></h3>
+<p>Update a function</p>
+<p>Request:</p>
+<pre><code class="language-json">{ &quot;p&quot;: &quot;Print a Lorem Ipsum paragraph with at most {length} words and only lowercase words&quot; }
+</code></pre>
+<h3><code>GET /fn/:uid.js</code></h3>
+<p>Get a Javascript module with the code to call a function</p>
+<pre><code class="language-ts">import loremIpsum from 'https://aifn.run/fn/[uid].js';
+
+console.log(await loremIpsum({ length: 20 }));
+</code></pre>
+<h3><code>POST /run/[uid]</code></h3>
+<p>Run a function using a function ID</p>
+<p>Request:</p>
+<pre><code class="language-json">{ &quot;inputs&quot;: { &quot;length&quot;: &quot;20&quot; } }
+</code></pre>
+<p>Response:</p>
+<pre><code class="language-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae sagittis lorem. Fusce auctor euismod arcu...
+</code></pre>
+<h3><code>GET /fn</code></h3>
+<p>List all functions associated with an account (requires log in first)</p>
     </main>
     <!-- <aside class="w-1/4">
       <nav class="flex flex-col">
