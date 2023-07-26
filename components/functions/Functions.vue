@@ -43,9 +43,9 @@
             :disabled="busy || !fn.p"
             type="submit"
           >
-            <span class="material-icons" :class="busy && 'animate-spin'">{{
-              busy ? "refresh" : "done"
-            }}</span>
+            <span v-if="busy" class="material-icons animate-spin'"
+              >refresh</span
+            >
             <span>{{ fn.uid ? "Save" : "Create" }}</span>
           </button>
         </div>
@@ -184,7 +184,7 @@ async function saveItem() {
     await loadFunctions();
     fn.value.uid = newId;
   } finally {
-    busy.false = false;
+    busy.value = false;
   }
 }
 
