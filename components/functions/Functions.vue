@@ -43,7 +43,10 @@
             :disabled="busy || !fnInput.trim()"
             type="submit"
           >
-            {{ fn.uid ? "Save" : "Create" }}
+            <span class="material-icons" :class="busy && 'animate-spin'">{{
+              running ? "refresh" : "done"
+            }}</span>
+            <span>{{ fn.uid ? "Save" : "Create" }}</span>
           </button>
         </div>
         <template v-if="fn.uid">
@@ -176,11 +179,13 @@ async function saveItem() {
 
   busy.value = true;
 
-  const newId = await saveFunction({ uid, p, name });
-  await loadFunctions();
-
-  busy.false = true;
-  fn.value.uid = newId;
+  try {
+    const newId = await saveFunction({ uid, p, name });
+    await loadFunctions();
+    fn.value.uid = newId;
+  } finally {
+    busy.false = true;
+  }
 }
 
 const fnInput = ref("");
