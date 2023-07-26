@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import GettingStarted from "../components/guide/GettingStarted.vue";
 import ApiDocs from "../components/guide/ApiDocs.vue";
 import Me from "../components/user/Me.vue";
-import Settings from "../components/settings/Settings.vue";
+import Functions from "../components/functions/Functions.vue";
 
 const topPages = [
   {
@@ -22,7 +22,7 @@ const topPages = [
     name: "Functions",
     icon: "functions",
     protected: true,
-    component: Settings,
+    component: Functions,
   },
 ];
 

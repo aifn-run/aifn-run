@@ -93,16 +93,25 @@ async function runFunction(req, res) {
 
   try {
     const fn = await functions.get(uid);
-    const input = await readBody(req);
+    const rawInputs = await readBody(req);
     log(input, fn);
-    const json = JSON.parse(input);
-    const message = await fetchCompletion(fn, json.inputs);
+    const input = parseInputs(rawInputs);
+    const message = await fetchCompletion(fn, input);
     res.end(message);
     log(message);
   } catch (error) {
     res.writeHead(500).end("Oh, shoot!");
     onError(error);
     log(uid, error);
+  }
+}
+
+function parseInputs(text) {
+  try {
+    const json = JSON.parse(text);
+    return json.inputs || {};
+  } catch {
+    return text.trim();
   }
 }
 

@@ -19,7 +19,11 @@ const Resource = require("./resource.cjs");
 const queryHistory = new Resource("history");
 
 function replaceMarkers(text, input) {
-  return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim() || ""]);
+  if (typeof input === "string") {
+    return text + input;
+  }
+
+  return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim()] || "");
 }
 
 async function fetchCompletion(fn, input) {

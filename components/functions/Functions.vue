@@ -25,16 +25,21 @@
 
           <textarea
             id="fnBody"
-            class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full h-half mb-4"
+            class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full h-40 mb-4"
             v-model="fn.p"
           ></textarea>
           <p class="text-sm">
-            Tip: use curly brackets to create input {placeholders}.
+            Tip: you can use curly brackets to create input {placeholders}. The
+            function input will be an object to replace in the text.
+          </p>
+          <p class="text-sm">
+            If the function input is just text, it will be appended to the
+            function prompt instead.
           </p>
         </div>
         <div class="text-right">
           <button
-            class="border border-white px-4 py-2 rounded-md"
+            class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex mx-auto"
             :disabled="busy"
             type="submit"
           >
@@ -52,10 +57,51 @@
               >'https://aifn.run/fn/{{ fn.uid }}.js'</span
             >;
           </div>
+          <hr class="my-4" />
+          <div class="mb-4">
+            <p class="text-sm">Try this function (save it first!):</p>
+            <label
+              for="fnInput"
+              class="block uppercase text-xs font-medium text-gray-100 mb-2"
+              >Function inputs</label
+            >
+            <textarea
+              id="fnInput"
+              class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full h-half"
+              v-model="fnInput"
+            ></textarea>
+            <p class="text-sm">
+              Tip: use regular JS objects for input, or plain text.
+            </p>
+          </div>
+          <div
+            v-if="output.length"
+            class="font-mono my-4 p-2 bg-gray-800 rounded-md"
+          >
+            <div class="mb-2 border-gray-400 border-b" v-for="next of output">
+              {{ next }}
+            </div>
+
+            <div class="mb-2 border-gray-400 border-b" v-if="running">
+              <span class="material-icons animate-spin">autorenew</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <button
+              :disabled="running"
+              @click="runFunction(fn.uid)"
+              class="border border-white px-4 py-2 rounded-md"
+            >
+              <span class="material-icons" :class="running && 'animate-spin'">{{
+                running ? "refresh" : "play_arrow"
+              }}</span>
+              <span>Run</span>
+            </button>
+          </div>
         </template>
       </form>
       <div class="w-1/4 bg-gray-600 border-gray-200 border-l">
-        <ul>
+        <ul class="h-max-half overflow-y-scroll">
           <li v-for="fn of functions">
             <a
               href="#"
@@ -106,17 +152,6 @@ import { onMounted, ref } from "vue";
 import { useSettings } from "../../composables/useSettings";
 import { useFunctions } from "../../composables/useFunctions";
 
-// function debounce(func, delay) {
-//   let timeoutId;
-
-//   return function (...args) {
-//     clearTimeout(timeoutId);
-//     timeoutId = setTimeout(() => {
-//       func.apply(this, args);
-//     }, delay);
-//   };
-// }
-
 const { settings, load: loadSettings, save } = useSettings();
 const { listFunctions, saveFunction } = useFunctions();
 const functions = ref([]);
@@ -148,6 +183,37 @@ async function saveItem() {
   fn.value.uid = newId;
 }
 
+const fnInput = ref("");
+const output = ref([]);
+
+async function runFunction(uid) {
+  const fn = `
+  import fn from 'https://aifn.run/fn/${uid}.js';
+
+  async function runExample() {
+    try {
+      console.log(await fn(${fnInput.value}))
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+
+  runExample()`;
+
+  const s = document.createElement("script");
+  s.type = "module";
+  s.onerror = (e) => console.log(String(e));
+  s.innerHTML = fn;
+
+  running.value = true;
+  document.head.append(s);
+}
+
+console.log = (text) => {
+  output.value.push(text);
+  running.value = false;
+};
+
 function onChange(key, value) {
   settings.value[key] = value;
 }
@@ -162,3 +228,11 @@ const settingList = properties.map((key) => {
   return { label, key };
 });
 </script>
+<style scoped>
+.h-half {
+  height: 50vh;
+}
+.h-max-half {
+  max-height: 50vh;
+}
+</style>
