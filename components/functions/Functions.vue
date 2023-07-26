@@ -40,7 +40,7 @@
         <div class="text-right">
           <button
             class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex ml-auto"
-            :disabled="busy || !fn.p.trim()"
+            :disabled="busy || !fn.p"
             type="submit"
           >
             <span class="material-icons" :class="busy && 'animate-spin'">{{
@@ -166,14 +166,14 @@ async function loadFunctions() {
 }
 
 async function editItem(item) {
-  const { uid, p, name } = item;
+  const { uid = "", p = "", name = "" } = item;
   fn.value = { uid, p, name };
 }
 
 async function saveItem() {
   const { uid, p, name } = fn.value;
 
-  if (!p) {
+  if (!String(p).trim()) {
     return;
   }
 
