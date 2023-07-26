@@ -6,7 +6,7 @@
         <div class="mb-4">
           <label
             for="fnName"
-            class="block uppercase text-xs font-medium text-gray-100 mb-2"
+            class="block uppercase text-xs font-medium text-gray-100"
             >Name
           </label>
           <input
@@ -19,7 +19,7 @@
         <div class="mb-4">
           <label
             for="fnBody"
-            class="block uppercase text-xs font-medium text-gray-100 mb-2"
+            class="block uppercase text-xs font-medium text-gray-100"
             >Instruction (required)</label
           >
 
@@ -39,15 +39,15 @@
         </div>
         <div class="text-right">
           <button
-            class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex mx-auto"
-            :disabled="busy"
+            class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex ml-auto"
+            :disabled="busy || !fnInput.trim()"
             type="submit"
           >
             {{ fn.uid ? "Save" : "Create" }}
           </button>
         </div>
         <template v-if="fn.uid">
-          <hr class="my-4" />
+          <hr class="my-8" />
           <p class="text-sm mb-2">Use this function as a module:</p>
           <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800">
             <span class="hljs-keyword">import</span>
@@ -57,12 +57,12 @@
               >'https://aifn.run/fn/{{ fn.uid }}.js'</span
             >;
           </div>
-          <hr class="my-4" />
+          <hr class="my-8" />
           <div class="mb-4">
-            <p class="text-sm">Try this function (save it first!):</p>
+            <p class="text-sm mb-2">Try this function (save it first!):</p>
             <label
               for="fnInput"
-              class="block uppercase text-xs font-medium text-gray-100 mb-2"
+              class="block uppercase text-xs font-medium text-gray-100"
               >Function inputs</label
             >
             <textarea
@@ -90,7 +90,7 @@
             <button
               :disabled="running"
               @click="runFunction(fn.uid)"
-              class="border border-white px-4 py-2 rounded-md"
+              class="border border-white px-4 py-2 rounded-md flex ml-auto"
             >
               <span class="material-icons" :class="running && 'animate-spin'">{{
                 running ? "refresh" : "play_arrow"
@@ -185,6 +185,7 @@ async function saveItem() {
 
 const fnInput = ref("");
 const output = ref([]);
+const running = ref(false);
 
 async function runFunction(uid) {
   const fn = `
