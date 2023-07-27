@@ -106,22 +106,16 @@
         </template>
       </div>
       <div class="w-1/4 bg-gray-600 border-gray-200 border-l">
-        <ul class="h-max-half overflow-y-scroll">
+        <button class="p-4 block border-gray-200 border-b text-right w-full" @click.prevent="editItem({})">
+          <span class="material-icons">add</span>
+        </button>
+        <ul class="h-max-half overflow-y-scroll font-mono">
           <li v-for="fn of functions">
             <a
               href="#"
-              class="text-sm px-4 py-2 block border-gray-200 border-b overflow-ellipsis overflow-hidden whitespace-nowrap"
+              class="px-4 py-2 block border-gray-200 border-b overflow-ellipsis overflow-hidden whitespace-nowrap"
               @click.prevent="editItem(fn)"
               >{{ fn.name || fn.uid }}</a
-            >
-          </li>
-
-          <li>
-            <a
-              href="#"
-              class="text-sm px-4 py-2 block border-gray-200 border-b overflow-ellipsis overflow-hidden whitespace-nowrap"
-              @click.prevent="editItem({})"
-              >New function...</a
             >
           </li>
         </ul>
