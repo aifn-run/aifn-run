@@ -17,34 +17,46 @@ const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });</pre
       <h2 class="text-lg my-4">Use an AI function</h2>
       <CodeBlock>const result = await f('input for AI to process');</CodeBlock>
 
-      <h2 class="text-lg my-4">HTTP API</h2>
-      <h3 class="mb-4"><code>POST /fn</code></h3>
+      <h2 class="text-2xl font-bold mb-4 mt-6">HTTP API</h2>
+
+      <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">POST /fn</h3>
+
       <p class="mb-3">Create a function</p>
       <p class="mb-3">Request:</p>
       <CodeBlock class="mb-3">{ "p": "Print a Lorem Ipsum paragraph with at most {length} words" }</CodeBlock>
+
       <p class="mb-3">Response:</p>
       <CodeBlock class="mb-3">{ "uid": "function-id" }</CodeBlock>
-      <h3 class="mb-3">PUT /fn/:uid</h3>
+
+      <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">PUT /fn/:uid</h3>
+
       <p class="mb-3">Update a function</p>
+
       <p class="mb-3">Request:</p>
       <CodeBlock class="mb-3"
         >{ "p": "Print a Lorem Ipsum paragraph with at most {length} words and only lowercase words" }</CodeBlock
       >
-      <h3 class="mb-3">GET /fn/:uid.js</h3>
+
+      <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">GET /fn/:uid.js</h3>
+
       <p class="mb-3">Get a Javascript module with the code to call a function</p>
       <CodeBlock class="mb-3"
         >import loremIpsum from 'https://aifn.run/fn/[uid].js'; console.log(await loremIpsum({ length: 20 }));
       </CodeBlock>
-      <h3 class="mb-3">POST /run/[uid]</h3>
+
+      <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">POST /run/[uid]</h3>
+
       <p class="mb-3">Run a function using a function ID</p>
       <p class="mb-3">Request:</p>
       <CodeBlock class="mb-3">{ "inputs": { "length": "20" } }</CodeBlock>
+
       <p class="mb-3">Response:</p>
       <CodeBlock class="mb-3"
         >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae sagittis lorem. Fusce auctor euismod
         arcu...</CodeBlock
       >
-      <h3 class="mb-3">GET /fn</h3>
+
+      <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">GET /fn</h3>
       <p class="mb-3">List all functions associated with an account (requires log in first)</p>
     </main>
   </div>

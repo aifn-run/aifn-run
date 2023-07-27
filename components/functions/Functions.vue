@@ -48,9 +48,9 @@
           <hr class="my-8" />
           <p class="text-sm mb-2">Use this function as a module:</p>
           <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative">
-            <div class="absolute top-0 right-0">
-              <button @click="onCopy()">
-                <span class="material-icons">{{ copied ? 'check' : 'clipboard' }}</span>
+            <div class="absolute top-0 right-0 -m-1">
+              <button @click="onCopy()" class="w-8 h-8">
+                <span class="material-icons text-sm">{{ copied ? 'check' : 'content_paste' }}</span>
               </button>
             </div>
             <div ref="importSnippet">
@@ -196,7 +196,7 @@ async function runFunction(uid) {
 }
 
 async function onCopy() {
-  await navigator.clipboard.writeText(importSnippet);
+  await navigator.clipboard.writeText(importSnippet.textContent.trim());
   copied.value = true;
   setTimeout(() => (copied.value = false), 2000);
 }
