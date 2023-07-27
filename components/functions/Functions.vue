@@ -44,9 +44,9 @@
             <span>{{ fn.uid ? 'Save' : 'Create' }}</span>
           </button>
         </form>
+
         <template v-if="fn.uid">
-          <hr class="my-8" />
-          <p class="text-sm mb-2">Use this function as a module:</p>
+          <p class="text-sm mb-4">Use this function as a module:</p>
           <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative">
             <div class="absolute top-0 right-0 -m-1">
               <button @click="onCopyImport()" class="w-8 h-8">
@@ -60,7 +60,8 @@
               <span class="hljs-string">'https://aifn.run/fn/{{ fn.uid }}.js'</span>;
             </div>
           </div>
-          <p>Or copy the function ID:</p>
+          <p class="text-sm my-4">Or copy the function ID:</p>
+
           <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative">
             <div class="absolute top-0 right-0 -m-1">
               <button @click="onCopyId()" class="w-8 h-8">
@@ -69,8 +70,8 @@
             </div>
             <div ref="fnIdSnippet" class="text-white font-bold">{{ fn.uid }}</div>
           </div>
-          <hr class="my-8" />
-          <div class="mb-4">
+
+          <div class="mt-8">
             <p class="text-sm mb-2">Try this function (save it first!):</p>
             <label for="fnInput" class="block uppercase text-xs font-medium text-gray-100">Function inputs</label>
             <textarea
@@ -80,6 +81,7 @@
             ></textarea>
             <p class="text-sm">Tip: use regular JS objects for input, or plain text.</p>
           </div>
+
           <div v-if="output.length || running" class="font-mono my-4 p-2 bg-gray-800 rounded-md">
             <div class="mb-2 border-gray-400 border-b whitespace-pre-wrap" v-for="next of output">
               {{ next }}
