@@ -3,19 +3,44 @@
     <main>
       <h1 class="text-2xl font-bold mb-6">Javascript API</h1>
 
-      <h2 id="create" class="text-lg my-4">Create a function</h2>
+      <p class="mb-3">Note: the same API works for browsers and Node</p>
+
+      <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">ai.fn(prompt)</h3>
+
       <CodeBlock>
         <pre v-pre>
+import ai from 'https://aifn.run/ai.mjs';
+
 // with just a prompt
 const f = await ai.fn('text for prompt');
 
 // with a prompt and a name
-const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });</pre
+const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });
+</pre
         >
       </CodeBlock>
 
-      <h2 class="text-lg my-4">Use an AI function</h2>
+      <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">ai.create(fnOptions)</h3>
+      <p class="mb-3">Creates a function and returns its UID</p>
+
+      <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">ai.call(uid, inputs)</h3>
+      <p class="mb-3">Calls a function and returns the text output from AI</p>
+
+      <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">Using an AI function</h3>
+      <p class="mb-3">Just invoke it with inputs, like a regular function:</p>
       <CodeBlock>const result = await f('input for AI to process');</CodeBlock>
+
+      <p class="mb-3">All together:</p>
+      <CodeBlock>
+        <pre v-pre>
+        // create and call in 2 steps
+const { uid } = await ai.create({ p: 'text for prompt' });
+const h = (input) => ai.call(uid, input);
+
+await ai.update(uid, { p: 'new prompt for {text}' });
+h({ text: 'text input' })</pre
+        >
+      </CodeBlock>
 
       <h2 class="text-2xl font-bold mb-4 mt-6">HTTP API</h2>
 
