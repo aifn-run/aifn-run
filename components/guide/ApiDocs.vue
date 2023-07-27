@@ -5,52 +5,48 @@
 
       <h2 id="create" class="text-lg my-4">Create a function</h2>
       <CodeBlock>
-        <pre v-pre>// with just a prompt
+        <pre v-pre>
+// with just a prompt
 const f = await ai.fn('text for prompt');
 
 // with a prompt and a name
-const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });</pre>
+const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });</pre
+        >
       </CodeBlock>
 
-      <h2 id="use" class="text-lg my-4">Use an AI function</h2>
+      <h2 class="text-lg my-4">Use an AI function</h2>
       <CodeBlock>const result = await f('input for AI to process');</CodeBlock>
-      <h2>HTTP API</h2>
-<h3><code>POST /fn</code></h3>
-<p>Create a function</p>
-<p>Request:</p>
-<pre><code class="language-json">{ &quot;p&quot;: &quot;Print a Lorem Ipsum paragraph with at most {length} words&quot; }
-</code></pre>
-<p>Response:</p>
-<pre><code class="language-json">{ &quot;uid&quot;: &quot;function-id&quot; }
-</code></pre>
-<h3><code>PUT /fn/:uid</code></h3>
-<p>Update a function</p>
-<p>Request:</p>
-<pre><code class="language-json">{ &quot;p&quot;: &quot;Print a Lorem Ipsum paragraph with at most {length} words and only lowercase words&quot; }
-</code></pre>
-<h3><code>GET /fn/:uid.js</code></h3>
-<p>Get a Javascript module with the code to call a function</p>
-<pre><code class="language-ts">import loremIpsum from 'https://aifn.run/fn/[uid].js';
 
-console.log(await loremIpsum({ length: 20 }));
-</code></pre>
-<h3><code>POST /run/[uid]</code></h3>
-<p>Run a function using a function ID</p>
-<p>Request:</p>
-<pre><code class="language-json">{ &quot;inputs&quot;: { &quot;length&quot;: &quot;20&quot; } }
-</code></pre>
-<p>Response:</p>
-<pre><code class="language-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae sagittis lorem. Fusce auctor euismod arcu...
-</code></pre>
-<h3><code>GET /fn</code></h3>
-<p>List all functions associated with an account (requires log in first)</p>
+      <h2 class="text-lg my-4">HTTP API</h2>
+      <h3 class="mb-4"><code>POST /fn</code></h3>
+      <p class="mb-3">Create a function</p>
+      <p class="mb-3">Request:</p>
+      <CodeBlock class="mb-3">{ "p": "Print a Lorem Ipsum paragraph with at most {length} words" }</CodeBlock>
+      <p class="mb-3">Response:</p>
+      <CodeBlock class="mb-3">{ "uid": "function-id" }</CodeBlock>
+      <h3 class="mb-3">PUT /fn/:uid</h3>
+      <p class="mb-3">Update a function</p>
+      <p class="mb-3">Request:</p>
+      <CodeBlock class="mb-3"
+        >{ "p": "Print a Lorem Ipsum paragraph with at most {length} words and only lowercase words" }</CodeBlock
+      >
+      <h3 class="mb-3">GET /fn/:uid.js</h3>
+      <p class="mb-3">Get a Javascript module with the code to call a function</p>
+      <CodeBlock class="mb-3"
+        >import loremIpsum from 'https://aifn.run/fn/[uid].js'; console.log(await loremIpsum({ length: 20 }));
+      </CodeBlock>
+      <h3 class="mb-3">POST /run/[uid]</h3>
+      <p class="mb-3">Run a function using a function ID</p>
+      <p class="mb-3">Request:</p>
+      <CodeBlock class="mb-3">{ "inputs": { "length": "20" } }</CodeBlock>
+      <p class="mb-3">Response:</p>
+      <CodeBlock class="mb-3"
+        >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae sagittis lorem. Fusce auctor euismod
+        arcu...</CodeBlock
+      >
+      <h3 class="mb-3">GET /fn</h3>
+      <p class="mb-3">List all functions associated with an account (requires log in first)</p>
     </main>
-    <!-- <aside class="w-1/4">
-      <nav class="flex flex-col">
-        <a href="#" class="px-4 py-2 text-underline" v-nav="'create'">Create a function</a>
-        <a href="#" class="px-4 py-2 text-underline" v-nav="'use'">Use an AI function</a>
-      </nav>
-    </aside> -->
   </div>
 </template>
 
