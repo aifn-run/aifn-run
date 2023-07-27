@@ -1,11 +1,7 @@
 <template>
   <form @submit.prevent="save()" v-if="settingList.length">
     <div class="mb-4" v-for="setting of settingList">
-      <label
-        :for="setting.key"
-        class="block uppercase text-xs font-medium text-gray-100"
-        >{{ setting.label }}</label
-      >
+      <label :for="setting.key" class="block uppercase text-xs font-medium text-gray-100">{{ setting.label }}</label>
       <input
         :id="setting.key"
         :value="settings[setting.key]"
@@ -15,24 +11,26 @@
       />
     </div>
     <div class="text-right">
-      <button class="border border-white px-4 py-2 rounded-md" type="submit">
-        Save
-      </button>
+      <button class="border border-white px-4 py-2 rounded-md" type="submit">Save</button>
     </div>
   </form>
 </template>
 
 <script setup>
-import { onMounted } from "vue";
-import { useSettings } from "../../composables/useSettings";
+import { onMounted } from 'vue';
+import { useSettings } from '../../composables/useSettings';
 
 const { settings, load: loadSettings, save } = useSettings();
 
+function onChange(key, value) {
+  settings.value[key] = value;
+}
+
 onMounted(loadSettings);
 
-const properties = ["gptApiKey"];
+const properties = ['gptApiKey'];
 const settingList = properties.map((key) => {
-  const label = key.replace(/[A-Z]{1}/g, (c) => " " + c);
+  const label = key.replace(/[A-Z]{1}/g, (c) => ' ' + c);
   return { label, key };
 });
 </script>

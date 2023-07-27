@@ -11,11 +11,7 @@
       <div class="w-3/4 p-4" v-else>
         <form @submit.prevent="saveItem()">
           <div class="mb-4">
-            <label
-              for="fnName"
-              class="block uppercase text-xs font-medium text-gray-100"
-              >Name
-            </label>
+            <label for="fnName" class="block uppercase text-xs font-medium text-gray-100">Name </label>
             <input
               id="fnName"
               v-model="fn.name"
@@ -24,11 +20,7 @@
             />
           </div>
           <div class="mb-4">
-            <label
-              for="fnBody"
-              class="block uppercase text-xs font-medium text-gray-100"
-              >Instruction (required)</label
-            >
+            <label for="fnBody" class="block uppercase text-xs font-medium text-gray-100">Instruction (required)</label>
 
             <textarea
               id="fnBody"
@@ -36,12 +28,11 @@
               v-model="fn.p"
             ></textarea>
             <p class="text-sm">
-              Tip: you can use curly brackets to create input {placeholders}.
-              The function input will be an object to replace in the text.
+              Tip: you can use curly brackets to create input {placeholders}. The function input will be an object to
+              replace in the text.
             </p>
             <p class="text-sm">
-              If the function input is just text, it will be appended to the
-              function prompt instead.
+              If the function input is just text, it will be appended to the function prompt instead.
             </p>
           </div>
           <button
@@ -50,45 +41,38 @@
             type="submit"
           >
             <span v-if="busy" class="material-icons animate-spin">refresh</span>
-            <span>{{ fn.uid ? "Save" : "Create" }}</span>
+            <span>{{ fn.uid ? 'Save' : 'Create' }}</span>
           </button>
         </form>
         <template v-if="fn.uid">
           <hr class="my-8" />
           <p class="text-sm mb-2">Use this function as a module:</p>
-          <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800">
-            <span class="hljs-keyword">import</span>
-            {{ fn.name }}
-            <span class="hljs-keyword">from </span>
-            <span class="hljs-string"
-              >'https://aifn.run/fn/{{ fn.uid }}.js'</span
-            >;
+          <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative">
+            <div class="absolute top-0 right-0">
+              <button @click="onCopy()">
+                <span class="material-icons">{{ copied ? 'check' : 'clipboard' }}</span>
+              </button>
+            </div>
+            <div ref="importSnippet">
+              <span class="hljs-keyword">import</span>
+              {{ fn.name }}
+              <span class="hljs-keyword">from </span>
+              <span class="hljs-string">'https://aifn.run/fn/{{ fn.uid }}.js'</span>;
+            </div>
           </div>
           <hr class="my-8" />
           <div class="mb-4">
             <p class="text-sm mb-2">Try this function (save it first!):</p>
-            <label
-              for="fnInput"
-              class="block uppercase text-xs font-medium text-gray-100"
-              >Function inputs</label
-            >
+            <label for="fnInput" class="block uppercase text-xs font-medium text-gray-100">Function inputs</label>
             <textarea
               id="fnInput"
               class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full h-half"
               v-model="fnInput"
             ></textarea>
-            <p class="text-sm">
-              Tip: use regular JS objects for input, or plain text.
-            </p>
+            <p class="text-sm">Tip: use regular JS objects for input, or plain text.</p>
           </div>
-          <div
-            v-if="output.length || running"
-            class="font-mono my-4 p-2 bg-gray-800 rounded-md"
-          >
-            <div
-              class="mb-2 border-gray-400 border-b whitespace-pre-wrap"
-              v-for="next of output"
-            >
+          <div v-if="output.length || running" class="font-mono my-4 p-2 bg-gray-800 rounded-md">
+            <div class="mb-2 border-gray-400 border-b whitespace-pre-wrap" v-for="next of output">
               {{ next }}
             </div>
 
@@ -103,7 +87,7 @@
               class="border border-white px-4 py-2 rounded-md flex ml-auto"
             >
               <span class="material-icons" :class="running && 'animate-spin'">{{
-                running ? "refresh" : "play_arrow"
+                running ? 'refresh' : 'play_arrow'
               }}</span>
               <span>Run</span>
             </button>
@@ -136,22 +120,27 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
-import { useFunctions } from "../../composables/useFunctions";
-import { useProperty } from "../../composables/useProperty";
+import { onMounted, ref } from 'vue';
+import { useFunctions } from '../../composables/useFunctions';
+import { useProperty } from '../../composables/useProperty';
 
 const { listFunctions, saveFunction } = useFunctions();
 const functions = ref([]);
 const fn = ref(null);
 const busy = ref(false);
-const [model] = useProperty("defaultModel");
+const [model] = useProperty('defaultModel');
+const fnInput = ref('');
+const output = ref([]);
+const running = ref(false);
+const copied = ref(false);
+const importSnippet = ref(null);
 
 async function loadFunctions() {
   functions.value = await listFunctions();
 }
 
 async function editItem(item) {
-  const { uid = "", p = "", name = "" } = item;
+  const { uid = '', p = '', name = '' } = item;
   fn.value = { uid, p, name };
 }
 
@@ -183,10 +172,6 @@ async function saveItem() {
   }
 }
 
-const fnInput = ref("");
-const output = ref([]);
-const running = ref(false);
-
 async function runFunction(uid) {
   const fn = `
   import fn from 'https://aifn.run/fn/${uid}.js';
@@ -201,8 +186,8 @@ async function runFunction(uid) {
 
   runExample()`;
 
-  const s = document.createElement("script");
-  s.type = "module";
+  const s = document.createElement('script');
+  s.type = 'module';
   s.onerror = (e) => console.log(String(e));
   s.innerHTML = fn;
 
@@ -210,14 +195,16 @@ async function runFunction(uid) {
   document.head.append(s);
 }
 
+async function onCopy() {
+  await navigator.clipboard.writeText(importSnippet);
+  copied.value = true;
+  setTimeout(() => (copied.value = false), 2000);
+}
+
 console.log = (text) => {
   output.value.push(text);
   running.value = false;
 };
-
-function onChange(key, value) {
-  settings.value[key] = value;
-}
 
 onMounted(loadFunctions);
 </script>
