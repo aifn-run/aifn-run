@@ -49,7 +49,7 @@
           <p class="text-sm mb-2">Use this function as a module:</p>
           <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative">
             <div class="absolute top-0 right-0 -m-1">
-              <button @click="onCopy()" class="w-8 h-8">
+              <button @click="onCopyImport()" class="w-8 h-8">
                 <span class="material-icons text-sm">{{ copied ? 'check' : 'content_paste' }}</span>
               </button>
             </div>
@@ -59,6 +59,15 @@
               <span class="hljs-keyword">from </span>
               <span class="hljs-string">'https://aifn.run/fn/{{ fn.uid }}.js'</span>;
             </div>
+          </div>
+          <p>Or copy the function ID:</p>
+          <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative">
+            <div class="absolute top-0 right-0 -m-1">
+              <button @click="onCopyId()" class="w-8 h-8">
+                <span class="material-icons text-sm">{{ copied ? 'check' : 'content_paste' }}</span>
+              </button>
+            </div>
+            <div ref="fnIdSnippet" class="text-white font-bold">{{ fn.uid }}</div>
           </div>
           <hr class="my-8" />
           <div class="mb-4">
@@ -134,6 +143,7 @@ const output = ref([]);
 const running = ref(false);
 const copied = ref(false);
 const importSnippet = ref(null);
+const fnIdSnippet = ref(null);
 
 async function loadFunctions() {
   functions.value = await listFunctions();
@@ -195,8 +205,16 @@ async function runFunction(uid) {
   document.head.append(s);
 }
 
-async function onCopy() {
-  await navigator.clipboard.writeText(importSnippet.value.textContent.trim());
+function onCopyImport() {
+  onCopy(importSnippet.value.textContent.trim());
+}
+
+function onCopyId() {
+  onCopy(fnIdSnippet.value.textContent.trim());
+}
+
+async function onCopy(t) {
+  await navigator.clipboard.writeText(t);
   copied.value = true;
   setTimeout(() => (copied.value = false), 2000);
 }
