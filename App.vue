@@ -32,14 +32,8 @@
 
     <div class="overflow-y-scroll mx-auto container py-8 px-4">
       <router-view></router-view>
-      <div class="bg-gray-700 text-center py-8 px-4 mt-8">
-        <router-link
-          v-for="route of footerPages"
-          :key="route.path"
-          :to="route.path"
-          class="px-4 inline-block"
-          active-class="bg-gray-200 text-gray-900"
-        >
+      <div class="border-gray-700 border-t text-center p-4 mt-8">
+        <router-link v-for="route of footerPages" :key="route.path" :to="route.path" class="px-4 inline-block">
           <span class="text-sm">{{ route.name }}</span>
         </router-link>
       </div>

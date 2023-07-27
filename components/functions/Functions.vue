@@ -196,7 +196,7 @@ async function runFunction(uid) {
 }
 
 async function onCopy() {
-  await navigator.clipboard.writeText(importSnippet.textContent.trim());
+  await navigator.clipboard.writeText(importSnippet.value.textContent.trim());
   copied.value = true;
   setTimeout(() => (copied.value = false), 2000);
 }
