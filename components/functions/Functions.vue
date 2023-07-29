@@ -44,7 +44,7 @@
               function prompt instead.
             </p>
           </div>
-          <div class="flex ml-auto">
+          <div class="flex justify-end my-4">
             <button
               class="text-white bg-transparent shadow-lg border border-red-500 text-lg py-1 px-4 rounded flex mr-8"
               type="button"
@@ -230,7 +230,7 @@ async function onRemoveFunction() {
   if (!fn.value?.uid) return;
 
   if (confirm("Are you sure?")) {
-    await removeFunction(uid);
+    await removeFunction(fn.value?.uid);
     fn.value = null;
   }
 }
