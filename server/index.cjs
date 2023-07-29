@@ -41,6 +41,26 @@ async function getFunction(req, res) {
   res.writeHead(200).end(JSON.stringify({ p, model, name, uid }));
 }
 
+async function removeFunction(uid, req, res) {
+  let profile = { id: "" };
+
+  try {
+    profile = await getProfile(req.headers.cookie);
+  } catch {
+    res.writeHead(401).send("");
+    return;
+  }
+
+  const fn = await functions.get(uid);
+  if (!fn || (fn.oid && fn.oid !== profile.id)) {
+    res.writeHead(403).end("");
+    return;
+  }
+
+  const result = await functions.remove(uid);
+  res.writeHead(result ? 202 : 400).end("");
+}
+
 async function saveFunction(uid, req, res) {
   let profile = { id: "" };
 
@@ -165,6 +185,10 @@ module.exports = function (req, res, next) {
   }
 
   if (url.startsWith("/fn")) {
+    if (method === "DELETE" && uuidRe.test(url.slice(4))) {
+      return removeFunction(url.slice(4), req, res);
+    }
+
     if (method === "PUT" && uuidRe.test(url.slice(4))) {
       return saveFunction(url.slice(4), req, res);
     }

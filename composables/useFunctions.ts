@@ -19,5 +19,14 @@ export function useFunctions() {
     return response.uid;
   };
 
-  return { listFunctions, saveFunction };
+  const removeFunction = async (uid) => {
+    const request = await fetch("/fn/" + uid, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    return request.ok;
+  };
+
+  return { listFunctions, saveFunction, removeFunction };
 }

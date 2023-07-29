@@ -11,7 +11,11 @@
       <div class="w-3/4 p-4" v-else>
         <form @submit.prevent="saveItem()">
           <div class="mb-4">
-            <label for="fnName" class="block uppercase text-xs font-medium text-gray-100">Name </label>
+            <label
+              for="fnName"
+              class="block uppercase text-xs font-medium text-gray-100"
+              >Name
+            </label>
             <input
               id="fnName"
               v-model="fn.name"
@@ -20,7 +24,11 @@
             />
           </div>
           <div class="mb-4">
-            <label for="fnBody" class="block uppercase text-xs font-medium text-gray-100">Instruction (required)</label>
+            <label
+              for="fnBody"
+              class="block uppercase text-xs font-medium text-gray-100"
+              >Instruction (required)</label
+            >
 
             <textarea
               id="fnBody"
@@ -28,62 +36,99 @@
               v-model="fn.p"
             ></textarea>
             <p class="text-sm">
-              Tip: you can use curly brackets to create input {placeholders}. The function input will be an object to
-              replace in the text.
+              Tip: you can use curly brackets to create input {placeholders}.
+              The function input will be an object to replace in the text.
             </p>
             <p class="text-sm">
-              If the function input is just text, it will be appended to the function prompt instead.
+              If the function input is just text, it will be appended to the
+              function prompt instead.
             </p>
           </div>
-          <button
-            class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex ml-auto"
-            :disabled="busy || !fn.p"
-            type="submit"
-          >
-            <span v-if="busy" class="material-icons animate-spin">refresh</span>
-            <span>{{ fn.uid ? 'Save' : 'Create' }}</span>
-          </button>
+          <div class="flex ml-auto">
+            <button
+              class="text-white bg-transparent shadow-lg border border-red-500 text-lg py-1 px-4 rounded flex mr-8"
+              type="button"
+              @click="onRemoveFunction()"
+            >
+              <span class="material-icons">delete</span>
+              <span>Delete</span>
+            </button>
+            <button
+              class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex"
+              :disabled="busy || !fn.p"
+              type="submit"
+            >
+              <span v-if="busy" class="material-icons animate-spin"
+                >refresh</span
+              >
+              <span>{{ fn.uid ? "Save" : "Create" }}</span>
+            </button>
+          </div>
         </form>
 
         <template v-if="fn.uid">
           <p class="text-sm mb-4">Use this function as a module:</p>
-          <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative">
+          <div
+            class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative"
+          >
             <div class="absolute top-0 right-0 -m-1">
               <button @click="onCopyImport()" class="w-8 h-8">
-                <span class="material-icons text-sm">{{ copied ? 'check' : 'content_paste' }}</span>
+                <span class="material-icons text-sm">{{
+                  copied ? "check" : "content_paste"
+                }}</span>
               </button>
             </div>
             <div ref="importSnippet">
               <span class="hljs-keyword">import</span>
               {{ fn.name }}
               <span class="hljs-keyword">from </span>
-              <span class="hljs-string">'https://aifn.run/fn/{{ fn.uid }}.js'</span>;
+              <span class="hljs-string"
+                >'https://aifn.run/fn/{{ fn.uid }}.js'</span
+              >;
             </div>
           </div>
           <p class="text-sm my-4">Or copy the function ID:</p>
 
-          <div class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative">
+          <div
+            class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative"
+          >
             <div class="absolute top-0 right-0 -m-1">
               <button @click="onCopyId()" class="w-8 h-8">
-                <span class="material-icons text-sm">{{ copied ? 'check' : 'content_paste' }}</span>
+                <span class="material-icons text-sm">{{
+                  copied ? "check" : "content_paste"
+                }}</span>
               </button>
             </div>
-            <div ref="fnIdSnippet" class="text-white font-bold">{{ fn.uid }}</div>
+            <div ref="fnIdSnippet" class="text-white font-bold">
+              {{ fn.uid }}
+            </div>
           </div>
 
           <div class="mt-8">
             <p class="text-sm mb-2">Try this function (save it first!):</p>
-            <label for="fnInput" class="block uppercase text-xs font-medium text-gray-100">Function inputs</label>
+            <label
+              for="fnInput"
+              class="block uppercase text-xs font-medium text-gray-100"
+              >Function inputs</label
+            >
             <textarea
               id="fnInput"
               class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full h-half"
               v-model="fnInput"
             ></textarea>
-            <p class="text-sm">Tip: use regular JS objects for input, or plain text.</p>
+            <p class="text-sm">
+              Tip: use regular JS objects for input, or plain text.
+            </p>
           </div>
 
-          <div v-if="output.length || running" class="font-mono my-4 p-2 bg-gray-800 rounded-md">
-            <div class="mb-2 border-gray-400 border-b whitespace-pre-wrap" v-for="next of output">
+          <div
+            v-if="output.length || running"
+            class="font-mono my-4 p-2 bg-gray-800 rounded-md"
+          >
+            <div
+              class="mb-2 border-gray-400 border-b whitespace-pre-wrap"
+              v-for="next of output"
+            >
               {{ next }}
             </div>
 
@@ -98,7 +143,7 @@
               class="border border-white px-4 py-2 rounded-md flex ml-auto"
             >
               <span class="material-icons" :class="running && 'animate-spin'">{{
-                running ? 'refresh' : 'play_arrow'
+                running ? "refresh" : "play_arrow"
               }}</span>
               <span>Run</span>
             </button>
@@ -106,7 +151,10 @@
         </template>
       </div>
       <div class="w-1/4 bg-gray-600 border-gray-200 border-l">
-        <button class="p-4 block border-gray-200 border-b text-right w-full" @click.prevent="editItem({})">
+        <button
+          class="p-4 block border-gray-200 border-b text-right w-full"
+          @click.prevent="editItem({})"
+        >
           <span class="material-icons">add</span>
         </button>
         <ul class="h-max-half overflow-y-scroll font-mono">
@@ -125,16 +173,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useFunctions } from '../../composables/useFunctions';
-import { useProperty } from '../../composables/useProperty';
+import { onMounted, ref } from "vue";
+import { useFunctions } from "../../composables/useFunctions";
+import { useProperty } from "../../composables/useProperty";
 
-const { listFunctions, saveFunction } = useFunctions();
+const { listFunctions, saveFunction, removeFunction } = useFunctions();
 const functions = ref([]);
 const fn = ref(null);
 const busy = ref(false);
-const [model] = useProperty('defaultModel');
-const fnInput = ref('');
+const [model] = useProperty("defaultModel");
+const fnInput = ref("");
 const output = ref([]);
 const running = ref(false);
 const copied = ref(false);
@@ -146,7 +194,7 @@ async function loadFunctions() {
 }
 
 async function editItem(item) {
-  const { uid = '', p = '', name = '' } = item;
+  const { uid = "", p = "", name = "" } = item;
   fn.value = { uid, p, name };
 }
 
@@ -178,6 +226,15 @@ async function saveItem() {
   }
 }
 
+async function onRemoveFunction() {
+  if (!fn.value?.uid) return;
+
+  if (confirm("Are you sure?")) {
+    await removeFunction(uid);
+    fn.value = null;
+  }
+}
+
 async function runFunction(uid) {
   const fn = `
   import fn from 'https://aifn.run/fn/${uid}.js';
@@ -192,8 +249,8 @@ async function runFunction(uid) {
 
   runExample()`;
 
-  const s = document.createElement('script');
-  s.type = 'module';
+  const s = document.createElement("script");
+  s.type = "module";
   s.onerror = (e) => console.log(String(e));
   s.innerHTML = fn;
 

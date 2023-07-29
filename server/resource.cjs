@@ -43,7 +43,7 @@ module.exports = class Resource {
     const url = new URL(id, this.resourceUrl);
     const x = await fetch(url, fetchOptions);
 
-    if (!x) {
+    if (!x.ok) {
       return null;
     }
 
