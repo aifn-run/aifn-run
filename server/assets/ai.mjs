@@ -23,7 +23,7 @@ async function create(fnOptions) {
   const body = typeof fnOptions === "string" ? { p: fnOptions } : fnOptions;
   const create = await fetch(new URL("/fn", baseURL), {
     method: "POST",
-    headers: { Authorization: config.key || "" },
+    headers: config.key && { Authorization: config.key },
     mode: "cors",
     body: JSON.stringify(body),
   });
@@ -41,7 +41,7 @@ async function update(uid, fnOptions) {
   const body = typeof fnOptions === "string" ? { p: fnOptions } : fnOptions;
   const request = await fetch(new URL("/fn/" + uid, baseURL), {
     method: "PUT",
-    headers: { Authorization: config.key || "" },
+    headers: config.key && { Authorization: config.key },
     mode: "cors",
     body: JSON.stringify(body),
   });
@@ -61,7 +61,7 @@ async function call(uid, inputs) {
   const request = await fetch(new URL("/run/" + uid, baseURL), {
     method: "POST",
     mode: "cors",
-    headers: { Authorization: config.key || "" },
+    headers: config.key && { Authorization: config.key },
     body: JSON.stringify({ inputs }),
   });
 
