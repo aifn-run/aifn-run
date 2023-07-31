@@ -74,7 +74,7 @@ main();</pre
 
       <div
         v-if="output.length || running"
-        class="font-mono mb-4 p-2 border border-gray-400 bg-gray-800 rounded-lg w-full"
+        class="font-mono mb-4 p-4 bg-gray-800 rounded"
       >
         <div v-for="next in output" class="border-b border-gray-500 mb-2 py-2">
           {{ next }}
@@ -87,6 +87,7 @@ main();</pre
         <button
           type="button"
           class="text-sm p-2 rounded"
+          v-if="output.length"
           @click="output.length = 0"
         >
           Clear
