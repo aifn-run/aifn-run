@@ -209,7 +209,12 @@ module.exports = function (req, res, next) {
   if (url.startsWith("/run/")) {
     if (method === "POST") return runFunction(req, res);
     if (method === "OPTIONS") {
-      res.writeHead(200, { "Access-Control-Allow-Origin": "*" });
+      res.writeHead(200, {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "authorization",
+        "Access-Control-Allow-Methods": "POST",
+      });
+
       res.end();
       return;
     }
