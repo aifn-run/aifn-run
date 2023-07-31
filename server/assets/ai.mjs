@@ -6,6 +6,7 @@
  */
 
 const config = {};
+const baseURL = 'https://__BASE_URL__/';
 
 /**
  * Create a new AI function
@@ -20,7 +21,7 @@ async function fn(fnOptions) {
 
 async function create(fnOptions) {
   const body = typeof fnOptions === "string" ? { p: fnOptions } : fnOptions;
-  const create = await fetch("/fn", {
+  const create = await fetch(new URL("/fn", baseURL), {
     method: "POST",
     headers: { Authorization: config.key || "" },
     body: JSON.stringify(body),
@@ -37,7 +38,7 @@ async function create(fnOptions) {
 
 async function update(uid, fnOptions) {
   const body = typeof fnOptions === "string" ? { p: fnOptions } : fnOptions;
-  const request = await fetch("/fn/" + uid, {
+  const request = await fetch(new URL("/fn/" + uid, baseURL), {
     method: "PUT",
     headers: { Authorization: config.key || "" },
     body: JSON.stringify(body),
@@ -55,7 +56,7 @@ async function configure(key) {
 }
 
 async function call(uid, inputs) {
-  const request = await fetch("/run/" + uid, {
+  const request = await fetch(new URL("/run/" + uid, baseURL), {
     method: "POST",
     headers: { Authorization: config.key || "" },
     body: JSON.stringify({ inputs }),
