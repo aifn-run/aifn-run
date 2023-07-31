@@ -213,5 +213,9 @@ module.exports = function (req, res, next) {
     if (method === "PUT") return saveSettings(req, res);
   }
 
+  if (url === '/ai.mjs' && method === 'GET') {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
+
   next();
 };
