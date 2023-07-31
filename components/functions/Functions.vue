@@ -48,6 +48,7 @@
             <button
               class="text-white bg-transparent shadow-lg border border-red-500 text-lg py-1 px-4 rounded flex mr-8"
               type="button"
+              v-if="fn.uid"
               @click="onRemoveFunction()"
             >
               <span class="material-icons">delete</span>
