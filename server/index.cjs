@@ -206,8 +206,13 @@ module.exports = function (req, res, next) {
     return getFunction(req, res);
   }
 
-  if (url.startsWith("/run/") && method === "POST") {
-    return runFunction(req, res);
+  if (url.startsWith("/run/")) {
+    if (method === "POST") return runFunction(req, res);
+    if (method === "OPTIONS") {
+      res.writeHead(200, { "Access-Control-Allow-Origin": "*" });
+      res.end();
+      return;
+    }
   }
 
   if (url === "/settings") {
@@ -222,7 +227,7 @@ module.exports = function (req, res, next) {
       "Content-Type": "application/javascript; charset=utf-8",
       "Cache-Control": "max-age=604800, must-revalidate",
     });
-    res.end(aiModule.replace('__BASE_URL__', req.headers["x-forwarded-for"]));
+    res.end(aiModule.replace("__BASE_URL__", req.headers["x-forwarded-for"]));
     return;
   }
 
