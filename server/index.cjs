@@ -222,7 +222,7 @@ module.exports = function (req, res, next) {
       "Content-Type": "application/javascript; charset=utf-8",
       "Cache-Control": "max-age=604800, must-revalidate",
     });
-    res.end(aiModule.replace(__BASE_URL__, req.headers["x-forwarded-for"]));
+    res.end(aiModule.replace('__BASE_URL__', req.headers["x-forwarded-for"]));
     return;
   }
 
