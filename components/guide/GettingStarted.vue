@@ -127,8 +127,7 @@ const code = ref(initialSnippet.trim());
 const output = ref([]);
 
 async function run() {
-  const fn = Function(`async function runExample(ai) { ${code.value}; }
-  return runExample(ai)`);
+  const fn = Function('ai', `async function runExample() { ${code.value}; } return runExample()`);
 
   running.value = true;
 
