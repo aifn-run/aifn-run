@@ -1,5 +1,6 @@
-import { createApp } from 'vue';
-import App from './App.vue';
-import { router } from './composables/useRouter.js';
+import "./highlight.css";
+import { createApp } from "vue";
+import App from "./App.vue";
+import { router } from "./composables/useRouter.js";
 
-createApp(App).use(router).mount('#app');
+createApp(App).use(router).mount("#app");
