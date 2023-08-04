@@ -1,5 +1,5 @@
-const { randomUUID } = require("crypto");
-const Resource = require("./resource.cjs");
+import { randomUUID } from "crypto";
+import { Resource } from "./resource.mjs";
 
 const logs = new Resource("log");
 const errors = new Resource("log");
