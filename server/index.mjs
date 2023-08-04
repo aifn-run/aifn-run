@@ -238,5 +238,6 @@ export default function (req, res, next) {
     return;
   }
 
+  console.log(`No match for ${req.method} ${req.url}`);
   next();
-};
+}
