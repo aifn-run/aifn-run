@@ -10,6 +10,7 @@ const aiModule = readFileSync("./server/assets/ai.mjs", "utf-8");
 const startDate = new Date().toUTCString();
 const functions = new Resource("fn");
 const settings = new Resource("settings");
+const queryHistory = new Resource("history");
 
 function getFunctionCode(req, res) {
   const uid = req.url.replace("/fn/", "").replace(".js", "");
@@ -120,6 +121,7 @@ async function runFunction(req, res) {
     const input = parseInputs(rawInputs);
     const message = await fetchCompletion(fn, input);
     res.end(message);
+    queryHistory.set(randomUUID(), { uid, input, output: message, rawInputs });
     log(message);
   } catch (error) {
     res.writeHead(500).end("Oh, shoot!");

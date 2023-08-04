@@ -15,9 +15,6 @@ const completionOptions = {
   },
 };
 
-const Resource = require("./resource.mjs");
-const queryHistory = new Resource("history");
-
 function replaceMarkers(text, input) {
   if (typeof input === "string") {
     return text + input;
@@ -28,7 +25,6 @@ function replaceMarkers(text, input) {
 
 export async function fetchCompletion(fn, input) {
   const functionPrompt = fn.p;
-  const uid = fn.uid;
   const model = fn.model || apiModel;
 
   return new Promise((resolve, reject) => {
@@ -60,8 +56,6 @@ export async function fetchCompletion(fn, input) {
       const json = JSON.parse(buffer);
       const text = json.choices[0].message.content;
       resolve(text);
-
-      queryHistory.set(randomUUID(), { uid, input: content, output: text });
     });
 
     remote.write(JSON.stringify(payload));
