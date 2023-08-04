@@ -5,10 +5,9 @@
       <h2 class="text-2xl font-bold mt-8 mb-4">Introduction</h2>
       <p>
         <strong
-          >ai.fn() is a service to use AI chat completions as a regular
-          Javascript function</strong
+          >ai.fn() is a service to embed AI into Javascript functions.</strong
         >
-        in any project, for both browser and Node.JS.
+        It works in the browser and in Node.JS.
       </p>
 
       <h2 class="text-2xl font-bold mb-4 mt-8">But why?</h2>
@@ -128,7 +127,10 @@ const code = ref(initialSnippet.trim());
 const output = ref([]);
 
 async function run() {
-  const fn = Function('ai', `async function runExample() { ${code.value}; } return runExample()`);
+  const fn = Function(
+    "ai",
+    `async function runExample() { ${code.value}; } return runExample()`
+  );
 
   running.value = true;
 
