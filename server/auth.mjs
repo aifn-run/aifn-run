@@ -1,9 +1,9 @@
-const { request } = require("https");
-const { readBody } = require("./utils.cjs");
+import { request } from "https";
+import { readBody } from "./utils.mjs";
 
 const authUrl = process.env.AUTH_URL;
 
-function getProfile(cookie) {
+export function getProfile(cookie) {
   return new Promise((resolve, reject) => {
     const r = request(authUrl, { headers: { cookie } });
 
@@ -19,5 +19,3 @@ function getProfile(cookie) {
     r.end();
   });
 }
-
-module.exports = { getProfile };

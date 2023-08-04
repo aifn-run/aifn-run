@@ -1,12 +1,12 @@
-const { readFileSync } = require("fs");
-const { createHash, randomUUID } = require("crypto");
-const Resource = require("./resource.cjs");
-const { fetchCompletion } = require("./completions.cjs");
-const { getProfile } = require("./auth.cjs");
-const { readBody, log, onError } = require("./utils.cjs");
+import { readFileSync } from "fs";
+import { createHash, randomUUID } from "crypto";
+import { fetchCompletion } from "./completions.mjs";
+import { getProfile } from "./auth.mjs";
+import { Resource } from "./resource.mjs";
+import { readBody, log, onError } from "./utils.mjs";
 
 const uuidRe = /^.{8}-.{4}-.{4}-.{4}-.{12}$/;
-const aiModule = readFileSync(__dirname + "/assets/ai.mjs", "utf-8");
+const aiModule = readFileSync("./server/assets/ai.mjs", "utf-8");
 const startDate = new Date().toUTCString();
 const functions = new Resource("fn");
 const settings = new Resource("settings");

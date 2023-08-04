@@ -29,4 +29,4 @@ function readBody(stream) {
   });
 }
 
-module.exports = { readBody, log, onError };
+export { readBody, log, onError };

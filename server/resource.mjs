@@ -3,7 +3,7 @@ const fetchOptions = { mode: "cors" };
 const fetchHeaders = { headers: { "content-type": "application/json" } };
 const idIsMissingError = new Error("Id is missing");
 
-module.exports = class Resource {
+export class Resource {
   constructor(name) {
     if (!name) {
       throw new Error("Resource name is missing");
