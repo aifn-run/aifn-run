@@ -179,7 +179,7 @@ async function saveSettings(req, res) {
   }
 }
 
-module.exports = function (req, res, next) {
+export default function (req, res, next) {
   const { method } = req;
   const url = req.url.replace(/\/$/, "");
 
