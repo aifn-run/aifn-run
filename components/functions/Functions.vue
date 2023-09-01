@@ -23,7 +23,7 @@
       <div
         v-for="fn of functions"
         @click="fn.editing || editItem(fn)"
-        class="p-4"
+        class="px-4 border-b border-gray-200"
       >
         <div class="flex items-center justify-between">
           <span class="font-mono">{{
