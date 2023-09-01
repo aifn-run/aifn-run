@@ -26,7 +26,9 @@
             }}</span>
           </button>
           <button
-            @click.prevent="fn.editing && (fn.editing = false)"
+            @click.prevent="
+              (fn.editing && (fn.editing = false)) || editItem(fn)
+            "
             class="p-2"
           >
             <span class="material-icons"
@@ -41,6 +43,7 @@
           @remove="loadFunctions()"
           @update="onUpdate(fn)"
         ></Editor>
+        {{ fn }}
       </div>
     </div>
   </div>
