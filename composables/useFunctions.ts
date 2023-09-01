@@ -1,3 +1,10 @@
+export type FunctionBody = {
+  uid?: string;
+  p: string;
+  name: string;
+  model?: string;
+};
+
 export function useFunctions() {
   const listFunctions = async () => {
     const req = await fetch("/fn", { credentials: "include" });
