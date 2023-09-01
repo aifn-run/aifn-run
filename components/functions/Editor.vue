@@ -72,8 +72,7 @@
           <span class="hljs-keyword">import</span>
           {{ fn.name }}
           <span class="hljs-keyword">from </span>
-          <span class="hljs-string"
-            >'https://aifn.run/fn/{{ fn.uid }}.js'</span
+          <span class="hljs-string">'https://aifn.run/fn/{{ fn.uid }}.js'</span
           >;
         </div>
       </div>
@@ -149,7 +148,9 @@ import { useFunctions } from "../../composables/useFunctions";
 
 const { saveFunction, removeFunction } = useFunctions();
 
-const props = defineProps({ fn: { type: Object, default: {} } });
+const props = defineProps({
+  fn: { type: Object, default: {} },
+});
 const emit = defineEmits(["update", "remove"]);
 const busy = ref(false);
 const [model] = useProperty("defaultModel");
@@ -211,6 +212,11 @@ async function runFunction(uid) {
 
   runExample()`;
 
+  console.log = (text: string) => {
+    output.value.push(text);
+    running.value = false;
+  };
+
   const s = document.createElement("script");
   s.type = "module";
   s.onerror = (e) => console.log(String(e));
@@ -233,9 +239,4 @@ async function onCopy(t) {
   copied.value = true;
   setTimeout(() => (copied.value = false), 2000);
 }
-
-console.log = (text: string) => {
-  output.value.push(text);
-  running.value = false;
-};
 </script>

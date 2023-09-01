@@ -2,11 +2,9 @@
   <div>
     <h1 class="text-2xl font-bold mb-6 flex items-center justify-between">
       Your Functions
-      <button
-        class="p-4 block border-gray-200 border-b text-right w-full"
-        @click.prevent="addFunction()"
-      >
+      <button class="p-4 flex items-center" @click.prevent="addFunction()">
         <span class="material-icons">add</span>
+        New function
       </button>
     </h1>
     <div class="my-8 border border-gray-200 rounded-lg overflow-hidden">
@@ -20,29 +18,28 @@
         </div>
       </div>
 
-      <div
-        v-for="fn of functions"
-        @click="fn.editing || editItem(fn)"
-        class="px-4 border-b border-gray-200"
-      >
+      <div v-for="fn of functions" class="px-4 border-b border-gray-200">
         <div class="flex items-center justify-between">
-          <span class="font-mono">{{
-            (fn.tmp && fn.tmp.name) || fn.item.name || fn.item.uid
-          }}</span>
+          <button @click="fn.editing || editItem(fn)">
+            <span class="font-mono">{{
+              (fn.tmp && fn.tmp.name) || fn.item.name || fn.item.uid
+            }}</span>
+          </button>
           <button
             @click.prevent="fn.editing && (fn.editing = false)"
             class="p-2"
           >
             <span class="material-icons"
-              >{{ (fn.editing && "close") || "arrow_down" }}
+              >{{ (fn.editing && "close") || "expand_more" }}
             </span>
           </button>
         </div>
         <Editor
           v-if="fn.editing"
-          class="pt-2 mt-2 border-t border-gray-200"
+          class="mt-4"
           :fn="fn.tmp"
           @remove="loadFunctions()"
+          @update="onUpdate(fn)"
         ></Editor>
       </div>
     </div>
@@ -58,17 +55,17 @@ import Editor from "./Editor.vue";
 const { listFunctions } = useFunctions();
 
 const functions = ref<
-  Array<{ item: FunctionBody; tmp: Partial<FunctionBody>; editing: boolean }>
+  Array<{ item: FunctionBody; tmp: FunctionBody; editing: boolean }>
 >([]);
 
 async function editItem(item) {
-  const { uid = "", p = "", name = "" } = item;
-  item.tmp = { uid, p, name };
+  item.tmp = { ...item.fn };
   item.editing = true;
 }
 
 function addFunction() {
-  functions.value.push({ item: { p: "", name: "" }, tmp: {}, editing: true });
+  const fn = { p: "", name: "-" };
+  functions.value.push({ item: fn, tmp: fn, editing: true });
 }
 
 async function loadFunctions() {
@@ -78,6 +75,10 @@ async function loadFunctions() {
     tmp: { ...fn },
     editing: false,
   }));
+}
+
+function onUpdate(item) {
+  item.fn = item.tmp;
 }
 
 onMounted(loadFunctions);
