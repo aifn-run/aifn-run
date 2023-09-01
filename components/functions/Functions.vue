@@ -2,7 +2,10 @@
   <div>
     <h1 class="text-2xl font-bold mb-6 flex items-center justify-between">
       Your Functions
-      <button class="py-2 px-4 bg-gray-200 text-gray-900 rounded text-base" @click.prevent="addFunction()">
+      <button
+        class="py-2 px-4 bg-gray-200 text-gray-900 rounded text-base"
+        @click.prevent="addFunction()"
+      >
         new function
       </button>
     </h1>
@@ -18,16 +21,17 @@
       </div>
 
       <div v-for="fn of functions" class="px-4 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <button @click.prevent="onToggle(fn)">
-            <span class="font-mono">{{
-              (fn.tmp && fn.tmp.name) || fn.fn.name || fn.fn.uid
-            }}</span>
-            <span class="material-icons"
-              >{{ (fn.editing && "close") || "expand_more" }}
-            </span>
-          </button>
-        </div>
+        <button
+          @click.prevent="onToggle(fn)"
+          class="flex items-center justify-between w-full py-2"
+        >
+          <span class="font-mono">{{
+            (fn.tmp && fn.tmp.name) || fn.fn.name || fn.fn.uid
+          }}</span>
+          <span class="material-icons"
+            >{{ (fn.editing && "close") || "expand_more" }}
+          </span>
+        </button>
         <Editor
           v-if="fn.editing"
           class="mt-4"
@@ -35,7 +39,6 @@
           @remove="loadFunctions()"
           @update="onUpdate(fn)"
         ></Editor>
-        {{ fn }}
       </div>
     </div>
   </div>
