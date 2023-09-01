@@ -7,6 +7,8 @@
 
       <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">ai.fn(prompt)</h3>
 
+      <p class="mb-3">Creates and returns a function</p>
+
       <CodeBlock>
         <pre v-pre>
 import ai from 'https://aifn.run/ai.mjs';
@@ -23,8 +25,26 @@ const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });
       <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">ai.create(fnOptions)</h3>
       <p class="mb-3">Creates a function and returns its UID</p>
 
+      <CodeBlock>
+        <pre v-pre>
+import ai from 'https://aifn.run/ai.mjs';
+
+const { uid } = await ai.create({ p: 'text for prompt', name: 'lorem' });
+</pre
+        >
+      </CodeBlock>
+
       <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">ai.call(uid, inputs)</h3>
       <p class="mb-3">Calls a function and returns the text output from AI</p>
+
+      <CodeBlock>
+        <pre v-pre>
+import ai from 'https://aifn.run/ai.mjs';
+
+const uid = await ai.call('fd050f3c-4ac5-4742-a33b-5cc506c13189', { input: 'value' });
+</pre
+        >
+      </CodeBlock>
 
       <h3 class="mt-6 mb-3 border-gray-100 border-b py-2 font-mono">Using an AI function</h3>
       <p class="mb-3">Just invoke it with inputs, like a regular function:</p>
@@ -35,10 +55,10 @@ const g = await ai.fn({ p: 'text for prompt', name: 'lorem' });
         <pre v-pre>
         // create and call in 2 steps
 const { uid } = await ai.create({ p: 'text for prompt' });
-const h = (input) => ai.call(uid, input);
+const fn = (input) => ai.call(uid, input);
 
 await ai.update(uid, { p: 'new prompt for {text}' });
-h({ text: 'text input' })</pre
+fn({ text: 'text input' })</pre
         >
       </CodeBlock>
 

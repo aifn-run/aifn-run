@@ -1,5 +1,5 @@
 <template>
-  <div class="w-3/4 p-4">
+  <div>
     <form @submit.prevent="saveItem()">
       <div class="mb-4">
         <label
@@ -9,7 +9,7 @@
         </label>
         <input
           id="fnName"
-          v-model="props.fn.name"
+          v-model="fn.name"
           type="text"
           class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full mb-4"
         />
@@ -24,7 +24,7 @@
         <textarea
           id="fnBody"
           class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full h-40 mb-4"
-          v-model="props.fn.p"
+          v-model="fn.p"
         ></textarea>
         <p class="text-sm">
           Tip: you can use curly brackets to create input {placeholders}. The
@@ -39,7 +39,7 @@
         <button
           class="text-white bg-transparent shadow-lg border border-red-500 text-lg py-1 px-4 rounded flex mr-8"
           type="button"
-          v-if="props.fn.uid"
+          v-if="fn.uid"
           @click="onRemoveFunction()"
         >
           <span class="material-icons">delete</span>
@@ -47,16 +47,16 @@
         </button>
         <button
           class="text-white bg-blue-500 shadow-lg border border-blue-400 font-bold text-lg py-1 px-4 rounded flex"
-          :disabled="busy || !props.fn.p"
+          :disabled="busy || !fn.p"
           type="submit"
         >
           <span v-if="busy" class="material-icons animate-spin">refresh</span>
-          <span>{{ props.fn.uid ? "Save" : "Create" }}</span>
+          <span>{{ fn.uid ? "Save" : "Create" }}</span>
         </button>
       </div>
     </form>
 
-    <template v-if="props.fn.uid">
+    <template v-if="fn.uid">
       <p class="text-sm mb-4">Use this function as a module:</p>
       <div
         class="font-mono p-4 rounded border border-gray-600 bg-gray-800 relative"
@@ -70,10 +70,10 @@
         </div>
         <div ref="importSnippet">
           <span class="hljs-keyword">import</span>
-          {{ props.fn.name }}
+          {{ fn.name }}
           <span class="hljs-keyword">from </span>
           <span class="hljs-string"
-            >'https://aifn.run/fn/{{ props.fn.uid }}.js'</span
+            >'https://aifn.run/fn/{{ fn.uid }}.js'</span
           >;
         </div>
       </div>
@@ -90,7 +90,7 @@
           </button>
         </div>
         <div ref="fnIdSnippet" class="text-white font-bold">
-          {{ props.fn.uid }}
+          {{ fn.uid }}
         </div>
       </div>
 
@@ -129,7 +129,7 @@
       <div class="text-right">
         <button
           :disabled="running"
-          @click="runFunction(props.fn.uid)"
+          @click="runFunction(fn.uid)"
           class="border border-white px-4 py-2 rounded-md flex ml-auto"
         >
           <span class="material-icons" :class="running && 'animate-spin'">{{
@@ -150,7 +150,7 @@ import { useFunctions } from "../../composables/useFunctions";
 const { saveFunction, removeFunction } = useFunctions();
 
 const props = defineProps({ fn: { type: Object, default: {} } });
-const emit = defineEmits(['update', 'remove']);
+const emit = defineEmits(["update", "remove"]);
 const busy = ref(false);
 const [model] = useProperty("defaultModel");
 const fnInput = ref("");
@@ -182,7 +182,7 @@ async function saveItem() {
 
     const newId = await saveFunction(body);
     props.fn.uid = newId;
-    emit('update');
+    emit("update");
   } finally {
     busy.value = false;
   }
@@ -193,7 +193,7 @@ async function onRemoveFunction() {
 
   if (confirm("Are you sure?")) {
     await removeFunction(props.fn?.uid);
-    emit('remove');
+    emit("remove");
   }
 }
 
