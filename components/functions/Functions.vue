@@ -21,7 +21,7 @@
         <div class="flex items-center justify-between">
           <button @click.prevent="onToggle(fn)">
             <span class="font-mono">{{
-              (fn.tmp && fn.tmp.name) || fn.item.name || fn.item.uid
+              (fn.tmp && fn.tmp.name) || fn.fn.name || fn.fn.uid
             }}</span>
             <span class="material-icons"
               >{{ (fn.editing && "close") || "expand_more" }}
@@ -58,7 +58,7 @@ function onToggle(fn) {
     return (fn.editing = false);
   }
 
-  fn.tmp = { ...fn.item };
+  fn.tmp = { ...fn.fn };
   fn.editing = true;
 }
 
