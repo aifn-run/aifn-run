@@ -9,7 +9,7 @@
         <span class="material-icons">add</span>
       </button>
     </h1>
-    <div class="flex my-8 border border-gray-200 rounded-lg overflow-hidden">
+    <div class="my-8 border border-gray-200 rounded-lg overflow-hidden">
       <div
         class="p-4 flex items-center justify-center"
         v-if="!functions.length"
@@ -23,19 +23,26 @@
       <div
         v-for="fn of functions"
         @click="fn.editing || editItem(fn)"
-        class="flex items-center justify-between"
+        class="p-4"
       >
-        <span class="font-mono">{{
-          (fn.tmp && fn.tmp.name) || fn.item.name
-        }}</span>
-        <span class="material-icons" @click="fn.editing && (fn.editing = false)"
-          >{{ (fn.editing && "close") || "arrow_down" }}
-        </span>
+        <div class="flex items-center justify-between">
+          <span class="font-mono">{{
+            (fn.tmp && fn.tmp.name) || fn.item.name || fn.item.uid
+          }}</span>
+          <button
+            @click.prevent="fn.editing && (fn.editing = false)"
+            class="p-2"
+          >
+            <span class="material-icons"
+              >{{ (fn.editing && "close") || "arrow_down" }}
+            </span>
+          </button>
+        </div>
         <Editor
           v-if="fn.editing"
           class="pt-2 mt-2 border-t border-gray-200"
           :fn="fn.tmp"
-          @update="loadFunctions()"
+          @remove="loadFunctions()"
         ></Editor>
       </div>
     </div>

@@ -150,7 +150,7 @@ import { useFunctions } from "../../composables/useFunctions";
 const { saveFunction, removeFunction } = useFunctions();
 
 const props = defineProps({ fn: { type: Object, default: {} } });
-const emit = defineEmits(['update']);
+const emit = defineEmits(['update', 'remove']);
 const busy = ref(false);
 const [model] = useProperty("defaultModel");
 const fnInput = ref("");
@@ -161,11 +161,11 @@ const importSnippet = ref<any>(null);
 const fnIdSnippet = ref<any>(null);
 
 async function saveItem() {
-  if (!props.fn.value) {
+  if (!props.fn) {
     return;
   }
 
-  const { uid, p, name } = props.fn.value;
+  const { uid, p, name } = props.fn;
 
   if (!String(p).trim()) {
     return;
@@ -181,7 +181,7 @@ async function saveItem() {
     }
 
     const newId = await saveFunction(body);
-    props.fn.value.uid = newId;
+    props.fn.uid = newId;
     emit('update');
   } finally {
     busy.value = false;
@@ -189,11 +189,11 @@ async function saveItem() {
 }
 
 async function onRemoveFunction() {
-  if (!props.fn.value?.uid) return;
+  if (!props.fn?.uid) return;
 
   if (confirm("Are you sure?")) {
-    await removeFunction(props.fn.value?.uid);
-    props.fn.value = null;
+    await removeFunction(props.fn?.uid);
+    emit('remove');
   }
 }
 
