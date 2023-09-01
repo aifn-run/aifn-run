@@ -23,7 +23,7 @@
       <div v-for="fn of functions" class="px-4 border-b border-gray-200">
         <button
           @click.prevent="onToggle(fn)"
-          class="flex items-center justify-between w-full py-2"
+          class="flex items-center justify-between w-full py-4"
         >
           <span class="font-mono">{{
             (fn.tmp && fn.tmp.name) || fn.fn.name || fn.fn.uid
@@ -34,7 +34,7 @@
         </button>
         <Editor
           v-if="fn.editing"
-          class="mt-4"
+          class="my-4"
           :fn="fn.tmp"
           @remove="loadFunctions()"
           @update="onUpdate(fn)"
