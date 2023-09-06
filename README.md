@@ -84,3 +84,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla vitae sagittis lo
 ### `GET /fn`
 
 List all functions associated with an account (requires log in first)
+
+## Configuration
+
+The base URL used for AI requests can be changed by settings `globalThis.aiBaseURL` to a server running aifn.

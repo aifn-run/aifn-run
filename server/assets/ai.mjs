@@ -6,7 +6,7 @@
  */
 
 const config = {};
-const baseURL = "https://__BASE_URL__/";
+const getBaseURL = () => (globalThis.aiBaseURL || "https://__BASE_URL__/");
 
 /**
  * Create a new AI function
@@ -21,7 +21,7 @@ async function fn(fnOptions) {
 
 async function create(fnOptions) {
   const body = typeof fnOptions === "string" ? { p: fnOptions } : fnOptions;
-  const create = await fetch(new URL("/fn", baseURL), {
+  const create = await fetch(new URL("/fn", getBaseURL()), {
     method: "POST",
     headers: config.key && { Authorization: config.key },
     mode: "cors",
@@ -39,7 +39,7 @@ async function create(fnOptions) {
 
 async function update(uid, fnOptions) {
   const body = typeof fnOptions === "string" ? { p: fnOptions } : fnOptions;
-  const request = await fetch(new URL("/fn/" + uid, baseURL), {
+  const request = await fetch(new URL("/fn/" + uid, getBaseURL()), {
     method: "PUT",
     headers: config.key && { Authorization: config.key },
     mode: "cors",
@@ -58,7 +58,7 @@ async function configure(key) {
 }
 
 async function call(uid, inputs) {
-  const request = await fetch(new URL("/run/" + uid, baseURL), {
+  const request = await fetch(new URL("/run/" + uid, getBaseURL()), {
     method: "POST",
     mode: "cors",
     headers: config.key && { Authorization: config.key },
