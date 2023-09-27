@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <div class="overflow-y-scroll mx-auto container py-8 px-4">
+    <div class="overflow-y-auto mx-auto container py-8 px-4">
       <router-view></router-view>
       <div class="border-gray-700 border-t text-center p-4 mt-8">
         <router-link v-for="route of footerPages" :key="route.path" :to="route.path" class="px-4 inline-block">

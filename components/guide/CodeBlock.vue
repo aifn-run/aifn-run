@@ -1,5 +1,5 @@
 <template>
-  <div class="font-mono my-4 p-4 rounded overflow-scroll border border-gray-600 bg-gray-800" ref="code">
+  <div class="font-mono my-4 p-4 rounded overflow-auto border border-gray-600 bg-gray-800" ref="code">
     <slot></slot>
   </div>
 </template>
