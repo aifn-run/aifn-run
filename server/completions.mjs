@@ -24,7 +24,7 @@ function replaceMarkers(text, input) {
   return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim()] || "");
 }
 
-function createPayload() {
+function createPayload(model, content) {
   switch (apiFormat) {
     case "prompt":
       return systemMessage + "\n" + content;
@@ -37,8 +37,25 @@ function createPayload() {
           { role: "user", content },
         ],
       };
+
+    default:
+      return {};
   }
 }
+
+function readCompletion(json) {
+  switch (apiFormat) {
+    case "prompt":
+      return json.choices.map((m) => m.text).join("\n");
+
+    case "chat":
+      return json.choices.map((m) => m.message.content).join("\n");
+
+    default:
+      return "";
+  }
+}
+
 export async function fetchCompletion(fn, input) {
   const functionPrompt = fn.p;
   const model = fn.model || apiModel;
@@ -64,7 +81,7 @@ export async function fetchCompletion(fn, input) {
       }
 
       const json = JSON.parse(buffer);
-      const text = json.choices[0].message.content;
+      const text = readCompletion(json);
       resolve(text);
     });
 
