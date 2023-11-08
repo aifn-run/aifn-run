@@ -1,11 +1,11 @@
-import { randomUUID } from "crypto";
 import { request } from "https";
 import { readBody, log, onError } from "./utils.mjs";
 
-const apiUrl = process.env.API_URL;
+const apiChatUrl = process.env.API_URL;
+const apiPromptUrl = process.env.API_URL;
 const apiKey = process.env.API_KEY;
 const apiModel = process.env.API_MODEL;
-const systemMessage = process.env.SYSTEM_MESSAGE || '';
+const systemMessage = process.env.SYSTEM_MESSAGE || "";
 const apiFormat = process.env.API_FORMAT;
 
 const completionOptions = {
@@ -24,8 +24,8 @@ function replaceMarkers(text, input) {
   return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim()] || "");
 }
 
-function createPayload(model, content) {
-  switch (apiFormat) {
+function createPayload(model, content, format) {
+  switch (format) {
     case "prompt":
       return {
         model,
@@ -46,8 +46,8 @@ function createPayload(model, content) {
   }
 }
 
-function readCompletion(json) {
-  switch (apiFormat) {
+function readCompletion(json, format) {
+  switch (format) {
     case "prompt":
       return json.choices.map((m) => m.text).join("\n");
 
@@ -62,11 +62,13 @@ function readCompletion(json) {
 export async function fetchCompletion(fn, input) {
   const functionPrompt = fn.p;
   const model = fn.model || apiModel;
+  const format = fn.format || apiFormat;
+  const apiUrl = format === "chat" ? apiChatUrl : apiPromptUrl;
 
   return new Promise((resolve, reject) => {
     const remote = request(apiUrl, completionOptions);
     const content = replaceMarkers(functionPrompt, input);
-    const payload = createPayload(model, content);
+    const payload = createPayload(model, content, format);
 
     remote.on("error", (error) => {
       log(input, model, error);
@@ -84,7 +86,7 @@ export async function fetchCompletion(fn, input) {
       }
 
       const json = JSON.parse(buffer);
-      const text = readCompletion(json);
+      const text = readCompletion(json, format);
       resolve(text);
     });
 

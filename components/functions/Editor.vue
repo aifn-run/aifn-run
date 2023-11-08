@@ -16,6 +16,32 @@
       </div>
       <div class="mb-4">
         <label
+          for="fnModel"
+          class="block uppercase text-xs font-medium text-gray-100"
+          >Name
+        </label>
+        <input
+          id="fnModel"
+          v-model="fn.model"
+          type="text"
+          class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full mb-4"
+        />
+      </div>
+      <div class="mb-4">
+        <label
+          for="fnFormat"
+          class="block uppercase text-xs font-medium text-gray-100"
+          >Name
+        </label>
+        <input
+          id="fnFormat"
+          v-model="fn.format"
+          type="text"
+          class="font-mono my-4 p-2 border border-gray-400 bg-gray-800 rounded-md w-full mb-4"
+        />
+      </div>
+      <div class="mb-4">
+        <label
           for="fnBody"
           class="block uppercase text-xs font-medium text-gray-100"
           >Instruction (required)</label
