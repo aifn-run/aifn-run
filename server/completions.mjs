@@ -6,6 +6,7 @@ const apiUrl = process.env.API_URL;
 const apiKey = process.env.API_KEY;
 const apiModel = process.env.API_MODEL;
 const systemMessage = process.env.SYSTEM_MESSAGE;
+const apiFormat = process.env.API_FORMAT;
 
 const completionOptions = {
   method: "POST",
@@ -23,6 +24,21 @@ function replaceMarkers(text, input) {
   return text.replace(/\{([\s\S]+?)\}/g, (_, item) => input[item.trim()] || "");
 }
 
+function createPayload() {
+  switch (apiFormat) {
+    case "prompt":
+      return systemMessage + "\n" + content;
+
+    case "chat":
+      return {
+        model,
+        messages: [
+          { role: "system", content: systemMessage },
+          { role: "user", content },
+        ],
+      };
+  }
+}
 export async function fetchCompletion(fn, input) {
   const functionPrompt = fn.p;
   const model = fn.model || apiModel;
@@ -30,13 +46,7 @@ export async function fetchCompletion(fn, input) {
   return new Promise((resolve, reject) => {
     const remote = request(apiUrl, completionOptions);
     const content = replaceMarkers(functionPrompt, input);
-    const payload = {
-      model,
-      messages: [
-        { role: "system", content: systemMessage },
-        { role: "user", content },
-      ],
-    };
+    const payload = createPayload(model, content);
 
     remote.on("error", (error) => {
       log(input, model, error);
