@@ -5,7 +5,7 @@ import { readBody, log, onError } from "./utils.mjs";
 const apiUrl = process.env.API_URL;
 const apiKey = process.env.API_KEY;
 const apiModel = process.env.API_MODEL;
-const systemMessage = process.env.SYSTEM_MESSAGE;
+const systemMessage = process.env.SYSTEM_MESSAGE || '';
 const apiFormat = process.env.API_FORMAT;
 
 const completionOptions = {
@@ -27,7 +27,10 @@ function replaceMarkers(text, input) {
 function createPayload(model, content) {
   switch (apiFormat) {
     case "prompt":
-      return systemMessage + "\n" + content;
+      return {
+        model,
+        prompt: systemMessage + "\n" + content,
+      };
 
     case "chat":
       return {
