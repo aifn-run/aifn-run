@@ -29,6 +29,8 @@ function createPayload(model, content, format) {
     case "prompt":
       return {
         model,
+        n: 1,
+        max_tokens: 4096,
         prompt: systemMessage + "\n" + content,
       };
 
