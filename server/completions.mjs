@@ -27,11 +27,12 @@ function replaceMarkers(text, input) {
 function createPayload(model, content, format) {
   switch (format) {
     case "prompt":
+      const prompt = systemMessage + "\n" + content;
       return {
         model,
         n: 1,
-        max_tokens: 4096,
-        prompt: systemMessage + "\n" + content,
+        max_tokens: 4080 - prompt.length,
+        prompt: prompt,
       };
 
     case "chat":
