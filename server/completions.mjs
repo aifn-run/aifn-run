@@ -1,8 +1,8 @@
 import { request } from "https";
 import { readBody, log, onError } from "./utils.mjs";
 
-const apiChatUrl = process.env.API_URL;
-const apiPromptUrl = process.env.API_URL;
+const apiChatUrl = process.env.API_CHAT_URL;
+const apiPromptUrl = process.env.API_PROMPT_URL;
 const apiKey = process.env.API_KEY;
 const apiModel = process.env.API_MODEL;
 const systemMessage = process.env.SYSTEM_MESSAGE || "";
@@ -36,9 +36,9 @@ function createPayload(model, content, format) {
       return {
         model,
         messages: [
-          { role: "system", content: systemMessage },
+          systemMessage && { role: "system", content: systemMessage },
           { role: "user", content },
-        ],
+        ].filter(Boolean),
       };
 
     default:
