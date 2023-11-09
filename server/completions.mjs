@@ -52,7 +52,7 @@ function createPayload(model, content, format) {
 function readCompletion(json, format) {
   switch (format) {
     case "prompt":
-      return json.choices.map((m) => m.text).join("\n");
+      return json.choices[0].text;
 
     case "chat":
       return json.choices.map((m) => m.message.content).join("\n");
