@@ -18,7 +18,7 @@
         <label
           for="fnModel"
           class="block uppercase text-xs font-medium text-gray-100"
-          >Name
+          >Model
         </label>
         <input
           id="fnModel"
@@ -31,7 +31,7 @@
         <label
           for="fnFormat"
           class="block uppercase text-xs font-medium text-gray-100"
-          >Name
+          >Format
         </label>
         <input
           id="fnFormat"
