@@ -31,7 +31,7 @@
         <label
           for="fnFormat"
           class="block uppercase text-xs font-medium text-gray-100"
-          >Format
+          >Format (prompt, chat)
         </label>
         <input
           id="fnFormat"
