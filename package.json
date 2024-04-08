@@ -10,7 +10,7 @@
     "vite": "^5.2.8"
   },
   "scripts": {
-    "test": "echo ok",
+    "ci": "npm i && npm run build",
     "build": "vite build"
   },
   "dependencies": {
