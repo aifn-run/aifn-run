@@ -17,4 +17,4 @@ jobs:
       defaultBranch: main
       withSha: false
       withTag: true
-      type: vite
+      type: node

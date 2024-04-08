@@ -42,8 +42,8 @@
 </template>
 
 <script setup>
-import { useAuth } from './composables/useAuth';
-import { useRouter } from './composables/useRouter';
+import { useAuth } from '../composables/useAuth';
+import { useRouter } from '../composables/useRouter';
 import { computed } from 'vue';
 
 const { topPages, footerPages, router } = useRouter();
