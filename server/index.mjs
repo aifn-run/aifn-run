@@ -39,9 +39,8 @@ async function getFunction(req, res) {
     return res.writeHead(404).end("Function not found");
   }
 
-  console.log(fn);
-  const { p, model, name } = fn;
-  res.writeHead(200).end(JSON.stringify({ p, model, name, uid }));
+  const { p, model, name, format } = fn;
+  res.writeHead(200).end(JSON.stringify({ p, model, name, uid, format }));
 }
 
 async function removeFunction(uid, req, res) {
@@ -82,7 +81,7 @@ async function saveFunction(uid, req, res) {
       return;
     }
 
-    const { p, model = "", name = "" } = body;
+    const { p, model = "", name = "", format = "chat" } = body;
     const hash = createHash("sha256")
       .update(p + model + name + oid)
       .digest("hex");
@@ -92,7 +91,7 @@ async function saveFunction(uid, req, res) {
     if (list.length) {
       uid = list[0].uid;
     } else {
-      const payload = { p, model, name, hash, uid, oid };
+      const payload = { p, model, name, format, hash, uid, oid };
       await functions.set(uid, payload);
     }
 
