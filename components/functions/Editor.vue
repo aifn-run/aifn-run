@@ -179,7 +179,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["update", "remove"]);
 const busy = ref(false);
-const [model] = useProperty("defaultModel");
+const [defaultModel] = useProperty("defaultModel");
 const fnInput = ref("");
 const output = ref<string[]>([]);
 const running = ref(false);
@@ -192,7 +192,7 @@ async function saveItem() {
     return;
   }
 
-  const { uid, p, name } = props.fn;
+  const { uid, p, name, model } = props.fn;
 
   if (!String(p).trim()) {
     return;
@@ -201,10 +201,10 @@ async function saveItem() {
   busy.value = true;
 
   try {
-    const body: any = { uid, p, name, model: undefined };
+    const body: any = { uid, p, name, model };
 
-    if (model.value) {
-      body.model = model.value;
+    if (!model && defaultModel.value) {
+      body.model = defaultModel.value;
     }
 
     const newId = await saveFunction(body);
