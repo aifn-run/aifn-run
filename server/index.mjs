@@ -17,6 +17,7 @@ function getFunctionCode(req, res) {
 
   if (!uid || !uuidRe.test(uid)) {
     res.writeHead(400).end("Invalid UID");
+    return;
   }
 
   const code = `import ai from 'https://aifn.run/ai.mjs';export default (inputs) => ai.call('${uid}', inputs);`;
