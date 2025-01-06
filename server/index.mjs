@@ -120,7 +120,9 @@ async function runFunction(req, res) {
     log(rawInputs, fn);
     const input = parseInputs(rawInputs);
     const message = await fetchCompletion(fn, input);
-    res.end(String(message));
+    res.setHeader('content-type', 'text/plain');
+    res.setHeader('content-length', message.length);
+    res.end(message);
     queryHistory.set(randomUUID(), { uid, input, output: message, rawInputs });
     log(typeof message, message);
   } catch (error) {
