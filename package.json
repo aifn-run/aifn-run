@@ -2,19 +2,17 @@
   "name": "aifn-run",
   "private": true,
   "type": "module",
-  "prettier": "@cloud-cli/prettier-config",
   "main": "./server/index.mjs",
   "devDependencies": {
-    "@cloud-cli/prettier-config": "^1.0.0",
-    "@vitejs/plugin-vue": "^5.0.4",
-    "vite": "^5.2.8"
+    "@vitejs/plugin-vue": "^6.0.1",
+    "vite": "^7.1.4"
   },
   "scripts": {
     "ci": "npm i && npm run build",
     "build": "vite build"
   },
   "dependencies": {
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue": "^3.5.21",
+    "vue-router": "^4.5.1"
   }
 }
