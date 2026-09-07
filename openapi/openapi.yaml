@@ -211,4 +211,10 @@ components:
       required: [error]
       properties:
         error:
-          type: string
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string

@@ -1,0 +1,30 @@
+<template component="app-shell">
+  <header class="site-header">
+    <a class="brand" href="/">ai<span>fn</span>.run</a>
+    <nav class="nav"><a href="/">Home</a><a href="/api">API</a><a href="/workspace">Workspace</a></nav>
+    <button class="button" on-click="authenticate()">Sign in</button>
+  </header>
+  <main class="page">
+    <section if="view === 'home'">
+      <div class="eyebrow">AI functions, without the fog</div>
+      <h1>Make AI behave like code.</h1>
+      <p class="lede">Write a prompt once. Version it. Call it from JavaScript with a predictable text or JSON result.</p>
+      <div class="actions"><a class="button primary" href="/workspace">Open the editor</a><a class="button" href="/api">Read the API</a></div>
+      <div class="grid">
+        <div class="card"><strong>Versioned by default</strong><p>Every prompt change becomes an immutable version. Roll back without losing history.</p></div>
+        <div class="card"><strong>JSON when it matters</strong><p>Ask compatible providers for structured output and validate it at the edge.</p></div>
+        <div class="card"><strong>Plain web primitives</strong><p>A light Li3 interface, a portable HTTP API, and no framework-sized runtime.</p></div>
+      </div>
+    </section>
+    <section if="view === 'workspace'"><function-editor></function-editor></section>
+    <section if="view === 'api'"><div class="eyebrow">Contract first</div><h2>OpenAPI is the API.</h2><p>Download the raw contract at <a href="/api">/api</a>. JSON is returned by default; request YAML with <code>Accept: application/yaml</code>.</p></section>
+  </main>
+  <script setup>
+    import { ref } from '@li3/web';
+    export default function () {
+      const view = ref(location.pathname === '/workspace' ? 'workspace' : location.pathname === '/api' ? 'api' : 'home');
+      const authenticate = () => { window.location.href = 'https://auth.aifn.run/login?url=' + encodeURIComponent(location.href); };
+      return { view, authenticate };
+    }
+  </script>
+</template>

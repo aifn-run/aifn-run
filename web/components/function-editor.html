@@ -1,0 +1,23 @@
+<template component="function-editor" shadow-dom="open">
+  <div class="workspace">
+    <form class="card" on-submit="save($event)">
+      <div class="eyebrow">Function workspace</div>
+      <h2>Shape a function</h2>
+      <div class="field"><label for="name">Name</label><input id="name" bind-value="name" placeholder="summarizeText" /></div>
+      <div class="field"><label for="output">Output mode</label><select id="output" bind-value="output"><option value="json">JSON</option><option value="text">Text</option></select></div>
+      <div class="field"><label for="model">OpenAI-compatible model</label><input id="model" bind-value="model" placeholder="gpt-4o-mini or llama3.2" /></div>
+      <div class="field"><label for="prompt">Prompt</label><code-editor class="code-editor" language="markdown" bind-value="prompt"></code-editor></div>
+      <div class="actions"><button class="button primary" type="submit" bind-disabled="busy">{{ busy ? 'Saving…' : 'Create version' }}</button><span class="status">{{ status }}</span></div>
+    </form>
+    <aside class="card"><div class="eyebrow">Try it</div><h2>Run the latest</h2><div class="field"><label for="inputs">Inputs</label><textarea id="inputs" bind-value="inputs" placeholder='{"text":"Hello"}'></textarea></div><button class="button" on-click="run()" bind-disabled="!functionId">Run function</button><div class="field"><label>Output</label><div class="result">{{ result || 'Your result will appear here.' }}</div></div></aside>
+  </div>
+  <script setup>
+    import { ref } from '@li3/web';
+    export default function () {
+      const name = ref('newFunction'), output = ref('json'), model = ref(''), prompt = ref(''), inputs = ref('{}'), result = ref(''), status = ref(''), busy = ref(false), functionId = ref('');
+      async function save(event) { event.preventDefault(); busy.value = true; status.value = 'Saving…'; try { const response = await fetch('/api/fn', { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name.value, output: output.value, model: model.value, prompt: prompt.value }) }); const body = await response.json(); if (!response.ok) throw new Error(body.error?.message || body.error || response.status); functionId.value = body.functionId; status.value = `Version ${body.version} saved`; } catch (error) { status.value = error.message; } finally { busy.value = false; } }
+      async function run() { result.value = 'Running…'; try { const response = await fetch('/api/run/' + functionId.value, { method: 'POST', headers: { 'content-type': 'application/json' }, body: inputs.value }); result.value = await response.text(); } catch (error) { result.value = error.message; } }
+      return { name, output, model, prompt, inputs, result, status, busy, functionId, save, run };
+    }
+  </script>
+</template>

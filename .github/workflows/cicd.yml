@@ -13,7 +13,7 @@ jobs:
       packages: write
     with:
       name: aifn-run/aifn-run
-      baseImage: cloud-cli/node:latest
+       baseImage: ghcr.io/cloud-cli/node:latest
       defaultBranch: main
       withSha: false
       withTag: true

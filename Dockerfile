@@ -8,4 +8,5 @@ RUN npm ci --omit=dev
 USER node
 
 COPY dist ./dist
-COPY server ./server
+COPY dist-server ./dist-server
+COPY openapi ./openapi

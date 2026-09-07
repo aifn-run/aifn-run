@@ -1,0 +1,20 @@
+const sources = [
+  "/components/app-shell.html",
+  "/components/function-editor.html",
+  "https://sodium.static.apphor.de/code-editor.html",
+];
+
+const templates = await Promise.all(sources.map(async (source) => {
+  const response = await fetch(source);
+  const html = await response.text();
+  return source.includes("code-editor.html")
+    ? html.replace('src="./code-editor.mjs"', 'src="https://sodium.static.apphor.de/code-editor.mjs"')
+    : html;
+}));
+document.body.insertAdjacentHTML("afterbegin", templates.join("\n"));
+await import("@li3/web");
+
+const app = document.querySelector("[data-app]");
+app.innerHTML = `
+  <app-shell></app-shell>
+`;

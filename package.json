@@ -2,17 +2,14 @@
   "name": "aifn-run",
   "private": true,
   "type": "module",
-  "main": "./server/index.mjs",
+  "main": "./dist-server/index.mjs",
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.1.4"
+    "@types/node": "^22.13.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.0"
   },
   "scripts": {
-    "ci": "npm i && npm run build",
-    "build": "vite build"
-  },
-  "dependencies": {
-    "vue": "^3.5.21",
-    "vue-router": "^4.5.1"
+    "ci": "npm ci && npm run build",
+    "build": "rm -rf dist dist-server && mkdir -p dist dist-server && cp -R web/. dist/ && esbuild server/index.ts --bundle --platform=node --format=esm --outfile=dist-server/index.mjs"
   }
 }
