@@ -19,8 +19,8 @@ editor rewrite begins.
 - There are currently no unit or end-to-end test files in this repository.
 - `/api` is currently the browser's API documentation page. It is not yet an
   OpenAPI document endpoint.
-- `v2/` is an unused prototype/static landing-page experiment, not the active
-  application.
+- The current Vue application is an interim build while the Li3 migration is in
+  progress; the target website will remove the Vite/Vue toolchain.
 
 ## Product Model
 
@@ -73,9 +73,8 @@ text.
 │   ├── completions.mjs              Prompt/chat provider adapter
 │   ├── utils.mjs                   Request body, logging, and error helpers
 │   └── assets/ai.mjs               Public browser client module
-├── v2/                             Unused prototype landing page
+├── Dockerfile                      Production container definition
 ├── .github/workflows/cicd.yml      Reusable Docker/GHCR build workflow
-├── superstatic.json                Static output configuration (`dist`)
 └── package.json                    Dependencies and build scripts
 ```
 
@@ -295,10 +294,12 @@ Pushes trigger `.github/workflows/cicd.yml`, which delegates to
 builds `aifn-run/aifn-run` using `cloud-cli/node:latest`, publishes with the
 configured tags, and uses `main` as the default branch.
 
-The Docker build context is restricted by `.dockerignore` to `dist`, `server`,
-`package.json`, and `superstatic.json`. Static hosting is configured to serve
-`dist/` through `superstatic.json`; the server middleware is supplied by the
-hosting/runtime integration.
+The production container uses `ghcr.io/cloud-cli/node:latest`, installs
+production dependencies from the lockfile, and copies the built `dist/` website
+and `server/` middleware. The package `main` field points to `server/index.mjs`,
+which is used by the hosting/runtime integration as the application entrypoint.
+Static assets must be served with a maximum cache age of one week. The
+generated `/ai.mjs` and function modules also use one-week cache headers.
 
 ## Known Gaps And Rewrite Targets
 
@@ -320,7 +321,7 @@ These are current implementation facts, not promises about the new version:
   contract, or document the store contract formally.
 - Build a new website and a modern AI-function editor while retaining the
   existing create, update, list, delete, import, and run capabilities.
-- Remove or explicitly repurpose the incomplete `v2/` prototype.
+- Remove the interim Vite/Vue toolchain after the Li3 website migration.
 - Add local development and preview commands that run the website and API
   together.
 

@@ -2,4 +2,4 @@
 !dist
 !server
 !package.json
-!superstatic.json
+!package-lock.json
