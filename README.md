@@ -155,10 +155,12 @@ Required environment variables:
 
 ## Deployment
 
-The production image uses `ghcr.io/cloud-cli/node:latest`. It installs only
-production dependencies, copies the built website, compiled server, and
-OpenAPI files, and runs `dist-server/index.mjs` through the package `main`
-field.
+The production image is a two-stage build using
+`ghcr.io/cloud-cli/node:latest` for both stages. The builder installs
+development dependencies and runs `npm run build`. The runtime stage installs
+only production dependencies, copies the built website, compiled server, and
+OpenAPI files from the builder, and runs `dist-server/index.mjs` through the
+package `main` field.
 
 Static assets and the OpenAPI document are sent with:
 
