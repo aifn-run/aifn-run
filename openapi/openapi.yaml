@@ -1,0 +1,214 @@
+openapi: 3.1.0
+info:
+  title: aifn.run API
+  version: 2.0.0
+  description: Versioned AI functions with predictable text or JSON output. The unversioned function URL always resolves to the latest version.
+servers:
+  - url: https://aifn.run
+paths:
+  /api/fn:
+    get:
+      operationId: listFunctions
+      summary: List visible functions
+      responses:
+        '200':
+          description: Functions visible to the current account
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FunctionSummary'
+    post:
+      operationId: createFunction
+      summary: Create a function at version 1
+      requestBody:
+        $ref: '#/components/requestBodies/FunctionInput'
+      responses:
+        '201':
+          description: Function created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FunctionVersion'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/fn/{functionId}:
+    parameters:
+      - $ref: '#/components/parameters/FunctionId'
+    get:
+      operationId: getLatestFunction
+      summary: Get the latest function version
+      responses:
+        '200':
+          description: Latest function version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FunctionVersion'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      operationId: createFunctionVersion
+      summary: Create the next function version
+      requestBody:
+        $ref: '#/components/requestBodies/FunctionInput'
+      responses:
+        '201':
+          description: New immutable function version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FunctionVersion'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: deleteFunction
+      summary: Delete a function and its versions
+      responses:
+        '204':
+          description: Function deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/fn/{functionId}/{version}:
+    parameters:
+      - $ref: '#/components/parameters/FunctionId'
+      - $ref: '#/components/parameters/Version'
+    get:
+      operationId: getFunctionVersion
+      summary: Get an immutable function version
+      responses:
+        '200':
+          description: Function version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FunctionVersion'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/run/{functionId}:
+    parameters:
+      - $ref: '#/components/parameters/FunctionId'
+      - name: version
+        in: query
+        description: Optional immutable version. Omit it to run the latest version.
+        schema:
+          type: integer
+          minimum: 1
+    post:
+      operationId: runFunction
+      summary: Run the latest or selected function version
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunInput'
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Function result. JSON functions return application/json; text functions return text/plain.
+          content:
+            application/json: {}
+            text/plain:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    FunctionId:
+      name: functionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Version:
+      name: version
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  requestBodies:
+    FunctionInput:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FunctionInput'
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Function or version not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    FunctionInput:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+          description: Instruction sent to the completion provider. Use {name} markers for input values.
+        name:
+          type: string
+        model:
+          type: string
+          description: OpenAI-compatible model name. Ollama model names are also supported.
+        format:
+          type: string
+          enum: [chat, prompt]
+          default: chat
+        output:
+          $ref: '#/components/schemas/OutputMode'
+    OutputMode:
+      type: string
+      enum: [text, json]
+      default: json
+      description: JSON asks the model for a JSON object and returns parsed JSON. Text returns the provider text unchanged.
+    FunctionSummary:
+      type: object
+      required: [functionId, version, name, output]
+      properties:
+        functionId:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        output:
+          $ref: '#/components/schemas/OutputMode'
+    FunctionVersion:
+      allOf:
+        - $ref: '#/components/schemas/FunctionSummary'
+        - $ref: '#/components/schemas/FunctionInput'
+    RunInput:
+      type: object
+      properties:
+        inputs:
+          description: Values substituted into prompt markers, or a string appended to the prompt.
+          oneOf:
+            - type: object
+              additionalProperties: true
+            - type: string
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string

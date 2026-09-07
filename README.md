@@ -240,7 +240,8 @@ The server expects these environment variables:
 | Variable | Used by | Purpose |
 | --- | --- | --- |
 | `AUTH_URL` | `server/auth.mjs` | Profile endpoint receiving the request cookie |
-| `STORE_URL` | `server/resource.mjs` | Base HTTP URL for stored resources |
+| `DATABASE_URL` | `server/database.mjs` | HTTPS URL of the database ESM module |
+| `STORE_URL` | `server/resource.mjs` | Legacy resource-store URL used by the current API |
 | `API_CHAT_URL` | `server/completions.mjs` | Chat completion endpoint |
 | `API_PROMPT_URL` | `server/completions.mjs` | Legacy prompt completion endpoint |
 | `API_KEY` | `server/completions.mjs` | Upstream completion bearer token |
@@ -249,9 +250,12 @@ The server expects these environment variables:
 | `SYSTEM_MESSAGE` | `server/completions.mjs` | Optional system instruction |
 | `DEBUG` | `server/utils.mjs` | Enables console and `log` resource writes |
 
-The store adapter maps resource names to URLs under `STORE_URL`. Current
-resources are `fn`, `settings`, `history`, and `log`. Errors are also written to
-the `log` resource. Store failures are generally converted to empty reads or
+The database module is imported during server bootstrap from `DATABASE_URL`. It
+must expose `get(statement, data)`, `run(statement, data)`, and
+`all(statement, data)` operations, and may expose `pragma(values)`. The current
+resource adapter still uses the older `STORE_URL` resource-store interface while
+the typed SQLite repository migration is in progress. Errors are also written
+to the `log` resource. Store failures are generally converted to empty reads or
 generic server errors rather than a structured API error response.
 
 ## Web Application

@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import { createHash, randomUUID } from "crypto";
 import { fetchCompletion } from "./completions.mjs";
 import { getProfile } from "./auth.mjs";
+import { pragma } from "./database.mjs";
 import { Resource } from "./resource.mjs";
 import { readBody, log, onError } from "./utils.mjs";
 
@@ -11,6 +12,8 @@ const startDate = new Date().toUTCString();
 const functions = new Resource("fn");
 const settings = new Resource("settings");
 const queryHistory = new Resource("history");
+
+pragma(["foreign_keys = ON"]);
 
 function getFunctionCode(req, res) {
   const uid = req.url.replace("/fn/", "").replace(".js", "");
