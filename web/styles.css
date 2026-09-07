@@ -23,6 +23,8 @@ button { cursor: pointer; }
 .nav { display: flex; gap: 1rem; color: var(--muted); font-size: .9rem; }
 .nav a { text-decoration: none; }
 .nav a:hover { color: var(--ink); }
+.auth-actions { display: flex; align-items: center; }
+.profile-button { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .button { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: .65rem 1rem; }
 .button.primary { background: var(--acid); color: #11140d; border-color: var(--acid); font-weight: 750; }
 .button.danger { color: var(--orange); }
@@ -44,4 +46,7 @@ p { color: var(--muted); line-height: 1.6; }
 .code-editor { display: block; min-height: 320px; }
 .result { white-space: pre-wrap; overflow: auto; background: #0b0c0a; border: 1px solid var(--line); border-radius: .6rem; padding: 1rem; min-height: 120px; }
 .status { color: var(--muted); font-size: .85rem; }
+.workspace-page { padding-top: 3rem; }
+.workspace-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 2.5rem; }
+.workspace-heading h1 { font-size: clamp(3rem, 6vw, 5.5rem); margin: .8rem 0 1rem; }
 @media (max-width: 760px) { .nav { display: none; } .page { padding-top: 3rem; } .grid, .workspace { grid-template-columns: 1fr; } h1 { font-size: 4rem; } }

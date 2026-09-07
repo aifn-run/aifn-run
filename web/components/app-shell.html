@@ -2,9 +2,12 @@
   <header class="site-header">
     <a class="brand" href="/">ai<span>fn</span>.run</a>
     <nav class="nav"><a href="/">Home</a><a href="/api">API</a><a href="/workspace">Workspace</a></nav>
-    <button class="button" on-click="authenticate()">Sign in</button>
+    <div class="auth-actions">
+      <template if="!profile"><button class="button" on-click="authenticate()">Sign in</button></template>
+      <template if="profile"><button class="button profile-button" on-click="signOut()">{{ profile.name || profile.email || 'Signed in' }} · Sign out</button></template>
+    </div>
   </header>
-  <main class="page">
+  <main class="page" if="view !== 'workspace'">
     <template if="view === 'home'">
       <div class="eyebrow">AI functions, without the fog</div>
       <h1>Make AI behave like code.</h1>
@@ -16,15 +19,23 @@
         <div class="card"><strong>Plain web primitives</strong><p>A light Li3 interface, a portable HTTP API, and no framework-sized runtime.</p></div>
       </div>
     </template>
-    <template if="view === 'workspace'"><function-editor></function-editor></template>
     <template if="view === 'api'"><div class="eyebrow">Contract first</div><h2>OpenAPI is the API.</h2><p>Download the raw contract at <a href="/api">/api</a>. JSON is returned by default; request YAML with <code>Accept: application/yaml</code>.</p></template>
   </main>
   <script setup>
-    import { ref } from '@li3/web';
+    import { ref, onInit, onDestroy } from '@li3/web';
+    import * as auth from 'https://auth.aifn.run/auth.js';
     export default function () {
       const view = ref(location.pathname === '/workspace' ? 'workspace' : location.pathname === '/api' ? 'api' : 'home');
-      const authenticate = () => { window.location.href = 'https://auth.aifn.run/login?url=' + encodeURIComponent(location.href); };
-      return { view, authenticate };
+      const profile = ref(null);
+      const onState = (event) => { profile.value = event.detail || null; };
+      const authenticate = () => auth.signIn(true);
+      const signOut = () => auth.signOut();
+      onInit(async () => {
+        auth.events.addEventListener('state', onState);
+        try { profile.value = await auth.getProfile(); } catch { profile.value = null; }
+      });
+      onDestroy(() => auth.events.removeEventListener('state', onState));
+      return { view, profile, authenticate, signOut };
     }
   </script>
 </template>

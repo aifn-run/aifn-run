@@ -1,8 +1,10 @@
 const sources = [
   "/components/app-shell.html",
-  "/components/function-editor.html",
-  "https://sodium.static.apphor.de/code-editor.html",
 ];
+
+if (location.pathname === "/workspace") {
+  sources.push("/components/workspace-page.html", "/components/function-editor.html", "https://sodium.static.apphor.de/code-editor.html");
+}
 
 const templates = await Promise.all(sources.map(async (source) => {
   const response = await fetch(source);
@@ -17,4 +19,5 @@ await import("@li3/web");
 const app = document.querySelector("[data-app]");
 app.innerHTML = `
   <app-shell></app-shell>
+  ${location.pathname === "/workspace" ? "<workspace-page></workspace-page>" : ""}
 `;
