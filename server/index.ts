@@ -88,7 +88,23 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
   return false;
 }
 
-async function staticFile(_req: IncomingMessage, res: ServerResponse, url: URL) { const requested = url.pathname === "/" ? "/index.html" : url.pathname; const file = normalize(join(root, "dist", requested)); if (!file.startsWith(join(root, "dist"))) return error(res, 403, "FORBIDDEN", "Forbidden"); try { const info = await stat(file); if (!info.isFile()) return false; const mime: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" }; res.writeHead(200, { "content-type": mime[extname(file)] || "application/octet-stream", "cache-control": cacheControl }); createReadStream(file).pipe(res); return true; } catch { return false; } }
+async function staticFile(_req: IncomingMessage, res: ServerResponse, url: URL) {
+  const dist = join(root, "dist");
+  const requested = url.pathname === "/" ? "/index.html" : url.pathname;
+  const candidate = normalize(join(dist, requested));
+  if (!candidate.startsWith(dist)) return error(res, 403, "FORBIDDEN", "Forbidden");
+  const file = extname(candidate) ? candidate : join(dist, "index.html");
+  try {
+    const info = await stat(file);
+    if (!info.isFile()) return false;
+    const mime: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
+    res.writeHead(200, { "content-type": mime[extname(file)] || "application/octet-stream", "cache-control": cacheControl });
+    createReadStream(file).pipe(res);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const server = createServer(async (req: IncomingMessage, res: ServerResponse) => { try { const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`); if (req.method === "OPTIONS") { res.writeHead(204, { "access-control-allow-origin": "*", "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS", "access-control-allow-headers": "content-type,authorization" }).end(); return; } if (url.pathname.startsWith("/api")) { if (await api(req, res, url)) return; return error(res, 404, "NOT_FOUND", "API route not found"); } if (await staticFile(req, res, url)) return; error(res, 404, "NOT_FOUND", "Not found"); } catch (cause) { error(res, 500, "INTERNAL_ERROR", cause instanceof Error ? cause.message : "Internal server error"); } });
 server.listen(port, "0.0.0.0", () => console.log(`aifn.run listening on ${port}`));
