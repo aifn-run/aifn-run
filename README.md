@@ -29,7 +29,7 @@ JSON or text output, and call the active version over HTTP.
 ├── Dockerfile                      Production container
 ├── tsconfig.json                   TypeScript checking configuration
 ├── package.json                    Build and runtime configuration
-└── .github/workflows/cicd.yml      Docker/GHCR deployment workflow
+└── package.json                    Build and runtime configuration
 ```
 
 ## Development
