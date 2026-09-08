@@ -1,0 +1,18 @@
+{
+  "name": "aifn.run",
+  "short_name": "aifn.run",
+  "description": "Build predictable AI functions with versioned prompts.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#10110f",
+  "theme_color": "#10110f",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

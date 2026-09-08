@@ -97,7 +97,7 @@ async function staticFile(_req: IncomingMessage, res: ServerResponse, url: URL) 
   try {
     const info = await stat(file);
     if (!info.isFile()) return false;
-    const mime: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
+    const mime: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".webmanifest": "application/manifest+json; charset=utf-8", ".svg": "image/svg+xml" };
     res.writeHead(200, { "content-type": mime[extname(file)] || "application/octet-stream", "cache-control": cacheControl });
     createReadStream(file).pipe(res);
     return true;
