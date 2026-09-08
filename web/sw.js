@@ -1,4 +1,4 @@
-const VERSION = "aifn-shell-v1";
+const VERSION = "aifn-shell-v2";
 const SHELL = [
   "/",
   "/index.html",

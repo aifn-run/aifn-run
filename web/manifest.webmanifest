@@ -2,6 +2,7 @@
   "name": "aifn.run",
   "short_name": "aifn.run",
   "description": "Build predictable AI functions with versioned prompts.",
+  "id": "/dashboard",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
