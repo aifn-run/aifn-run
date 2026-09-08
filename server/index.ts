@@ -12,6 +12,7 @@ type FunctionVersion = { functionId: string; version: number; prompt: string; na
 const root = fileURLToPath(new URL("..", import.meta.url));
 const port = Number(process.env.PORT || 3000);
 const cacheControl = "public, max-age=604800, must-revalidate";
+const revalidateControl = "no-cache, must-revalidate";
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const openapiJSON = await readFile(join(root, "openapi/openapi.json"), "utf8");
 const openapiYAML = await readFile(join(root, "openapi/openapi.yaml"), "utf8");
@@ -98,7 +99,9 @@ async function staticFile(_req: IncomingMessage, res: ServerResponse, url: URL) 
     const info = await stat(file);
     if (!info.isFile()) return false;
     const mime: Record<string, string> = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".webmanifest": "application/manifest+json; charset=utf-8", ".svg": "image/svg+xml" };
-    res.writeHead(200, { "content-type": mime[extname(file)] || "application/octet-stream", "cache-control": cacheControl });
+    const extension = extname(file);
+    const shouldRevalidate = [".html", ".js", ".css", ".webmanifest"].includes(extension) || file.endsWith("/sw.js");
+    res.writeHead(200, { "content-type": mime[extension] || "application/octet-stream", "cache-control": shouldRevalidate ? revalidateControl : cacheControl });
     createReadStream(file).pipe(res);
     return true;
   } catch {

@@ -162,11 +162,15 @@ only production dependencies, copies the built website, compiled server, and
 OpenAPI files from the builder, and runs `dist-server/index.mjs` through the
 package `main` field.
 
-Static assets and the OpenAPI document are sent with:
+Stable static assets and the OpenAPI document are sent with:
 
 ```text
 Cache-Control: public, max-age=604800, must-revalidate
 ```
+
+HTML, JavaScript, CSS, manifest, and service-worker files use
+`Cache-Control: no-cache, must-revalidate` so installed clients can pick up a
+new deployment without waiting for the one-week asset lifetime.
 
 Function execution responses use `no-store` because generated output must not be
 cached.
