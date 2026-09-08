@@ -1,41 +1,18 @@
 <template component="app-shell">
   <header class="site-header">
     <a class="brand" href="/">ai<span>fn</span>.run</a>
-    <nav class="nav"><a href="/">Home</a><a href="/dashboard">Dashboard</a><a href="/api">API</a></nav>
-    <div class="auth-actions">
-      <template if="!profile"><button class="button" on-click="authenticate()">Sign in</button></template>
-      <template if="profile"><button class="button profile-button" on-click="signOut()">{{ profile.name || profile.email || 'Signed in' }} · Sign out</button></template>
-    </div>
+    <nav class="nav"><a href="/">Home</a><a href="/dashboard">Dashboard</a><a href="/functions">Functions</a><a href="/help">Help</a></nav>
+    <div class="auth-actions"><template if="!profile"><button class="button" on-click="authenticate()">Sign in</button></template><template if="profile"><button class="button profile-button" on-click="signOut()">{{ profile.name || profile.email || 'Signed in' }} · Sign out</button></template></div>
   </header>
-  <main class="page" if="view !== 'workspace' && view !== 'dashboard'">
-    <template if="view === 'home'">
-      <div class="eyebrow">AI functions, without the fog</div>
-      <h1 class="hero-title">Make AI behave like code.</h1>
-      <p class="lede">Write a prompt once. Version it. Call it from JavaScript with a predictable text or JSON result.</p>
-      <div class="actions"><a class="button primary" href="/workspace">Open the editor</a><a class="button" href="/api">Read the API</a></div>
-      <div class="grid">
-        <div class="card"><strong>Versioned by default</strong><p>Every prompt change becomes an immutable version. Roll back without losing history.</p></div>
-        <div class="card"><strong>JSON when it matters</strong><p>Ask compatible providers for structured output and validate it at the edge.</p></div>
-        <div class="card"><strong>Plain web primitives</strong><p>A light Li3 interface, a portable HTTP API, and no framework-sized runtime.</p></div>
-      </div>
-    </template>
-    <template if="view === 'api'"><div class="eyebrow">Contract first</div><h2>OpenAPI is the API.</h2><p>Download the raw contract at <a href="/api">/api</a>. JSON is returned by default; request YAML with <code>Accept: application/yaml</code>.</p></template>
-  </main>
   <script setup>
     import { ref, onInit, onDestroy } from '@li3/web';
     import * as auth from 'https://auth.aifn.run/auth.js';
     export default function () {
-      const view = ref(location.pathname === '/workspace' ? 'workspace' : location.pathname === '/dashboard' ? 'dashboard' : location.pathname === '/api' ? 'api' : 'home');
-      const profile = ref(null);
-      const onState = (event) => { profile.value = event.detail || null; };
-      const authenticate = () => auth.signIn(true);
-      const signOut = () => auth.signOut();
-      onInit(async () => {
-        auth.events.addEventListener('state', onState);
-        try { profile.value = await auth.getProfile(); } catch { profile.value = null; }
-      });
+      const profile = ref(null), onState = (event) => { profile.value = event.detail || null; };
+      const authenticate = () => auth.signIn(true), signOut = () => auth.signOut();
+      onInit(async () => { auth.events.addEventListener('state', onState); try { profile.value = await auth.getProfile(); } catch { profile.value = null; } });
       onDestroy(() => auth.events.removeEventListener('state', onState));
-      return { view, profile, authenticate, signOut };
+      return { profile, authenticate, signOut };
     }
   </script>
 </template>

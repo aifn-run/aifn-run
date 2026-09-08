@@ -1,4 +1,4 @@
-const VERSION = "aifn-shell-v2";
+const VERSION = "aifn-shell-v4";
 const SHELL = [
   "/",
   "/index.html",
@@ -7,9 +7,13 @@ const SHELL = [
   "/manifest.webmanifest",
   "/icons/icon.svg",
   "/components/app-shell.html",
-  "/components/dashboard-page.html",
-  "/components/workspace-page.html",
+  "/components/app-shell.html",
   "/components/function-editor.html",
+  "/pages/landing-page.html",
+  "/pages/dashboard-page.html",
+  "/pages/functions-page.html",
+  "/pages/function-editor-page.html",
+  "/pages/help-page.html",
 ];
 
 self.addEventListener("install", (event) => {

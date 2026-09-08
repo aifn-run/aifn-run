@@ -50,6 +50,13 @@ p { color: var(--muted); line-height: 1.6; }
 .workspace-page { padding-top: 3rem; }
 .workspace-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 2.5rem; }
 .workspace-heading h1 { font-size: clamp(3rem, 6vw, 5.5rem); margin: .8rem 0 1rem; }
+.page-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 3rem; }
+.page-heading h1, .help-page h1 { font-size: clamp(3rem, 6vw, 5.5rem); margin: .8rem 0 1rem; }
+.empty-state { min-height: 300px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.empty-state h2 { margin: 1rem 0 0; }
+.empty-mark { color: var(--acid); font: 800 2rem ui-monospace, monospace; }
+.help-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 3rem; }
+.help-grid h2 { margin-top: 4rem; }
 .dashboard-page { padding-top: 3rem; }
 .dashboard-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 3rem; }
 .dashboard-heading h1 { font-size: clamp(3rem, 6vw, 5.5rem); margin: .8rem 0 1rem; }
@@ -63,4 +70,11 @@ p { color: var(--muted); line-height: 1.6; }
 .dashboard-card p { margin: .6rem 0 1.5rem; }
 .card-link { color: var(--acid); font-weight: 700; }
 .status-pill { align-self: flex-start; padding: .35rem .6rem; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: .75rem; }
-@media (max-width: 760px) { .nav { display: none; } .page { padding-top: 3rem; } .grid, .workspace, .dashboard-grid { grid-template-columns: 1fr; } h1 { font-size: clamp(3rem, 15vw, 4rem); } .hero-title { letter-spacing: -.02em; line-height: .98; } .dashboard-heading { align-items: start; flex-direction: column; } .dashboard-card { min-height: 220px; } }
+.page-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 3rem; }
+.page-heading h1, .help-page h1 { font-size: clamp(3rem, 6vw, 5.5rem); margin: .8rem 0 1rem; }
+.empty-state { min-height: 300px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.empty-state h2 { margin: 1rem 0 0; }
+.empty-mark { color: var(--acid); font: 800 2rem ui-monospace, monospace; }
+.help-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 3rem; }
+.help-grid h2 { margin-top: 4rem; }
+@media (max-width: 760px) { .nav { display: none; } .page { padding-top: 3rem; } .grid, .workspace, .dashboard-grid, .help-grid { grid-template-columns: 1fr; } h1 { font-size: clamp(3rem, 15vw, 4rem); } .hero-title { letter-spacing: -.02em; line-height: .98; } .dashboard-heading, .page-heading { align-items: start; flex-direction: column; } .dashboard-card { min-height: 220px; } }
