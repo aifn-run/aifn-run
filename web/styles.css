@@ -57,6 +57,9 @@ p { color: var(--muted); line-height: 1.6; }
 .empty-mark { color: var(--acid); font: 800 2rem ui-monospace, monospace; }
 .help-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 3rem; }
 .help-grid h2 { margin-top: 4rem; }
+.settings-card { max-width: 720px; margin-top: 2rem; }
+.provider-settings { margin: 1.25rem 0; border-top: 1px solid var(--line); padding-top: 1rem; }
+.provider-settings summary { cursor: pointer; color: var(--acid); font-weight: 700; }
 .dashboard-page { padding-top: 3rem; }
 .dashboard-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 3rem; }
 .dashboard-heading h1 { font-size: clamp(3rem, 6vw, 5.5rem); margin: .8rem 0 1rem; }

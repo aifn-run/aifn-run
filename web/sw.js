@@ -14,6 +14,7 @@ const SHELL = [
   "/pages/functions-page.html",
   "/pages/function-editor-page.html",
   "/pages/help-page.html",
+  "/pages/provider-settings-page.html",
 ];
 
 self.addEventListener("install", (event) => {

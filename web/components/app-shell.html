@@ -1,7 +1,7 @@
 <template component="app-shell">
   <header class="site-header">
     <a class="brand" href="/">ai<span>fn</span>.run</a>
-    <nav class="nav"><a href="/">Home</a><a href="/dashboard">Dashboard</a><a href="/functions">Functions</a><a href="/help">Help</a></nav>
+    <nav class="nav"><a href="/">Home</a><a href="/dashboard">Dashboard</a><a href="/functions">Functions</a><a href="/help">Help</a><a href="/settings/provider">Settings</a></nav>
     <div class="auth-actions"><template if="!profile"><button class="button" on-click="authenticate()">Sign in</button></template><template if="profile"><button class="button profile-button" on-click="signOut()">{{ profile.name || profile.email || 'Signed in' }} · Sign out</button></template></div>
   </header>
   <script setup>

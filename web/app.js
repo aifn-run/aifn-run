@@ -9,6 +9,7 @@ const routes = {
   "/functions": { template: "/pages/functions-page.html", component: "functions-page" },
   "/functions/new": { template: "/pages/function-editor-page.html", component: "function-editor-page" },
   "/help": { template: "/pages/help-page.html", component: "help-page" },
+  "/settings/provider": { template: "/pages/provider-settings-page.html", component: "provider-settings-page" },
 };
 const templateSources = [
   "/components/app-shell.html",
