@@ -8,11 +8,17 @@
       </div>
       <a class="button primary" href="/functions/new">New function ↗</a>
     </div>
-    <section class="empty-state card">
+    <section class="function-list" if="functions.length">
+      <a class="function-row card" for="item of functions" href="/functions/new">
+        <span><strong>{{ item.name || item.functionId }}</strong><small>Version {{ item.version }}</small></span>
+        <span class="visibility-badge" class-public="item.public">{{ item.public ? 'Public' : 'Private' }}</span>
+      </a>
+    </section>
+    <section class="empty-state card" if="!functions.length">
       <div class="empty-mark">fn</div>
       <h2>No functions yet</h2>
       <p>Create your first function to start building your library.</p>
       <a class="button" href="/functions/new">Create a function</a>
     </section>
-  </main></template
+  </main><script setup>import { ref, onInit } from '@li3/web'; export default function () { const functions = ref([]); onInit(async () => { const response = await fetch('/api/fn?visibility=all', { credentials: 'include' }); if (response.ok) functions.value = await response.json(); }); return { functions }; }</script></template
 >

@@ -57,6 +57,13 @@ p { color: var(--muted); line-height: 1.6; }
 .empty-mark { color: var(--acid); font: 800 2rem ui-monospace, monospace; }
 .help-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 3rem; }
 .help-grid h2 { margin-top: 4rem; }
+.visibility-toggle { display: flex; align-items: center; gap: .55rem; margin: 1rem 0; color: var(--ink); font-weight: 700; }
+.visibility-toggle span { color: var(--muted); font-size: .8rem; font-weight: 400; }
+.function-list { display: grid; gap: .75rem; }
+.function-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; text-decoration: none; }
+.function-row strong, .function-row small { display: block; }
+.function-row small { color: var(--muted); margin-top: .35rem; }
+.visibility-badge { border: 1px solid var(--line); border-radius: 999px; color: var(--acid); font-size: .75rem; padding: .35rem .6rem; }
 .settings-card { max-width: 720px; margin-top: 2rem; }
 .provider-settings { margin: 1.25rem 0; border-top: 1px solid var(--line); padding-top: 1rem; }
 .provider-settings summary { cursor: pointer; color: var(--acid); font-weight: 700; }

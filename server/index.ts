@@ -5,6 +5,10 @@ import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { auth } from './auth.js';
+import migrationInitialSchema from './migrations/001-initial-schema.js';
+import migrationProviderEndpoint from './migrations/002-provider-endpoint.js';
+import migrationFunctionVisibility from './migrations/003-function-visibility.js';
+import type { Migration } from './migrations/types.js';
 
 type OutputMode = 'json' | 'text';
 type Database = {
@@ -22,13 +26,14 @@ type FunctionVersion = {
   format: string;
   output: OutputMode;
   providerEndpoint: string;
+  public: boolean;
   active?: boolean;
 };
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const port = Number(process.env.PORT || 3000);
 const cacheControl = 'public, max-age=604800, must-revalidate';
-const revalidateControl = 'no-cache, must-revalidate';
+const revalidateControl = 'public, max-age=86400, must-revalidate';
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const openapiJSON = await readFile(join(root, 'openapi/openapi.json'), 'utf8');
 const openapiYAML = await readFile(join(root, 'openapi/openapi.yaml'), 'utf8');
@@ -49,15 +54,14 @@ async function loadDatabase(): Promise<Database> {
 }
 
 async function migrate() {
-  await database.run(
-    `CREATE TABLE IF NOT EXISTS functions (id TEXT PRIMARY KEY, owner_id TEXT, active_version INTEGER NOT NULL, latest_version INTEGER NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)`,
-  );
-  await database.run(
-    `CREATE TABLE IF NOT EXISTS function_versions (function_id TEXT NOT NULL, version INTEGER NOT NULL, prompt TEXT NOT NULL, name TEXT NOT NULL, model TEXT NOT NULL, format TEXT NOT NULL, output TEXT NOT NULL CHECK(output IN ('json', 'text')), provider_endpoint TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, PRIMARY KEY(function_id, version), FOREIGN KEY(function_id) REFERENCES functions(id) ON DELETE CASCADE)`,
-  );
-  try {
-    await database.run(`ALTER TABLE function_versions ADD COLUMN provider_endpoint TEXT NOT NULL DEFAULT ''`);
-  } catch {}
+  await database.run(`CREATE TABLE IF NOT EXISTS schema_migrations (id TEXT PRIMARY KEY, applied_at TEXT NOT NULL)`);
+  const applied = new Set((await database.all(`SELECT id FROM schema_migrations`)).map((row) => row.id));
+  const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility];
+  for (const migration of migrations) {
+    if (applied.has(migration.id)) continue;
+    await migration.up(database);
+    await database.run(`INSERT INTO schema_migrations (id, applied_at) VALUES (?, ?)`, [migration.id, new Date().toISOString()]);
+  }
 }
 
 function send(
@@ -107,6 +111,7 @@ function versionJSON(row: any): FunctionVersion {
     format: row.format,
     output: row.output,
     providerEndpoint: row.provider_endpoint || '',
+    public: Boolean(row.is_public),
     active: Boolean(row.active),
   };
 }
@@ -114,12 +119,11 @@ function versionJSON(row: any): FunctionVersion {
 async function getVersion(id: string, version?: number) {
   const row = version
     ? await database.get(
-        `SELECT v.*, f.active_version = v.version AS active FROM function_versions v JOIN functions f ON f.id = v.function_id WHERE v.function_id = ? AND v.version = ?`,
+        `SELECT v.*, f.is_public, f.active_version = v.version AS active FROM function_versions v JOIN functions f ON f.id = v.function_id WHERE v.function_id = ? AND v.version = ?`,
         [id, version],
       )
     : await database.get(
-        `SELECT v.*, 1 AS active FROM function_versions v JOIN functions f ON f.id = v.function_id WHERE v.function_id = f.id AND v.version = f.active_version`,
-        [id],
+        `SELECT v.*, f.is_public, 1 AS active FROM function_versions v JOIN functions f ON f.id = v.function_id WHERE v.function_id = f.id AND v.version = f.active_version`,
       );
   return row ? versionJSON(row) : null;
 }
@@ -135,6 +139,8 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
   if (!input.prompt || typeof input.prompt !== 'string') return error(res, 400, 'INVALID_PROMPT', 'prompt is required');
   if (input.output && !['json', 'text'].includes(input.output))
     return error(res, 400, 'INVALID_OUTPUT', 'output must be json or text');
+  if (input.public !== undefined && typeof input.public !== 'boolean')
+    return error(res, 400, 'INVALID_VISIBILITY', 'public must be a boolean');
   const functionId = id || randomUUID();
   const now = new Date().toISOString();
   const current = id ? await database.get(`SELECT * FROM functions WHERE id = ?`, [id]) : null;
@@ -142,11 +148,12 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
   const version = current ? Number(current.latest_version) + 1 : 1;
   if (!current)
     await database.run(
-      `INSERT INTO functions (id, owner_id, active_version, latest_version, created_at, updated_at) VALUES (?, ?, 1, 1, ?, ?)`,
-      [functionId, null, now, now],
+      `INSERT INTO functions (id, owner_id, is_public, active_version, latest_version, created_at, updated_at) VALUES (?, ?, ?, 1, 1, ?, ?)`,
+      [functionId, null, input.public === true ? 1 : 0, now, now],
     );
   else
-    await database.run(`UPDATE functions SET latest_version = ?, active_version = ?, updated_at = ? WHERE id = ?`, [
+    await database.run(`UPDATE functions SET is_public = ?, latest_version = ?, active_version = ?, updated_at = ? WHERE id = ?`, [
+      input.public === undefined ? Number(current.is_public) : input.public === true ? 1 : 0,
       version,
       version,
       now,
@@ -212,6 +219,12 @@ async function complete(fn: FunctionVersion, input: unknown, req: IncomingMessag
   }
 }
 
+async function requireFunctionAccess(req: IncomingMessage, res: ServerResponse, fn: FunctionVersion) {
+  if (fn.public || (await auth.session(requestOf(req)))) return true;
+  error(res, 404, 'FUNCTION_NOT_FOUND', 'Function not found');
+  return false;
+}
+
 async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
   if (url.pathname === '/api') {
     const yaml = (req.headers.accept || '').includes('yaml') || url.searchParams.get('format') === 'yaml';
@@ -266,9 +279,16 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
       }
     }
   }
+  if (parts[1] === 'fn' && parts.length === 2 && req.method === 'GET' && url.searchParams.get('visibility') === 'all') {
+    if (!(await requireAuthentication(req, res))) return true;
+    const rows = await database.all(
+      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version`,
+    );
+    return send(res, 200, rows.map((row) => ({ functionId: row.function_id, version: Number(row.version), name: row.name, output: row.output, public: Boolean(row.is_public) })));
+  }
   if (parts[1] === 'fn' && parts.length === 2 && req.method === 'GET') {
     const rows = await database.all(
-      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.output FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version`,
+      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE f.is_public = 1`,
     );
     return send(
       res,
@@ -278,6 +298,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
         version: Number(row.version),
         name: row.name,
         output: row.output,
+        public: Boolean(row.is_public),
       })),
     );
   }
@@ -289,7 +310,9 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
     if (parts.length > 4 || invalidVersion) return error(res, 400, 'INVALID_VERSION', 'Invalid function version');
     if (req.method === 'GET') {
       const found = await getVersion(id, versionValue);
-      return found ? send(res, 200, found) : error(res, 404, 'VERSION_NOT_FOUND', 'Function version not found');
+      if (!found) return error(res, 404, 'VERSION_NOT_FOUND', 'Function version not found');
+      if (!(await requireFunctionAccess(req, res, found))) return true;
+      return send(res, 200, found);
     }
     if (req.method === 'PUT' && versionValue === undefined) return saveFunction(req, res, id);
     if (req.method === 'DELETE' && versionValue === undefined) {
@@ -304,6 +327,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
       url.searchParams.get('version') ? Number(url.searchParams.get('version')) : undefined,
     );
     if (!fn) return error(res, 404, 'VERSION_NOT_FOUND', 'Function version not found');
+    if (!(await requireFunctionAccess(req, res, fn))) return true;
     try {
       const raw = await body(req);
       let input: unknown = raw;
@@ -342,10 +366,9 @@ async function staticFile(_req: IncomingMessage, res: ServerResponse, url: URL) 
       '.svg': 'image/svg+xml',
     };
     const extension = extname(file);
-    const shouldRevalidate = ['.html', '.js', '.css', '.webmanifest'].includes(extension) || file.endsWith('/sw.js');
     res.writeHead(200, {
       'content-type': mime[extension] || 'application/octet-stream',
-      'cache-control': shouldRevalidate ? revalidateControl : cacheControl,
+      'cache-control': revalidateControl,
     });
     createReadStream(file).pipe(res);
     return true;

@@ -168,9 +168,9 @@ Stable static assets and the OpenAPI document are sent with:
 Cache-Control: public, max-age=604800, must-revalidate
 ```
 
-HTML, JavaScript, CSS, manifest, and service-worker files use
-`Cache-Control: no-cache, must-revalidate` so installed clients can pick up a
-new deployment without waiting for the one-week asset lifetime.
+HTML, JavaScript, CSS, manifest, service-worker, and other static files use at
+least `Cache-Control: public, max-age=86400, must-revalidate` to avoid slow
+repeat loads while still requiring daily validation.
 
 Function execution responses use `no-store` because generated output must not be
 cached.

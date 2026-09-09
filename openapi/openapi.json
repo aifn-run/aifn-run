@@ -14,7 +14,7 @@
     "/api/fn": {
       "get": {
         "operationId": "listFunctions",
-        "summary": "List visible functions",
+        "summary": "List public functions",
         "responses": {
           "200": {
             "description": "Functions visible to the current account",
@@ -50,6 +50,9 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationRequired"
           }
         }
       }
@@ -76,6 +79,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationRequired"
           }
         }
       },
@@ -98,6 +104,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationRequired"
           }
         }
       },
@@ -110,6 +119,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthenticationRequired"
           }
         }
       }
@@ -248,6 +260,16 @@
             }
           }
         }
+      },
+      "AuthenticationRequired": {
+        "description": "Authentication required for this operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
       }
     },
     "schemas": {
@@ -279,6 +301,11 @@
           },
           "output": {
             "$ref": "#/components/schemas/OutputMode"
+          },
+          "public": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow unauthenticated listing, reads, and execution."
           }
         }
       },
@@ -313,6 +340,9 @@
           },
           "output": {
             "$ref": "#/components/schemas/OutputMode"
+          },
+          "public": {
+            "type": "boolean"
           }
         }
       },
