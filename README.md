@@ -91,15 +91,15 @@ the active version. Explicit version URLs provide reproducible reads and runs.
 
 Each function version contains:
 
-| Field | Description |
-| --- | --- |
-| `functionId` | Stable UUID for the logical function |
-| `version` | Immutable positive version number |
-| `prompt` | Prompt with optional `{placeholder}` markers |
-| `name` | Human-readable function name |
-| `model` | OpenAI-compatible model override |
-| `format` | Completion format, currently `chat` |
-| `output` | `json` or `text` |
+| Field        | Description                                  |
+| ------------ | -------------------------------------------- |
+| `functionId` | Stable UUID for the logical function         |
+| `version`    | Immutable positive version number            |
+| `prompt`     | Prompt with optional `{placeholder}` markers |
+| `name`       | Human-readable function name                 |
+| `model`      | OpenAI-compatible model override             |
+| `format`     | Completion format, currently `chat`          |
+| `output`     | `json` or `text`                             |
 
 JSON output requests the provider to return valid JSON and parses the result
 server-side. Text output returns provider text as `text/plain`.
@@ -143,14 +143,14 @@ The browser sign-in control uses the hosted auth flow at `auth.aifn.run`.
 
 Required environment variables:
 
-| Variable | Purpose |
-| --- | --- |
-| `PORT` | HTTP listening port |
-| `DATABASE_URL` | Remote SQLite ESM module |
-| `AUTH_URL` | Profile lookup endpoint |
-| `API_CHAT_URL` | OpenAI-compatible chat endpoint |
-| `API_KEY` | Provider bearer token |
-| `API_MODEL` | Default model |
+| Variable         | Purpose                           |
+| ---------------- | --------------------------------- |
+| `PORT`           | HTTP listening port               |
+| `DATABASE_URL`   | Remote SQLite ESM module          |
+| `AUTH_URL`       | Profile lookup endpoint           |
+| `API_CHAT_URL`   | OpenAI-compatible chat endpoint   |
+| `API_KEY`        | Provider bearer token             |
+| `API_MODEL`      | Default model                     |
 | `SYSTEM_MESSAGE` | Optional text-mode system message |
 
 ## Deployment
