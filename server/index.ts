@@ -92,6 +92,11 @@ function requestOf(req: IncomingMessage) {
 async function profileId(req: IncomingMessage) {
   return (await auth.session(requestOf(req)))?.id || null;
 }
+async function requireAuthentication(req: IncomingMessage, res: ServerResponse) {
+  if (await auth.session(requestOf(req))) return true;
+  error(res, 401, 'AUTHENTICATION_REQUIRED', 'Authentication required');
+  return false;
+}
 function versionJSON(row: any): FunctionVersion {
   return {
     functionId: row.function_id,
@@ -120,6 +125,7 @@ async function getVersion(id: string, version?: number) {
 }
 
 async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: string) {
+  if (!(await requireAuthentication(req, res))) return true;
   let input: any;
   try {
     input = JSON.parse(await body(req));
@@ -129,7 +135,6 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
   if (!input.prompt || typeof input.prompt !== 'string') return error(res, 400, 'INVALID_PROMPT', 'prompt is required');
   if (input.output && !['json', 'text'].includes(input.output))
     return error(res, 400, 'INVALID_OUTPUT', 'output must be json or text');
-  const owner = await profileId(req);
   const functionId = id || randomUUID();
   const now = new Date().toISOString();
   const current = id ? await database.get(`SELECT * FROM functions WHERE id = ?`, [id]) : null;
@@ -138,7 +143,7 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
   if (!current)
     await database.run(
       `INSERT INTO functions (id, owner_id, active_version, latest_version, created_at, updated_at) VALUES (?, ?, 1, 1, ?, ?)`,
-      [functionId, owner, now, now],
+      [functionId, null, now, now],
     );
   else
     await database.run(`UPDATE functions SET latest_version = ?, active_version = ?, updated_at = ? WHERE id = ?`, [
@@ -262,10 +267,8 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
     }
   }
   if (parts[1] === 'fn' && parts.length === 2 && req.method === 'GET') {
-    const owner = await profileId(req);
     const rows = await database.all(
-      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.output FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE f.owner_id = ? OR f.owner_id IS NULL`,
-      [owner],
+      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.output FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version`,
     );
     return send(
       res,
@@ -290,6 +293,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
     }
     if (req.method === 'PUT' && versionValue === undefined) return saveFunction(req, res, id);
     if (req.method === 'DELETE' && versionValue === undefined) {
+      if (!(await requireAuthentication(req, res))) return true;
       const result = await database.run(`DELETE FROM functions WHERE id = ?`, [id]);
       return result ? res.writeHead(204).end() : error(res, 404, 'FUNCTION_NOT_FOUND', 'Function not found');
     }
