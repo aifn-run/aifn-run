@@ -6,7 +6,7 @@
       ><a href="/settings/provider">Settings</a>
     </nav>
     <div class="auth-actions">
-      <template if="!profile"><button class="button" on-click="authenticate()">Sign in</button></template
+      <template if="!profile"><a class="button" href="/auth/login?return_to=/dashboard">Sign in</a></template
       ><template if="profile"
         ><button class="button profile-button" on-click="signOut()">
           {{ profile.name || profile.email || 'Signed in' }} · Sign out
@@ -15,25 +15,14 @@
     </div>
   </header>
   <script setup>
-    import { ref, onInit, onDestroy } from '@li3/web';
-    import * as auth from 'https://auth.aifn.run/auth.js';
+    import { ref, onInit } from '@li3/web';
     export default function () {
-      const profile = ref(null),
-        onState = (event) => {
-          profile.value = event.detail || null;
-        };
-      const authenticate = () => auth.signIn(true),
-        signOut = () => auth.signOut();
+      const profile = ref(null);
+      const signOut = async () => { await fetch('/auth/logout', { method: 'POST' }); location.href = '/'; };
       onInit(async () => {
-        auth.events.addEventListener('state', onState);
-        try {
-          profile.value = await auth.getProfile();
-        } catch {
-          profile.value = null;
-        }
+        try { const response = await fetch('/auth/session'); if (response.ok) profile.value = (await response.json()).profile; } catch {}
       });
-      onDestroy(() => auth.events.removeEventListener('state', onState));
-      return { profile, authenticate, signOut };
+      return { profile, signOut };
     }
   </script>
 </template>

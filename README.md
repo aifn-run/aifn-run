@@ -141,13 +141,24 @@ used by setting `API_CHAT_URL` to their compatible endpoint.
 `AUTH_URL` is used to resolve the current profile from the incoming cookie.
 The browser sign-in control uses the hosted auth flow at `auth.aifn.run`.
 
+The application now owns the OIDC browser flow. `GET /auth/login` creates a
+PKCE verifier and state record, redirects to `AUTH_PROVIDER/authorize`, and
+`GET /auth/callback` exchanges the code using `OIDC_CLIENT_ID` and
+`OIDC_CLIENT_SECRET`. The server stores a hashed session ID and profile in the
+remote database, returning an HttpOnly, Secure, SameSite session cookie. The
+browser uses `GET /auth/session` and `POST /auth/logout`; it no longer loads the
+legacy iframe authentication module.
+
 Required environment variables:
 
 | Variable         | Purpose                           |
 | ---------------- | --------------------------------- |
 | `PORT`           | HTTP listening port               |
 | `DATABASE_URL`   | Remote SQLite ESM module          |
-| `AUTH_URL`       | Profile lookup endpoint           |
+| `AUTH_URL`       | Legacy profile lookup endpoint   |
+| `AUTH_PROVIDER`  | OIDC provider origin             |
+| `OIDC_CLIENT_ID` | Registered OIDC client ID        |
+| `OIDC_CLIENT_SECRET` | Registered OIDC client secret |
 | `API_CHAT_URL`   | OpenAI-compatible chat endpoint   |
 | `API_KEY`        | Provider bearer token             |
 | `API_MODEL`      | Default model                     |

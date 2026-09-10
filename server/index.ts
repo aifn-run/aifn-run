@@ -4,10 +4,11 @@ import { createReadStream } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { auth } from './auth.js';
+import { createAuth } from './auth.js';
 import migrationInitialSchema from './migrations/001-initial-schema.js';
 import migrationProviderEndpoint from './migrations/002-provider-endpoint.js';
 import migrationFunctionVisibility from './migrations/003-function-visibility.js';
+import migrationOidcSessions from './migrations/004-oidc-sessions.js';
 import type { Migration } from './migrations/types.js';
 
 type OutputMode = 'json' | 'text';
@@ -40,6 +41,7 @@ const openapiYAML = await readFile(join(root, 'openapi/openapi.yaml'), 'utf8');
 const database = await loadDatabase();
 database.pragma?.(['foreign_keys = ON']);
 await migrate();
+const auth = createAuth(database);
 
 async function loadDatabase(): Promise<Database> {
   const address = process.env.DATABASE_URL;
@@ -56,7 +58,7 @@ async function loadDatabase(): Promise<Database> {
 async function migrate() {
   await database.run(`CREATE TABLE IF NOT EXISTS schema_migrations (id TEXT PRIMARY KEY, applied_at TEXT NOT NULL)`);
   const applied = new Set((await database.all(`SELECT id FROM schema_migrations`)).map((row) => row.id));
-  const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility];
+  const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility, migrationOidcSessions];
   for (const migration of migrations) {
     if (applied.has(migration.id)) continue;
     await migration.up(database);
@@ -79,6 +81,11 @@ function send(
 
 function error(res: ServerResponse, status: number, code: string, message: string) {
   return send(res, status, { error: { code, message } });
+}
+function redirect(res: ServerResponse, location: string, headers: Record<string, string> = {}) {
+  res.writeHead(302, { location, ...headers });
+  res.end();
+  return true;
 }
 function body(req: IncomingMessage) {
   return new Promise<string>((resolve, reject) => {
@@ -380,6 +387,23 @@ async function staticFile(_req: IncomingMessage, res: ServerResponse, url: URL) 
 const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
   try {
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+    const protocol = req.headers['x-forwarded-proto']?.toString().split(',')[0] || url.protocol.replace(':', '');
+    const origin = `${protocol}://${req.headers.host || url.host}`;
+    const redirectUri = `${origin}/auth/callback`;
+    if (url.pathname === '/auth/login' && req.method === 'GET') return redirect(res, await auth.login(url.searchParams.get('return_to') || '/dashboard', redirectUri));
+    if (url.pathname === '/auth/callback' && req.method === 'GET') {
+      try {
+        const result = await auth.callback(url.searchParams.get('code') || '', url.searchParams.get('state') || '', redirectUri);
+        return redirect(res, result.returnTo, { 'set-cookie': `${auth.sessionCookie}=${result.id}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000` });
+      } catch (cause) {
+        return error(res, 400, 'AUTHENTICATION_FAILED', cause instanceof Error ? cause.message : 'Authentication failed');
+      }
+    }
+    if (url.pathname === '/auth/session' && req.method === 'GET') return send(res, 200, { profile: await auth.session(req) });
+    if (url.pathname === '/auth/logout' && (req.method === 'POST' || req.method === 'GET')) {
+      await auth.logout(req);
+      return redirect(res, '/', { 'set-cookie': `${auth.sessionCookie}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0` });
+    }
     if (req.method === 'OPTIONS') {
       res
         .writeHead(204, {

@@ -1,12 +1,14 @@
 <template component="landing-page"
   ><main class="page landing-page">
     <div class="eyebrow">AI functions, without the fog</div>
-    <h1 class="hero-title">Make AI behave like code.</h1>
+    <h1 class="hero-title">It's AI, but embedded.</h1>
     <p class="lede">Write a prompt once. Version it. Call it from JavaScript with a predictable text or JSON result.</p>
     <div class="actions">
       <a class="button primary" href="/functions/new">Open the editor</a
       ><a class="button" href="/help">Read the guide</a>
     </div>
+    <div class="quickstart card"><div><span class="card-index">A tiny function</span><strong>Drop AI into a normal async call.</strong></div><pre><code>const translate = await ai.fn('Translate {text} to English');
+const result = await translate({ text: 'Hola mundo' });</code></pre><a class="card-link" href="/help">See how it works ↗</a></div>
     <div class="grid">
       <div class="card">
         <strong>Versioned by default</strong>

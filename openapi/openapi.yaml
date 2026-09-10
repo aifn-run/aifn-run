@@ -6,6 +6,41 @@ info:
 servers:
   - url: https://aifn.run
 paths:
+  /auth/login:
+    get:
+      operationId: startLogin
+      summary: Start the OIDC authorization-code flow
+      parameters:
+        - name: return_to
+          in: query
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to the configured OIDC provider
+  /auth/callback:
+    get:
+      operationId: completeLogin
+      summary: Complete the OIDC authorization-code flow
+      responses:
+        '302':
+          description: Redirect to the requested application page
+        '400':
+          description: Authentication failed
+  /auth/session:
+    get:
+      operationId: getSession
+      summary: Get the current application session
+      responses:
+        '200':
+          description: Current session or null profile
+  /auth/logout:
+    post:
+      operationId: logout
+      summary: End the current application session
+      responses:
+        '302':
+          description: Redirect to the landing page
   /api/fn:
     get:
       operationId: listFunctions
