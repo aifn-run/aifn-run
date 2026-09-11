@@ -6,12 +6,19 @@ app.append(pageRoot);
 const routes = {
   '/': { template: '/pages/landing-page.html', component: 'landing-page' },
   '/dashboard': { template: '/pages/dashboard-page.html', component: 'dashboard-page' },
-  '/functions': { template: '/pages/functions-page.html', component: 'functions-page' },
-  '/functions/new': { template: '/pages/function-editor-page.html', component: 'function-editor-page', editor: true },
+  '/functions': { template: '/pages/functions-page.html', component: 'functions-page', private: true },
+  '/functions/new': { template: '/pages/function-editor-page.html', component: 'function-editor-page', editor: true, private: true },
   '/help': { template: '/pages/help-page.html', component: 'help-page' },
-  '/settings/provider': { template: '/pages/provider-settings-page.html', component: 'provider-settings-page' },
+  '/settings/provider': { template: '/pages/provider-settings-page.html', component: 'provider-settings-page', private: true },
 };
 const route = routes[location.pathname] || routes['/'];
+if (route.private) {
+  const session = await fetch('/auth/session', { credentials: 'include' }).then((response) => response.json()).catch(() => ({ profile: null }));
+  if (!session.profile) {
+    location.replace(`/auth/login?return_to=${encodeURIComponent(location.pathname)}`);
+    throw new Error('Authentication required');
+  }
+}
 const sources = ['/components/app-shell.html', route.template];
 if (route.editor) sources.push('/components/function-editor.html', 'https://sodium.static.apphor.de/code-editor.html');
 

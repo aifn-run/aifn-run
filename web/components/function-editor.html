@@ -1,164 +1,42 @@
 <template component="function-editor">
-  <div class="workspace">
-    <form class="card" on-submit="save($event)">
-      <div class="eyebrow">Function workspace</div>
-      <h2>Shape a function</h2>
-      <div class="field">
-        <label for="name">Name</label><input id="name" bind-value="name" placeholder="summarizeText" />
+  <div class="editor-window">
+    <div class="editor-toolbar"><span class="traffic"><i></i><i></i><i></i></span><span class="editor-title">untitled function</span><span class="editor-state">{{ status || 'Draft' }}</span></div>
+    <form on-submit="save($event)">
+      <div class="editor-main">
+        <section class="prompt-pane">
+          <div class="editor-tabs"><span class="active">prompt.fn</span><span>preview</span></div>
+          <textarea class="prompt-input" bind-value="prompt" spellcheck="false" placeholder="Describe what this function should do...\n\nUse {{ name }} to interpolate a typed input."></textarea>
+          <div class="editor-footer"><span>{{ output === 'json' ? 'JSON output' : 'Text output' }}</span><span>{{ inputCount }} inputs</span></div>
+        </section>
+        <aside class="input-pane">
+          <div class="pane-heading"><strong>Inputs</strong><button class="icon-button" type="button" on-click="addInput()">+</button></div>
+          <p class="pane-help">Define values available as <code>{{ value }}</code> in the prompt.</p>
+          <div class="input-row" for="item of inputs">
+            <input class="input-name" bind-value="item.name" placeholder="name" />
+            <select bind-value="item.type"><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option></select>
+            <button class="icon-button muted" type="button" on-click="removeInput(item)">×</button>
+          </div>
+          <button class="add-input" type="button" on-click="addInput()">+ Add input</button>
+          <div class="field compact-field"><label for="output">Output</label><select id="output" bind-value="output"><option value="json">JSON</option><option value="text">Text</option></select></div>
+          <div class="field compact-field"><label for="model">Model</label><input id="model" bind-value="model" placeholder="default model" /></div>
+          <label class="visibility-toggle"><input type="checkbox" bind-checked="isPublic" /> Public</label>
+        </aside>
       </div>
-      <div class="field">
-        <label for="output">Output mode</label
-        ><select id="output" bind-value="output">
-          <option value="json">JSON</option>
-          <option value="text">Text</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="model">OpenAI-compatible model</label
-        ><input id="model" bind-value="model" placeholder="gpt-4o-mini or llama3.2" />
-      </div>
-      <label class="visibility-toggle"><input type="checkbox" bind-checked="isPublic" /> Public function <span>Allow unauthenticated listing and execution</span></label>
-      <details class="provider-settings">
-        <summary>Provider settings</summary>
-        <p class="status">
-          Account default: {{ accountEndpoint || 'Server default' }} · {{ accountKeyConfigured ? 'API key configured' :
-          'No account key' }}
-        </p>
-        <div class="field">
-          <label for="endpoint">Function endpoint override</label
-          ><input id="endpoint" bind-value="endpoint" placeholder="Leave blank to use account default" />
-        </div>
-        <div class="field">
-          <label for="key">Function API key override</label
-          ><input
-            id="key"
-            bind-value="key"
-            type="password"
-            placeholder="Leave blank to use account default"
-            autocomplete="new-password"
-          />
-        </div>
-        <p class="status">Keys are stored server-side in your auth account and are never returned to the browser.</p>
-      </details>
-      <div class="field">
-        <label for="prompt">Prompt</label
-        ><code-editor
-          class="code-editor"
-          language="javascript"
-          nostatus="1"
-          theme="a11y-dark"
-          bind-value="prompt"
-        ></code-editor>
-      </div>
-      <div class="actions">
-        <button class="button primary" type="submit" bind-disabled="busy">
-          {{ busy ? 'Saving…' : 'Create version' }}</button
-        ><span class="status">{{ status }}</span>
-      </div>
+      <div class="editor-actions"><details><summary>Provider override</summary><div class="provider-inline"><input bind-value="endpoint" placeholder="Endpoint override" /><input bind-value="key" type="password" placeholder="API key override" autocomplete="new-password" /></div></details><button class="button primary" type="submit" bind-disabled="busy">{{ busy ? 'Saving...' : 'Save version' }}</button></div>
     </form>
-    <aside class="card">
-      <div class="eyebrow">Try it</div>
-      <h2>Run the latest</h2>
-      <div class="field">
-        <label for="inputs">Inputs</label
-        ><textarea id="inputs" bind-value="inputs" placeholder='{"text":"Hello"}'></textarea>
-      </div>
-      <button class="button" on-click="run()" bind-disabled="!functionId">Run function</button>
-      <div class="field">
-        <label>Output</label>
-        <div class="result">{{ result || 'Your result will appear here.' }}</div>
-      </div>
-    </aside>
+    <section class="playground"><div class="playground-heading"><strong>Playground</strong><span>Test the active function</span></div><div class="playground-body"><textarea bind-value="testInput" placeholder='{"name":"Ada","age":36}'></textarea><button class="button" on-click="run()" bind-disabled="!functionId || running">{{ running ? 'Running...' : 'Run' }}</button><pre>{{ result || 'Output will appear here.' }}</pre></div></section>
   </div>
   <script setup>
-    import { ref, onInit } from '@li3/web';
+    import { ref, computed, onInit } from '@li3/web';
     export default function () {
-      const name = ref('newFunction'),
-        output = ref('json'),
-        model = ref(''),
-        prompt = ref(''),
-        endpoint = ref(''),
-        key = ref(''),
-        accountEndpoint = ref(''),
-        accountKeyConfigured = ref(false),
-        inputs = ref('{}'),
-        result = ref(''),
-        status = ref(''),
-        busy = ref(false),
-        functionId = ref('');
-      const isPublic = ref(false);
-      onInit(async () => {
-        try {
-          const response = await fetch('/api/provider/account', { credentials: 'include' });
-          if (response.ok) {
-            const defaults = await response.json();
-            accountEndpoint.value = defaults.endpoint;
-            accountKeyConfigured.value = defaults.keyConfigured;
-            if (!model.value) model.value = defaults.model;
-          }
-        } catch {}
-      });
-      async function save(event) {
-        event.preventDefault();
-        busy.value = true;
-        status.value = 'Saving…';
-        try {
-          const response = await fetch('/api/fn', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-              name: name.value,
-              output: output.value,
-              model: model.value,
-              prompt: prompt.value,
-              providerEndpoint: endpoint.value,
-              providerKey: key.value,
-              public: isPublic.value,
-            }),
-          });
-          const body = await response.json();
-          if (!response.ok) throw new Error(body.error?.message || body.error || response.status);
-          functionId.value = body.functionId;
-          key.value = '';
-          status.value = `Version ${body.version} saved`;
-        } catch (error) {
-          status.value = error.message;
-        } finally {
-          busy.value = false;
-        }
-      }
-      async function run() {
-        result.value = 'Running…';
-        try {
-          const response = await fetch('/api/run/' + functionId.value, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: inputs.value,
-          });
-          result.value = await response.text();
-        } catch (error) {
-          result.value = error.message;
-        }
-      }
-      return {
-        name,
-        output,
-        model,
-        prompt,
-        endpoint,
-        key,
-        accountEndpoint,
-        accountKeyConfigured,
-        inputs,
-        result,
-        status,
-        busy,
-        functionId,
-        isPublic,
-        save,
-        run,
-      };
+      const name = ref('newFunction'), output = ref('json'), model = ref(''), prompt = ref(''), endpoint = ref(''), key = ref(''), isPublic = ref(false), inputs = ref([{ name: 'text', type: 'string' }]), testInput = ref('{"text":"Hello"}'), result = ref(''), status = ref(''), busy = ref(false), running = ref(false), functionId = ref('');
+      const inputCount = computed(() => inputs.value.length);
+      function addInput() { inputs.value.push({ name: `value${inputs.value.length + 1}`, type: 'string' }); }
+      function removeInput(item) { if (inputs.value.length > 1) inputs.value = inputs.value.filter((value) => value !== item); }
+      onInit(async () => { try { const response = await fetch('/api/provider/account', { credentials: 'include' }); if (response.ok) { const defaults = await response.json(); if (!model.value) model.value = defaults.model; } } catch {} });
+      async function save(event) { event.preventDefault(); busy.value = true; status.value = 'Saving...'; try { const response = await fetch('/api/fn', { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name.value, output: output.value, model: model.value, prompt: prompt.value, providerEndpoint: endpoint.value, providerKey: key.value, public: isPublic.value, inputSchema: inputs.value }) }); const body = await response.json(); if (!response.ok) throw new Error(body.error?.message || response.status); functionId.value = body.functionId; key.value = ''; status.value = `v${body.version} saved`; } catch (error) { status.value = error.message; } finally { busy.value = false; } }
+      async function run() { running.value = true; try { const response = await fetch(`/api/run/${functionId.value}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ inputs: JSON.parse(testInput.value) }) }); result.value = await response.text(); } catch (error) { result.value = error.message; } finally { running.value = false; } }
+      return { name, output, model, prompt, endpoint, key, isPublic, inputs, inputCount, testInput, result, status, busy, running, functionId, addInput, removeInput, save, run };
     }
   </script>
 </template>

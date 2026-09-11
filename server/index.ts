@@ -9,6 +9,7 @@ import migrationInitialSchema from './migrations/001-initial-schema.js';
 import migrationProviderEndpoint from './migrations/002-provider-endpoint.js';
 import migrationFunctionVisibility from './migrations/003-function-visibility.js';
 import migrationOidcSessions from './migrations/004-oidc-sessions.js';
+import migrationFunctionInputSchema from './migrations/005-function-input-schema.js';
 import type { Migration } from './migrations/types.js';
 
 type OutputMode = 'json' | 'text';
@@ -28,6 +29,7 @@ type FunctionVersion = {
   output: OutputMode;
   providerEndpoint: string;
   public: boolean;
+  inputSchema: Array<{ name: string; type: 'string' | 'number' | 'boolean' }>;
   active?: boolean;
 };
 
@@ -58,7 +60,7 @@ async function loadDatabase(): Promise<Database> {
 async function migrate() {
   await database.run(`CREATE TABLE IF NOT EXISTS schema_migrations (id TEXT PRIMARY KEY, applied_at TEXT NOT NULL)`);
   const applied = new Set((await database.all(`SELECT id FROM schema_migrations`)).map((row) => row.id));
-  const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility, migrationOidcSessions];
+  const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility, migrationOidcSessions, migrationFunctionInputSchema];
   for (const migration of migrations) {
     if (applied.has(migration.id)) continue;
     await migration.up(database);
@@ -119,6 +121,7 @@ function versionJSON(row: any): FunctionVersion {
     output: row.output,
     providerEndpoint: row.provider_endpoint || '',
     public: Boolean(row.is_public),
+    inputSchema: JSON.parse(row.input_schema || '[]'),
     active: Boolean(row.active),
   };
 }
@@ -167,7 +170,7 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
       functionId,
     ]);
   await database.run(
-    `INSERT INTO function_versions (function_id, version, prompt, name, model, format, output, provider_endpoint, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO function_versions (function_id, version, prompt, name, model, format, output, provider_endpoint, input_schema, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       functionId,
       version,
@@ -177,6 +180,7 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
       input.format || 'chat',
       input.output || 'json',
       input.providerEndpoint || '',
+      JSON.stringify(Array.isArray(input.inputSchema) ? input.inputSchema.filter((item: any) => item && typeof item.name === 'string' && ['string', 'number', 'boolean'].includes(item.type)).map((item: any) => ({ name: item.name.trim(), type: item.type })) : []),
       now,
     ],
   );
@@ -185,9 +189,29 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
   return send(res, 201, await getVersion(functionId, version));
 }
 
+function normalizeInput(raw: unknown, schema: FunctionVersion['inputSchema']) {
+  if (typeof raw === 'string') return raw;
+  const source = raw && typeof raw === 'object' ? raw as Record<string, unknown> : {};
+  const clean: Record<string, unknown> = Object.create(null);
+  for (const item of schema) {
+    if (!Object.prototype.hasOwnProperty.call(source, item.name)) continue;
+    const value = source[item.name];
+    if (item.type === 'number') {
+      const number = typeof value === 'number' ? value : Number(String(value));
+      if (Number.isFinite(number)) clean[item.name] = number;
+    } else if (item.type === 'boolean') {
+      if (value === true || value === false) clean[item.name] = value;
+      else if (value === 'true' || value === 'false') clean[item.name] = value === 'true';
+    } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') clean[item.name] = String(value);
+  }
+  return schema.length ? clean : source;
+}
 function interpolate(prompt: string, input: unknown) {
   if (typeof input === 'string') return `${prompt}\n${input}`;
-  return prompt.replace(/\{([\s\S]+?)\}/g, (_, key) => String((input as Record<string, unknown>)?.[key.trim()] ?? ''));
+  return prompt.replace(/\{\{\s*([A-Za-z_][\w.-]*)\s*\}\}/g, (_, key) => {
+    const value = (input as Record<string, unknown>)?.[key];
+    return value && typeof value === 'object' ? JSON.stringify(value) : String(value ?? '');
+  });
 }
 async function complete(fn: FunctionVersion, input: unknown, req: IncomingMessage) {
   const content = interpolate(fn.prompt, input);
@@ -337,10 +361,8 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
     if (!(await requireFunctionAccess(req, res, fn))) return true;
     try {
       const raw = await body(req);
-      let input: unknown = raw;
-      try {
-        input = JSON.parse(raw).inputs ?? {};
-      } catch {}
+       let input: unknown = raw;
+       try { input = normalizeInput(JSON.parse(raw).inputs ?? {}, fn.inputSchema); } catch { input = normalizeInput(raw, fn.inputSchema); }
       const output = await complete(fn, input, req);
       return send(
         res,
@@ -404,6 +426,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
       await auth.logout(req);
       return redirect(res, '/', { 'set-cookie': `${auth.sessionCookie}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0` });
     }
+    if (url.pathname === '/functions/new' && !(await auth.session(req))) return redirect(res, `/auth/login?return_to=${encodeURIComponent(url.pathname)}`);
     if (req.method === 'OPTIONS') {
       res
         .writeHead(204, {

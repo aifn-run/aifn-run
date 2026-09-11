@@ -230,6 +230,17 @@ components:
           type: boolean
           default: false
           description: Allow unauthenticated listing, reads, and execution.
+        inputSchema:
+          type: array
+          items:
+            type: object
+            required: [name, type]
+            properties:
+              name:
+                type: string
+              type:
+                type: string
+                enum: [string, number, boolean]
     OutputMode:
       type: string
       enum: [text, json]
@@ -251,6 +262,17 @@ components:
           $ref: '#/components/schemas/OutputMode'
         public:
           type: boolean
+        inputSchema:
+          type: array
+          items:
+            type: object
+            required: [name, type]
+            properties:
+              name:
+                type: string
+              type:
+                type: string
+                enum: [string, number, boolean]
     FunctionVersion:
       allOf:
         - $ref: '#/components/schemas/FunctionSummary'

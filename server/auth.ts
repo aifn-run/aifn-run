@@ -68,7 +68,8 @@ export function createAuth(database: Database) {
     if (!token.ok) throw new Error(`OIDC token exchange failed: ${token.status}`);
     const tokens = await token.json();
     const user = await fetch(new URL('/userinfo', provider), { headers: { authorization: `Bearer ${tokens.access_token}`, 'x-auth-audience': clientId } });
-    const profile: Profile = user.ok ? await user.json() : JSON.parse(Buffer.from(String(tokens.id_token).split('.')[1], 'base64url').toString());
+    if (!user.ok) throw new Error(`OIDC userinfo request failed: ${user.status}`);
+    const profile: Profile = await user.json();
     const id = randomUUID();
     await database.run(`INSERT INTO auth_sessions (id, profile, expires_at, created_at) VALUES (?, ?, ?, ?)`, [hash(id), JSON.stringify(profile), Date.now() + sessionDays * 86400000, new Date().toISOString()]);
     return { id, returnTo: safeReturnTo(saved.return_to) };

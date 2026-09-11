@@ -194,3 +194,8 @@ cached.
   and provider failures.
 - Add Playwright coverage for the Li3 editor and authenticated flows.
 - Add a migration for legacy function records.
+- Functions use prompt text plus typed input definitions. Interpolated values use
+  `{{ name }}` markers; JSON inputs are sanitized and coerced server-side before
+  provider execution.
+- The editor is server- and client-authenticated and includes a compact prompt
+  workspace with a typed-input side panel and test playground.
