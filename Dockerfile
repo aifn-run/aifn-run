@@ -1,4 +1,4 @@
-FROM ghcr.io/cloud-cli/node:latest AS builder
+FROM ghcr.io/cloud-cli/image-node:latest AS builder
 
 WORKDIR /home/app
 
@@ -10,7 +10,7 @@ USER node
 COPY . .
 RUN npm run build
 
-FROM ghcr.io/cloud-cli/node:latest AS runtime
+FROM ghcr.io/cloud-cli/image-node:latest AS runtime
 
 WORKDIR /home/app
 
