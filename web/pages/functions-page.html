@@ -3,7 +3,7 @@
     <template if="!editing">
       <div class="compact-page-heading"><div><div class="eyebrow">Function library</div><strong class="compact-title">Functions</strong></div><button class="button primary" on-click="newFunction()">New function +</button></div>
       <section class="function-grid" if="functions.length">
-        <button class="function-card" for="item of functions" on-click="edit(item.functionId)"><span class="function-card-name">{{ item.name || item.functionId }}</span><span class="function-card-meta">v{{ item.version }} · {{ item.public ? 'Public' : 'Private' }} · {{ item.output }}</span><span class="function-card-edit">Edit</span></button>
+        <template for="item of functions"><button class="function-card" on-click="edit(item.functionId)"><span class="function-card-name">{{ item.name || item.functionId }}</span><span class="function-card-meta">v{{ item.version }} · {{ item.public ? 'Public' : 'Private' }} · {{ item.output }}</span><span class="function-card-edit">Edit</span></button></template>
       </section>
       <section class="empty-state card" if="!functions.length"><div class="empty-mark">fn</div><h2>No functions yet</h2><p>Create your first function to start building your library.</p><button class="button" on-click="newFunction()">Create a function</button></section>
     </template>
