@@ -5,7 +5,7 @@ JSON or text output, and call the active version over HTTP.
 
 ## Current Architecture
 
-- The website is a static Li3 application using browser-native modules.
+- The website is a static Li3 application using browser-native modules and Tailwind 4 browser utilities.
 - The server is a TypeScript HTTP server bundled with esbuild.
 - The container starts `package.json`'s `main` entrypoint and listens on `PORT`.
 - Function data is stored in the remote SQLite service configured by
@@ -21,7 +21,7 @@ JSON or text output, and call the active version over HTTP.
 ├── web/
 │   ├── index.html                  Li3 website shell
 │   ├── app.js                      Li3 bootstrap and template loading
-│   ├── styles.css                  Responsive visual system
+│   ├── pages/                      Route-level Li3 page templates
 │   └── components/                 Website and editor templates
 ├── server/index.ts                 TypeScript HTTP server and API routes
 ├── openapi/openapi.yaml            Canonical API contract
@@ -51,7 +51,8 @@ PORT=3000 DATABASE_URL=https://<uid>.db.apphor.de/index.mjs node dist-server/ind
 
 The server requires the remote database module and completion configuration for
 function creation and execution. Static pages and the OpenAPI document can be
-tested without an authenticated profile.
+tested without an authenticated profile. The functions dashboard and editor
+require an OIDC session.
 
 ## API
 
@@ -76,7 +77,8 @@ GET /api?format=yaml
 ### Functions
 
 ```text
-GET    /api/fn
+GET    /api/fn                         # public functions only
+GET    /api/fn?visibility=all          # authenticated dashboard listing
 POST   /api/fn
 GET    /api/fn/{functionId}
 PUT    /api/fn/{functionId}
@@ -95,11 +97,13 @@ Each function version contains:
 | ------------ | -------------------------------------------- |
 | `functionId` | Stable UUID for the logical function         |
 | `version`    | Immutable positive version number            |
-| `prompt`     | Prompt with optional `{placeholder}` markers |
+| `prompt`     | Prompt with `{{ name }}` input markers       |
 | `name`       | Human-readable function name                 |
 | `model`      | OpenAI-compatible model override             |
 | `format`     | Completion format, currently `chat`          |
 | `output`     | `json` or `text`                             |
+| `public`     | Whether anonymous listing/read/run is allowed |
+| `inputSchema`| Typed input definitions                      |
 
 JSON output requests the provider to return valid JSON and parses the result
 server-side. Text output returns provider text as `text/plain`.
@@ -127,10 +131,11 @@ https://<uid>.db.apphor.de/index.mjs
 
 The module must export `get(sql, data)`, `run(sql, data)`, and `all(sql, data)`.
 It may export `pragma(values)`. The server imports this module during bootstrap,
-enables foreign keys, and creates these tables if necessary:
+enables foreign keys, and applies tracked TypeScript migrations from
+`server/migrations/`, recorded in `schema_migrations`.
 
 - `functions`: stable IDs, owner, active version, latest version, timestamps
-- `function_versions`: immutable prompt/configuration snapshots
+- `function_versions`: immutable prompt/configuration snapshots and typed input schemas
 
 ## Providers And Authentication
 
@@ -138,8 +143,9 @@ The server sends OpenAI-compatible chat requests to `API_CHAT_URL` using
 `API_KEY` and `API_MODEL`. Ollama and other compatible local providers can be
 used by setting `API_CHAT_URL` to their compatible endpoint.
 
-`AUTH_URL` is used to resolve the current profile from the incoming cookie.
-The browser sign-in control uses the hosted auth flow at `auth.aifn.run`.
+`AUTH_PROVIDER`, `OIDC_CLIENT_ID`, and `OIDC_CLIENT_SECRET` configure the
+server-side OIDC flow. `AUTH_API_URL` is used for authenticated provider
+property storage.
 
 The application now owns the OIDC browser flow. `GET /auth/login` creates a
 PKCE verifier and state record, redirects to `AUTH_PROVIDER/authorize`, and
@@ -155,7 +161,7 @@ Required environment variables:
 | ---------------- | --------------------------------- |
 | `PORT`           | HTTP listening port               |
 | `DATABASE_URL`   | Remote SQLite ESM module          |
-| `AUTH_URL`       | Legacy profile lookup endpoint   |
+| `AUTH_API_URL`   | Auth property API endpoint      |
 | `AUTH_PROVIDER`  | OIDC provider origin             |
 | `OIDC_CLIENT_ID` | Registered OIDC client ID        |
 | `OIDC_CLIENT_SECRET` | Registered OIDC client secret |
@@ -167,7 +173,7 @@ Required environment variables:
 ## Deployment
 
 The production image is a two-stage build using
-`ghcr.io/cloud-cli/node:latest` for both stages. The builder installs
+`ghcr.io/cloud-cli/image-node:latest` for both stages. The builder installs
 development dependencies and runs `npm run build`. The runtime stage installs
 only production dependencies, copies the built website, compiled server, and
 OpenAPI files from the builder, and runs `dist-server/index.mjs` through the
