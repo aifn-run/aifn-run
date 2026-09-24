@@ -2,11 +2,9 @@ const VERSION = 'aifn-shell-v6';
 const SHELL = [
   '/',
   '/index.html',
-  '/styles.css',
   '/app.js',
   '/manifest.webmanifest',
   '/icons/icon.svg',
-  '/components/app-shell.html',
   '/components/app-shell.html',
   '/components/function-editor.html',
   '/pages/landing-page.html',

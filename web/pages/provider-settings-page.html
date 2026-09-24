@@ -1,37 +1,4 @@
-<template component="provider-settings-page"
-  ><main class="page">
-    <div class="eyebrow">Account defaults</div>
-    <h1>Provider settings.</h1>
-    <p class="lede">
-      Set the provider your functions use by default. Individual functions can override the endpoint and key.
-    </p>
-    <form class="card settings-card" on-submit="save($event)">
-      <div class="field">
-        <label for="account-endpoint">OpenAI-compatible endpoint</label
-        ><input id="account-endpoint" bind-value="endpoint" placeholder="https://api.openai.com/v1/chat/completions" />
-      </div>
-      <div class="field">
-        <label for="account-model">Default model</label
-        ><input id="account-model" bind-value="model" placeholder="gpt-4o-mini or llama3.2" />
-      </div>
-      <div class="field">
-        <label for="account-key">API key</label
-        ><input
-          id="account-key"
-          bind-value="key"
-          type="password"
-          placeholder="{{ configured ? 'Leave blank to keep current key' : 'Paste an API key' }}"
-          autocomplete="new-password"
-        />
-      </div>
-      <div class="actions">
-        <button class="button primary" type="submit" bind-disabled="busy">
-          {{ busy ? 'Saving…' : 'Save defaults' }}</button
-        ><span class="status">{{ status }}</span>
-      </div>
-      <p class="status">Keys are stored in the auth property service and are never returned to the browser.</p>
-    </form>
-  </main>
+<template component="provider-settings-page"><main class="mx-auto max-w-3xl px-6 py-12"><div class="text-xs font-bold uppercase tracking-[.2em] text-lime-300">Account defaults</div><h1 class="mt-3 text-5xl font-bold tracking-[-.06em]">Provider settings.</h1><p class="mt-4 text-lg leading-8 text-stone-400">Set the provider your functions use by default.</p><form class="mt-8 grid gap-5 rounded-xl border border-stone-700 bg-[#151815] p-6" on-submit="save($event)"><div class="grid gap-2"><label class="text-xs text-stone-400" for="account-endpoint">OpenAI-compatible endpoint</label><input class="rounded border border-stone-700 bg-[#0b0d0b] px-3 py-2 text-stone-100 outline-none focus:border-lime-300" id="account-endpoint" bind-value="endpoint" placeholder="https://api.openai.com/v1/chat/completions" /></div><div class="grid gap-2"><label class="text-xs text-stone-400" for="account-model">Default model</label><input class="rounded border border-stone-700 bg-[#0b0d0b] px-3 py-2 text-stone-100 outline-none focus:border-lime-300" id="account-model" bind-value="model" placeholder="gpt-4o-mini or llama3.2" /></div><div class="grid gap-2"><label class="text-xs text-stone-400" for="account-key">API key</label><input class="rounded border border-stone-700 bg-[#0b0d0b] px-3 py-2 text-stone-100 outline-none focus:border-lime-300" id="account-key" bind-value="key" type="password" placeholder="{{ configured ? 'Leave blank to keep current key' : 'Paste an API key' }}" autocomplete="new-password" /></div><div class="flex items-center gap-4"><button class="rounded bg-lime-300 px-4 py-2 font-bold text-stone-950 hover:bg-lime-200" type="submit" bind-disabled="busy">{{ busy ? 'Saving…' : 'Save defaults' }}</button><span class="text-xs text-stone-400">{{ status }}</span></div><p class="text-xs text-stone-500">Keys are stored in the auth property service and are never returned to the browser.</p></form></main>
   <script setup>
     import { ref, onInit } from '@li3/web';
     export default function () {

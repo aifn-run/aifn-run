@@ -1,13 +1,15 @@
 <template component="functions-page">
-  <main class="page functions-page">
+  <main class="mx-auto max-w-[1880px] px-6 py-10">
     <template if="!editing">
-      <div class="compact-page-heading"><div><div class="eyebrow">Function library</div><strong class="compact-title">Functions</strong></div><button class="button primary" on-click="newFunction()">New function +</button></div>
-      <section class="function-grid" if="functions.length">
-        <template for="item of functions"><button class="function-card" on-click="edit(item.functionId)"><span class="function-card-name">{{ item.name || item.functionId }}</span><span class="function-card-meta">v{{ item.version }} · {{ item.public ? 'Public' : 'Private' }} · {{ item.output }}</span><span class="function-card-edit">Edit</span></button></template>
+      <section class="overflow-hidden rounded-2xl border border-stone-700 bg-[#111411]">
+        <header class="flex items-center justify-between border-b border-stone-700 px-6 py-4"><h1 class="text-xl font-bold tracking-tight">AI functions</h1><button class="rounded border border-stone-600 bg-stone-500 px-3 py-1 text-lg leading-none text-white hover:bg-stone-400" on-click="newFunction()">+</button></header>
+        <div class="grid grid-cols-[minmax(180px,1fr)_minmax(150px,1fr)_minmax(150px,1fr)_4rem] border-b border-stone-800 bg-stone-800/70 px-6 py-3 text-sm text-stone-400"><span>functionName</span><span>provider</span><span>model</span><span></span></div>
+        <template for="item of functions"><div class="grid grid-cols-[minmax(180px,1fr)_minmax(150px,1fr)_minmax(150px,1fr)_4rem] items-center border-b border-stone-800 px-6 py-4 text-sm"><button class="text-left text-lime-300 hover:text-lime-200" on-click="edit(item.functionId)">{{ item.name || item.functionId }}</button><span class="text-stone-400">{{ item.provider || 'default' }}</span><span class="text-stone-400">{{ item.model || 'default' }}</span><button class="rounded bg-stone-500 px-2 py-1 text-xs text-white hover:bg-stone-400" on-click="edit(item.functionId)">edit</button></div></template>
+        <template if="!functions.length"><div class="px-6 py-14 text-center text-sm text-stone-500">No functions yet. Use + to create one.</div></template>
+        <footer class="flex justify-end px-6 py-4 text-sm text-stone-300">{{ functions.length }} items</footer>
       </section>
-      <section class="empty-state card" if="!functions.length"><div class="empty-mark">fn</div><h2>No functions yet</h2><p>Create your first function to start building your library.</p><button class="button" on-click="newFunction()">Create a function</button></section>
     </template>
-    <template if="editing"><div class="inline-editor-heading"><button class="button" on-click="showList()">← Functions</button><span>{{ selectedId ? 'Edit function' : 'New function' }}</span></div><function-editor bind-function-id="selectedId"></function-editor></template>
+    <template if="editing"><div class="mb-3 flex items-center gap-3 text-xs text-stone-400"><button class="rounded border border-stone-700 px-3 py-2 hover:border-lime-300" on-click="showList()">← Functions</button><span>{{ selectedId ? 'Edit function' : 'New function' }}</span></div><function-editor bind-function-id="selectedId"></function-editor></template>
   </main>
   <script setup>
     import { hook, onInit } from '@li3/web';

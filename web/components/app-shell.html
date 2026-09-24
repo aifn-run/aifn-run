@@ -1,14 +1,14 @@
 <template component="app-shell">
-  <header class="site-header">
-    <a class="brand" href="/">ai<span>fn</span>.run</a>
-    <nav class="nav">
-      <a href="/">Home</a><a href="/dashboard">Dashboard</a><a href="/functions">Functions</a><a href="/help">Help</a
-      ><a href="/settings/provider">Settings</a>
+  <header class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-5">
+    <a class="text-lg font-bold tracking-tight" href="/">ai<span class="text-lime-300">fn</span>.run</a>
+    <nav class="hidden gap-5 text-xs text-stone-400 md:flex">
+      <a class="hover:text-white" href="/">Home</a><a class="hover:text-white" href="/dashboard">Dashboard</a><a class="hover:text-white" href="/functions">Functions</a><a class="hover:text-white" href="/help">Help</a
+      ><a class="hover:text-white" href="/settings/provider">Settings</a>
     </nav>
-    <div class="auth-actions">
-      <template if="!profile"><a class="button" href="/auth/login?return_to=/dashboard">Sign in</a></template
+    <div>
+      <template if="!profile"><a class="rounded border border-stone-700 px-3 py-2 text-xs text-stone-200 hover:border-lime-300" href="/auth/login?return_to=/dashboard">Sign in</a></template
       ><template if="profile"
-        ><button class="button profile-button" on-click="signOut()">
+        ><button class="max-w-52 truncate rounded border border-stone-700 px-3 py-2 text-xs text-stone-200" on-click="signOut()">
           {{ profile.name || profile.email || 'Signed in' }} · Sign out
         </button></template
       >

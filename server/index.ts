@@ -313,13 +313,13 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
   if (parts[1] === 'fn' && parts.length === 2 && req.method === 'GET' && url.searchParams.get('visibility') === 'all') {
     if (!(await requireAuthentication(req, res))) return true;
     const rows = await database.all(
-      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version`,
+      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_endpoint, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version`,
     );
-    return send(res, 200, rows.map((row) => ({ functionId: row.function_id, version: Number(row.version), name: row.name, output: row.output, public: Boolean(row.is_public) })));
+    return send(res, 200, rows.map((row) => ({ functionId: row.function_id, version: Number(row.version), name: row.name, model: row.model, provider: row.provider_endpoint ? new URL(row.provider_endpoint).hostname : 'default', output: row.output, public: Boolean(row.is_public) })));
   }
   if (parts[1] === 'fn' && parts.length === 2 && req.method === 'GET') {
     const rows = await database.all(
-      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE f.is_public = 1`,
+      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_endpoint, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE f.is_public = 1`,
     );
     return send(
       res,
@@ -328,6 +328,8 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
         functionId: row.function_id,
         version: Number(row.version),
         name: row.name,
+        model: row.model,
+        provider: row.provider_endpoint ? new URL(row.provider_endpoint).hostname : 'default',
         output: row.output,
         public: Boolean(row.is_public),
       })),

@@ -1,27 +1,2 @@
-<template component="landing-page"
-  ><main class="page landing-page">
-    <div class="eyebrow">AI functions, without the fog</div>
-    <h1 class="hero-title">It's AI, but embedded.</h1>
-    <p class="lede">Write a prompt once. Version it. Call it from JavaScript with a predictable text or JSON result.</p>
-    <div class="actions">
-      <a class="button primary" href="/functions/new">Open the editor</a
-      ><a class="button" href="/help">Read the guide</a>
-    </div>
-    <div class="quickstart card"><div><span class="card-index">A tiny function</span><strong>Drop AI into a normal async call.</strong></div><pre><code>const translate = await ai.fn('Translate {text} to English');
-const result = await translate({ text: 'Hola mundo' });</code></pre><a class="card-link" href="/help">See how it works ↗</a></div>
-    <div class="grid">
-      <div class="card">
-        <strong>Versioned by default</strong>
-        <p>Every prompt change becomes an immutable version. Roll back without losing history.</p>
-      </div>
-      <div class="card">
-        <strong>JSON when it matters</strong>
-        <p>Ask compatible providers for structured output and validate it at the edge.</p>
-      </div>
-      <div class="card">
-        <strong>Plain web primitives</strong>
-        <p>A light Li3 interface, a portable HTTP API, and no framework-sized runtime.</p>
-      </div>
-    </div>
-  </main></template
->
+<template component="landing-page"><main class="mx-auto max-w-6xl px-6 py-20"><div class="text-xs font-bold uppercase tracking-[.2em] text-lime-300">AI functions, without the fog</div><h1 class="mt-5 max-w-3xl text-6xl font-bold leading-[.95] tracking-[-.06em] text-stone-100 md:text-8xl">It's AI, but embedded.</h1><p class="mt-6 max-w-2xl text-lg leading-8 text-stone-400">Write a prompt once. Version it. Call it from JavaScript with a predictable text or JSON result.</p><div class="mt-8 flex flex-wrap gap-3"><a class="rounded bg-lime-300 px-4 py-3 font-bold text-stone-950 hover:bg-lime-200" href="/functions/new">Open the editor</a><a class="rounded border border-stone-700 px-4 py-3 text-stone-200 hover:border-lime-300" href="/help">Read the guide</a></div><div class="mt-12 grid gap-6 rounded-xl border border-stone-700 bg-[#151b12] p-6 lg:grid-cols-[.8fr_1.6fr_auto] lg:items-center"><div><span class="text-xs uppercase tracking-[.18em] text-lime-300">A tiny function</span><strong class="mt-3 block text-lg">Drop AI into a normal async call.</strong></div><pre class="m-0 overflow-auto text-sm leading-7 text-stone-200"><code>const translate = await ai.fn('Translate {text} to English');
+const result = await translate({ text: 'Hola mundo' });</code></pre><a class="font-bold text-lime-300" href="/help">See how it works ↗</a></div><div class="mt-16 grid gap-4 md:grid-cols-3"><div class="rounded-xl border border-stone-800 bg-[#151815] p-6"><strong>Versioned by default</strong><p class="mt-3 leading-7 text-stone-400">Every prompt change becomes an immutable version. Roll back without losing history.</p></div><div class="rounded-xl border border-stone-800 bg-[#151815] p-6"><strong>JSON when it matters</strong><p class="mt-3 leading-7 text-stone-400">Ask compatible providers for structured output and validate it at the edge.</p></div><div class="rounded-xl border border-stone-800 bg-[#151815] p-6"><strong>Plain web primitives</strong><p class="mt-3 leading-7 text-stone-400">A light Li3 interface, a portable HTTP API, and no framework-sized runtime.</p></div></div></main></template>
