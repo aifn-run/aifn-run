@@ -8,19 +8,20 @@
         <template if="!functions.length"><div class="px-6 py-14 text-center text-sm text-stone-500">No functions yet. Use + to create one.</div></template>
         <footer class="flex justify-end px-6 py-4 text-sm text-stone-300">{{ functions.length }} items</footer>
       </section>
+      <section class="mt-8 overflow-hidden rounded-2xl border border-stone-700 bg-[#111411]"><header class="flex items-center justify-between border-b border-stone-700 px-6 py-4"><h2 class="text-xl font-bold tracking-tight">Providers</h2><a class="rounded border border-stone-600 bg-stone-500 px-3 py-1 text-xs text-white hover:bg-stone-400" href="/settings/provider">Manage</a></header><div class="grid grid-cols-[1fr_1.4fr_1fr] border-b border-stone-800 bg-stone-800/70 px-6 py-3 text-sm text-stone-400"><span>slug</span><span>url</span><span>default model</span></div><template for="provider of providers"><a class="grid grid-cols-[1fr_1.4fr_1fr] border-b border-stone-800 px-6 py-4 text-sm hover:bg-stone-900" href="/settings/provider"><span class="text-lime-300">{{ provider.slug }}</span><span class="truncate text-stone-400">{{ provider.url }}</span><span class="text-stone-400">{{ provider.defaultModel || '—' }}</span></a></template><template if="!providers.length"><div class="px-6 py-8 text-sm text-stone-500">No providers configured.</div></template></section>
     </template>
     <template if="editing"><div class="mb-3 flex items-center gap-3 text-xs text-stone-400"><button class="rounded border border-stone-700 px-3 py-2 hover:border-lime-300" on-click="showList()">← Functions</button><span>{{ selectedId ? 'Edit function' : 'New function' }}</span></div><function-editor bind-function-id="selectedId"></function-editor></template>
   </main>
   <script setup>
     import { hook, onInit } from '@li3/web';
     export default function () {
-      const [functions, setFunctions] = hook([]), [editing, setEditing] = hook(location.pathname === '/functions/new'), [selectedId, setSelectedId] = hook('');
-      async function load() { const response = await fetch('/api/fn?visibility=all', { credentials: 'include' }); if (response.ok) setFunctions(await response.json()); }
+      const [functions, setFunctions] = hook([]), [providers, setProviders] = hook([]), [editing, setEditing] = hook(location.pathname === '/editor'), [selectedId, setSelectedId] = hook('');
+      async function load() { const response = await fetch('/api/fn?visibility=all', { credentials: 'include' }); if (response.ok) setFunctions(await response.json()); const providerResponse = await fetch('/api/providers', { credentials: 'include' }); if (providerResponse.ok) setProviders(await providerResponse.json()); }
       function newFunction() { setSelectedId(''); setEditing(true); }
       function edit(id) { setSelectedId(id); setEditing(true); }
       function showList() { setEditing(false); load(); }
       onInit(load);
-      return { functions, editing, selectedId, newFunction, edit, showList };
+      return { functions, providers, editing, selectedId, newFunction, edit, showList };
     }
   </script>
 </template>
