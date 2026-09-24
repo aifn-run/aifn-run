@@ -10,6 +10,7 @@ import migrationProviderEndpoint from './migrations/002-provider-endpoint.js';
 import migrationFunctionVisibility from './migrations/003-function-visibility.js';
 import migrationOidcSessions from './migrations/004-oidc-sessions.js';
 import migrationFunctionInputSchema from './migrations/005-function-input-schema.js';
+import migrationProviderSlug from './migrations/006-provider-slug.js';
 import type { Migration } from './migrations/types.js';
 
 type OutputMode = 'json' | 'text';
@@ -28,6 +29,7 @@ type FunctionVersion = {
   format: string;
   output: OutputMode;
   providerEndpoint: string;
+  providerSlug: string;
   public: boolean;
   inputSchema: Array<{ name: string; type: 'string' | 'number' | 'boolean' }>;
   active?: boolean;
@@ -60,7 +62,7 @@ async function loadDatabase(): Promise<Database> {
 async function migrate() {
   await database.run(`CREATE TABLE IF NOT EXISTS schema_migrations (id TEXT PRIMARY KEY, applied_at TEXT NOT NULL)`);
   const applied = new Set((await database.all(`SELECT id FROM schema_migrations`)).map((row) => row.id));
-  const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility, migrationOidcSessions, migrationFunctionInputSchema];
+  const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility, migrationOidcSessions, migrationFunctionInputSchema, migrationProviderSlug];
   for (const migration of migrations) {
     if (applied.has(migration.id)) continue;
     await migration.up(database);
@@ -120,6 +122,7 @@ function versionJSON(row: any): FunctionVersion {
     format: row.format,
     output: row.output,
     providerEndpoint: row.provider_endpoint || '',
+    providerSlug: row.provider_slug || '',
     public: Boolean(row.is_public),
     inputSchema: JSON.parse(row.input_schema || '[]'),
     active: Boolean(row.active),
@@ -170,7 +173,7 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
       functionId,
     ]);
   await database.run(
-    `INSERT INTO function_versions (function_id, version, prompt, name, model, format, output, provider_endpoint, input_schema, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO function_versions (function_id, version, prompt, name, model, format, output, provider_endpoint, provider_slug, input_schema, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       functionId,
       version,
@@ -180,6 +183,7 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
       input.format || 'chat',
       input.output || 'json',
       input.providerEndpoint || '',
+      input.providerSlug || '',
       JSON.stringify(Array.isArray(input.inputSchema) ? input.inputSchema.filter((item: any) => item && typeof item.name === 'string' && ['string', 'number', 'boolean'].includes(item.type)).map((item: any) => ({ name: item.name.trim(), type: item.type })) : []),
       now,
     ],
@@ -219,8 +223,11 @@ async function complete(fn: FunctionVersion, input: unknown, req: IncomingMessag
   const accountEndpoint = (await auth.property(requestOf(req), 'aifn:provider:account:endpoint'))?.value || '';
   const accountKey = (await auth.property(requestOf(req), 'aifn:provider:account:key'))?.value || '';
   const functionKey = (await auth.property(requestOf(req), `aifn:provider:function:${fn.functionId}:key`))?.value || '';
-  const endpoint = fn.providerEndpoint || accountEndpoint || process.env.API_CHAT_URL || '';
-  const key = functionKey || accountKey || process.env.API_KEY || '';
+  const configured = (await auth.property(requestOf(req), 'aifn:providers'))?.value;
+  const providers = configured ? JSON.parse(configured) : [];
+  const provider = providers.find((item: any) => item.slug === fn.providerSlug);
+  const endpoint = fn.providerEndpoint || provider?.url || accountEndpoint || process.env.API_CHAT_URL || '';
+  const key = functionKey || provider?.key || accountKey || process.env.API_KEY || '';
   const messages = [
     {
       role: 'system',
@@ -234,7 +241,7 @@ async function complete(fn: FunctionVersion, input: unknown, req: IncomingMessag
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: fn.model || process.env.API_MODEL,
+       model: fn.model || provider?.defaultModel || process.env.API_MODEL,
       messages,
       response_format: json ? { type: 'json_object' } : undefined,
     }),
@@ -308,6 +315,27 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
           cause instanceof Error ? cause.message : 'Unable to save provider settings',
         );
       }
+    }
+  }
+  if (parts[1] === 'providers') {
+    if (!(await requireAuthentication(req, res))) return true;
+    const stored = (await auth.property(requestOf(req), 'aifn:providers'))?.value;
+    const providers = stored ? JSON.parse(stored) : [];
+    if (req.method === 'GET') return send(res, 200, providers.map((item: any) => ({ ...item, key: undefined, keyConfigured: Boolean(item.key) })));
+    if (req.method === 'PUT') {
+      let input: any;
+      try { input = JSON.parse(await body(req)); } catch { return error(res, 400, 'INVALID_JSON', 'Request body must be JSON'); }
+      if (!input.slug || !/^[a-z0-9-]+$/.test(input.slug) || !input.url) return error(res, 400, 'INVALID_PROVIDER', 'slug and url are required');
+      const next = providers.filter((item: any) => item.slug !== input.slug);
+      const current = providers.find((item: any) => item.slug === input.slug);
+      next.push({ slug: input.slug, url: String(input.url), key: input.key || current?.key || '', defaultModel: String(input.defaultModel || '') });
+      await auth.setProperty(requestOf(req), 'aifn:providers', JSON.stringify(next));
+      return send(res, 200, { slug: input.slug, url: input.url, defaultModel: input.defaultModel || '', keyConfigured: Boolean(input.key || current?.key) });
+    }
+    if (req.method === 'DELETE' && parts[2]) {
+      const next = providers.filter((item: any) => item.slug !== parts[2]);
+      await auth.setProperty(requestOf(req), 'aifn:providers', JSON.stringify(next));
+      return res.writeHead(204).end();
     }
   }
   if (parts[1] === 'fn' && parts.length === 2 && req.method === 'GET' && url.searchParams.get('visibility') === 'all') {
@@ -428,7 +456,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
       await auth.logout(req);
       return redirect(res, '/', { 'set-cookie': `${auth.sessionCookie}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0` });
     }
-    if (url.pathname === '/functions/new' && !(await auth.session(req))) return redirect(res, `/auth/login?return_to=${encodeURIComponent(url.pathname)}`);
+    if (['/functions', '/functions/new', '/settings/provider'].includes(url.pathname) && !(await auth.session(req))) return redirect(res, `/auth/login?return_to=${encodeURIComponent(url.pathname)}`);
     if (req.method === 'OPTIONS') {
       res
         .writeHead(204, {
