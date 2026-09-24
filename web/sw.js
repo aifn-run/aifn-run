@@ -12,7 +12,6 @@ const SHELL = [
   '/pages/landing-page.html',
   '/pages/dashboard-page.html',
   '/pages/functions-page.html',
-  '/pages/function-editor-page.html',
   '/pages/help-page.html',
   '/pages/provider-settings-page.html',
 ];

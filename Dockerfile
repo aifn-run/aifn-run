@@ -17,6 +17,7 @@ WORKDIR /home/app
 COPY package.json package-lock.json ./
 USER root
 RUN npm ci --omit=dev
+RUN mkdir -p node_modules && chown node:node node_modules
 USER node
 
 COPY --from=builder /home/app/dist ./dist

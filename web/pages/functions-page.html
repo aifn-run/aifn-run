@@ -1,24 +1,24 @@
-<template component="functions-page"
-  ><main class="page">
-    <div class="page-heading">
-      <div>
-        <div class="eyebrow">Function library</div>
-        <h1>Your functions.</h1>
-        <p class="lede">Stable IDs, immutable versions, and output you can trust.</p>
-      </div>
-      <a class="button primary" href="/functions/new">New function ↗</a>
-    </div>
-    <section class="function-list" if="functions.length">
-      <a class="function-row card" for="item of functions" href="/functions/new">
-        <span><strong>{{ item.name || item.functionId }}</strong><small>Version {{ item.version }}</small></span>
-        <span class="visibility-badge" class-public="item.public">{{ item.public ? 'Public' : 'Private' }}</span>
-      </a>
-    </section>
-    <section class="empty-state card" if="!functions.length">
-      <div class="empty-mark">fn</div>
-      <h2>No functions yet</h2>
-      <p>Create your first function to start building your library.</p>
-      <a class="button" href="/functions/new">Create a function</a>
-    </section>
-  </main><script setup>import { ref, onInit } from '@li3/web'; export default function () { const functions = ref([]); onInit(async () => { const response = await fetch('/api/fn?visibility=all', { credentials: 'include' }); if (response.ok) functions.value = await response.json(); }); return { functions }; }</script></template
->
+<template component="functions-page">
+  <main class="page functions-page">
+    <template if="!editing">
+      <div class="compact-page-heading"><div><div class="eyebrow">Function library</div><strong class="compact-title">Functions</strong></div><button class="button primary" on-click="newFunction()">New function +</button></div>
+      <section class="function-grid" if="functions.length">
+        <button class="function-card" for="item of functions" on-click="edit(item.functionId)"><span class="function-card-name">{{ item.name || item.functionId }}</span><span class="function-card-meta">v{{ item.version }} · {{ item.public ? 'Public' : 'Private' }} · {{ item.output }}</span><span class="function-card-edit">Edit</span></button>
+      </section>
+      <section class="empty-state card" if="!functions.length"><div class="empty-mark">fn</div><h2>No functions yet</h2><p>Create your first function to start building your library.</p><button class="button" on-click="newFunction()">Create a function</button></section>
+    </template>
+    <template if="editing"><div class="inline-editor-heading"><button class="button" on-click="showList()">← Functions</button><span>{{ selectedId ? 'Edit function' : 'New function' }}</span></div><function-editor bind-function-id="selectedId"></function-editor></template>
+  </main>
+  <script setup>
+    import { hook, onInit } from '@li3/web';
+    export default function () {
+      const [functions, setFunctions] = hook([]), [editing, setEditing] = hook(location.pathname === '/functions/new'), [selectedId, setSelectedId] = hook('');
+      async function load() { const response = await fetch('/api/fn?visibility=all', { credentials: 'include' }); if (response.ok) setFunctions(await response.json()); }
+      function newFunction() { setSelectedId(''); setEditing(true); }
+      function edit(id) { setSelectedId(id); setEditing(true); }
+      function showList() { setEditing(false); load(); }
+      onInit(load);
+      return { functions, editing, selectedId, newFunction, edit, showList };
+    }
+  </script>
+</template>

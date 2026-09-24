@@ -6,8 +6,8 @@ app.append(pageRoot);
 const routes = {
   '/': { template: '/pages/landing-page.html', component: 'landing-page' },
   '/dashboard': { template: '/pages/dashboard-page.html', component: 'dashboard-page' },
-  '/functions': { template: '/pages/functions-page.html', component: 'functions-page', private: true },
-  '/functions/new': { template: '/pages/function-editor-page.html', component: 'function-editor-page', editor: true, private: true },
+  '/functions': { template: '/pages/functions-page.html', component: 'functions-page', editor: true, private: true },
+  '/functions/new': { template: '/pages/functions-page.html', component: 'functions-page', editor: true, private: true },
   '/help': { template: '/pages/help-page.html', component: 'help-page' },
   '/settings/provider': { template: '/pages/provider-settings-page.html', component: 'provider-settings-page', private: true },
 };
