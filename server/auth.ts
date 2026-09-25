@@ -10,6 +10,8 @@ const clientId = process.env.OIDC_CLIENT_ID;
 const clientSecret = process.env.OIDC_CLIENT_SECRET;
 const sessionCookie = 'aifn.sid';
 const sessionDays = 30;
+const developmentBypass = process.env.AIFN_DEV_AUTH_BYPASS === '1' && process.env.NODE_ENV !== 'production';
+const developmentProfile: Profile = { id: 'dev-user', name: 'Local Developer', email: 'dev@localhost' };
 
 function cookieValue(request: RequestLike) {
   const header = request.headers.get?.('cookie') || request.headers.cookie || '';
@@ -21,6 +23,7 @@ function safeReturnTo(value: string | null | undefined) { return value && value.
 
 export function createAuth(database: Database) {
   async function session(request: RequestLike): Promise<Profile | null> {
+    if (developmentBypass) return developmentProfile;
     const id = cookieValue(request);
     if (!id) return null;
     const row = await database.get(`SELECT profile FROM auth_sessions WHERE id = ? AND expires_at > ?`, [hash(id), Date.now()]);

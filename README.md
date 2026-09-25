@@ -165,6 +165,7 @@ Required environment variables:
 | `AUTH_PROVIDER`  | OIDC provider origin             |
 | `OIDC_CLIENT_ID` | Registered OIDC client ID        |
 | `OIDC_CLIENT_SECRET` | Registered OIDC client secret |
+| `AIFN_DEV_AUTH_BYPASS` | Local-only auth bypass when `NODE_ENV` is not `production` |
 | `API_CHAT_URL`   | OpenAI-compatible chat endpoint   |
 | `API_KEY`        | Provider bearer token             |
 | `API_MODEL`      | Default model                     |
@@ -191,6 +192,10 @@ repeat loads while still requiring daily validation.
 
 Function execution responses use `no-store` because generated output must not be
 cached.
+
+For local editor testing only, set `AIFN_DEV_AUTH_BYPASS=1` with
+`NODE_ENV=development`. This creates a synthetic local profile and is disabled
+whenever `NODE_ENV=production`.
 
 ## Next Work
 
