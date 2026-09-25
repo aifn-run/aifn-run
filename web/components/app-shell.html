@@ -8,8 +8,8 @@
     <div>
       <template if="!profile"><a class="rounded border border-stone-700 px-3 py-2 text-xs text-stone-200 hover:border-lime-300" href="/auth/login?return_to=/dashboard">Sign in</a></template
       ><template if="profile"
-        ><button class="max-w-52 truncate rounded border border-stone-700 px-3 py-2 text-xs text-stone-200" on-click="signOut()">
-          {{ profile.name || profile.email || 'Signed in' }} · Sign out
+        ><button class="flex max-w-64 items-center gap-3 rounded-lg border border-stone-700 bg-[#151815] px-3 py-2 text-left hover:border-lime-300" on-click="openProfile()">
+          <img class="h-8 w-8 rounded-full object-cover" if="profile.photo" bind-src="profile.photo" alt="" /><span class="flex min-w-0 flex-col"><strong class="truncate text-xs text-stone-100">{{ profile.name || 'Signed in' }}</strong><small class="truncate text-[10px] text-stone-500">{{ profile.email }}</small></span>
         </button></template
       >
     </div>
@@ -17,12 +17,11 @@
   <script setup>
     import { ref, onInit } from '@li3/web';
     export default function () {
-      const profile = ref(null);
+      const profile = ref(null), provider = ref('https://auth.aifn.run');
       const signOut = async () => { await fetch('/auth/logout', { method: 'POST' }); location.href = '/'; };
-      onInit(async () => {
-        try { const response = await fetch('/auth/session'); if (response.ok) profile.value = (await response.json()).profile; } catch {}
-      });
-      return { profile, signOut };
+      const openProfile = () => window.open(`${provider.value}/me`, '_blank', 'noopener,noreferrer');
+      onInit(async () => { try { const [session, authProvider] = await Promise.all([fetch('/auth/session'), fetch('/auth/provider')]); if (session.ok) profile.value = (await session.json()).profile; if (authProvider.ok) provider.value = (await authProvider.json()).url; } catch {} });
+      return { profile, signOut, openProfile };
     }
   </script>
 </template>

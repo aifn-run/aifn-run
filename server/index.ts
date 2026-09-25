@@ -459,6 +459,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
       }
     }
     if (url.pathname === '/auth/session' && req.method === 'GET') return send(res, 200, { profile: await auth.session(req) });
+    if (url.pathname === '/auth/provider' && req.method === 'GET') return send(res, 200, { url: auth.provider });
     if (url.pathname === '/auth/logout' && (req.method === 'POST' || req.method === 'GET')) {
       await auth.logout(req);
       return redirect(res, '/', { 'set-cookie': `${auth.sessionCookie}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0` });
