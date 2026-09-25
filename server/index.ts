@@ -36,11 +36,13 @@ type FunctionVersion = {
   inputSchema: Array<{ name: string; type: 'string' | 'number' | 'boolean' }>;
   active?: boolean;
 };
+class ProviderError extends Error { status: number; body: string; url: string; keyUsed: boolean; constructor(status: number, body: string, url: string, keyUsed: boolean) { super(`Provider returned ${status}`); this.status = status; this.body = body; this.url = url; this.keyUsed = keyUsed; } }
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const port = Number(process.env.PORT || 3000);
 const cacheControl = 'public, max-age=604800, must-revalidate';
 const revalidateControl = 'public, max-age=86400, must-revalidate';
+const debugEnabled = process.env.DEBUG === '1' || process.env.DEBUG === 'true';
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const openapiJSON = await readFile(join(root, 'openapi/openapi.json'), 'utf8');
 const openapiYAML = await readFile(join(root, 'openapi/openapi.yaml'), 'utf8');
@@ -48,6 +50,11 @@ const database = await loadDatabase();
 database.pragma?.(['foreign_keys = ON']);
 await migrate();
 const auth = createAuth(database);
+
+function debug(message: string, details?: unknown) {
+  if (!debugEnabled) return;
+  console.log(`[debug] ${message}`, details === undefined ? '' : details);
+}
 
 async function loadDatabase(): Promise<Database> {
   const address = process.env.DATABASE_URL;
@@ -62,11 +69,13 @@ async function loadDatabase(): Promise<Database> {
 }
 
 async function migrate() {
+  debug('migration check started');
   await database.run(`CREATE TABLE IF NOT EXISTS schema_migrations (id TEXT PRIMARY KEY, applied_at TEXT NOT NULL)`);
   const applied = new Set((await database.all(`SELECT id FROM schema_migrations`)).map((row) => row.id));
   const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility, migrationOidcSessions, migrationFunctionInputSchema, migrationProviderSlug, migrationProviders];
   for (const migration of migrations) {
     if (applied.has(migration.id)) continue;
+    debug('applying migration', migration.id);
     await migration.up(database);
     await database.run(`INSERT INTO schema_migrations (id, applied_at) VALUES (?, ?)`, [migration.id, new Date().toISOString()]);
   }
@@ -229,6 +238,7 @@ async function complete(fn: FunctionVersion, input: unknown, req: IncomingMessag
   const provider = userId && fn.providerSlug ? await database.get(`SELECT url, default_model, encrypted_key FROM providers WHERE user_id = ? AND slug = ?`, [userId, fn.providerSlug]) : null;
   const endpoint = fn.providerEndpoint || provider?.url || accountEndpoint || process.env.API_CHAT_URL || '';
   const key = functionKey || (provider?.encrypted_key ? decrypt(provider.encrypted_key) : '') || accountKey || process.env.API_KEY || '';
+  debug('provider request', { functionId: fn.functionId, version: fn.version, url: endpoint, keyUsed: Boolean(key), model: fn.model || provider?.default_model || process.env.API_MODEL, output: fn.output });
   const messages = [
     {
       role: 'system',
@@ -247,7 +257,7 @@ async function complete(fn: FunctionVersion, input: unknown, req: IncomingMessag
       response_format: json ? { type: 'json_object' } : undefined,
     }),
   });
-  if (!response.ok) throw new Error(`Provider returned ${response.status}`);
+  if (!response.ok) throw new ProviderError(response.status, await response.text(), endpoint, Boolean(key));
   const result: any = await response.json();
   const text = result.choices?.map((choice: any) => choice.message?.content || '').join('\n') || '';
   if (!json) return text;
@@ -265,6 +275,7 @@ async function requireFunctionAccess(req: IncomingMessage, res: ServerResponse, 
 }
 
 async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
+  debug('api request', { method: req.method, path: url.pathname, query: url.search });
   if (url.pathname === '/client.mjs' && req.method === 'GET') return false;
   if (url.pathname === '/api') {
     const yaml = (req.headers.accept || '').includes('yaml') || url.searchParams.get('format') === 'yaml';
@@ -398,15 +409,20 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
        let input: unknown = raw;
        try { input = normalizeInput(JSON.parse(raw).inputs ?? {}, fn.inputSchema); } catch { input = normalizeInput(raw, fn.inputSchema); }
       const output = await complete(fn, input, req);
+      const userId = await profileId(req);
+      const configuredProvider = userId && fn.providerSlug ? await database.get(`SELECT url, encrypted_key FROM providers WHERE user_id = ? AND slug = ?`, [userId, fn.providerSlug]) : null;
+      const providerUrl = fn.providerEndpoint || configuredProvider?.url || (await auth.property(requestOf(req), 'aifn:provider:account:endpoint'))?.value || process.env.API_CHAT_URL || '';
+      const providerKey = configuredProvider?.encrypted_key || (await auth.property(requestOf(req), 'aifn:provider:account:key'))?.value || process.env.API_KEY || '';
       return send(
         res,
         200,
         output,
         fn.output === 'json' ? 'application/json; charset=utf-8' : 'text/plain; charset=utf-8',
-        { 'x-aifn-function-id': fn.functionId, 'x-aifn-version': String(fn.version), 'cache-control': 'no-store' },
+        { 'x-aifn-function-id': fn.functionId, 'x-aifn-version': String(fn.version), 'x-aifn-provider-url': providerUrl, 'x-aifn-key-used': String(Boolean(providerKey)), 'cache-control': 'no-store' },
       );
-    } catch (cause) {
-      return error(res, 502, 'PROVIDER_ERROR', cause instanceof Error ? cause.message : 'Provider request failed');
+      } catch (cause) {
+        if (cause instanceof ProviderError) return send(res, 502, { error: { code: 'PROVIDER_ERROR', message: cause.message, status: cause.status, response: cause.body, providerUrl: cause.url, keyUsed: cause.keyUsed } }, 'application/json; charset=utf-8', { 'x-aifn-provider-url': cause.url, 'x-aifn-key-used': String(cause.keyUsed) });
+        return error(res, 502, 'PROVIDER_ERROR', cause instanceof Error ? cause.message : 'Provider request failed');
     }
   }
   return false;
@@ -443,6 +459,7 @@ async function staticFile(_req: IncomingMessage, res: ServerResponse, url: URL) 
 const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
   try {
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
+    debug('incoming request', { method: req.method, path: url.pathname });
     const protocol = req.headers['x-forwarded-proto']?.toString().split(',')[0] || url.protocol.replace(':', '');
     const origin = `${protocol}://${req.headers.host || url.host}`;
     const redirectUri = `${origin}/auth/callback`;
