@@ -264,6 +264,7 @@ async function requireFunctionAccess(req: IncomingMessage, res: ServerResponse, 
 }
 
 async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
+  if (url.pathname === '/client.mjs' && req.method === 'GET') return false;
   if (url.pathname === '/api') {
     const yaml = (req.headers.accept || '').includes('yaml') || url.searchParams.get('format') === 'yaml';
     return send(
@@ -276,6 +277,12 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
   }
   const parts = url.pathname.split('/').filter(Boolean);
   if (parts[0] !== 'api') return false;
+  if (parts[1] === 'fn' && parts[2]?.endsWith('.js') && req.method === 'GET') {
+    const functionId = parts[2].slice(0, -3);
+    if (!uuid.test(functionId)) return error(res, 400, 'INVALID_FUNCTION_ID', 'Invalid function ID');
+    const code = `import ai from 'https://aifn.run/client.mjs';\nexport default (inputs) => ai.call('${functionId}', inputs);\n`;
+    return send(res, 200, code, 'text/javascript; charset=utf-8', { 'access-control-allow-origin': '*', 'cache-control': cacheControl });
+  }
   if (parts[1] === 'provider' && parts[2] === 'account') {
     if (!(await auth.session(requestOf(req))))
       return error(res, 401, 'AUTHENTICATION_REQUIRED', 'Authentication required');

@@ -155,6 +155,19 @@
         }
       }
     },
+    "/api/fn/{functionId}.js": {
+      "get": {
+        "operationId": "getFunctionModule",
+        "summary": "Get an ES module that calls a function UUID",
+        "parameters": [{"$ref": "#/components/parameters/FunctionId"}],
+        "responses": {
+          "200": {
+            "description": "JavaScript ES module",
+            "content": {"text/javascript": {"schema": {"type": "string"}}}
+          }
+        }
+      }
+    },
     "/api/fn/{functionId}/{version}": {
       "parameters": [
         {
