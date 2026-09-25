@@ -8,7 +8,6 @@ const routes = {
   '/dashboard': { template: '/pages/dashboard-page.html', component: 'dashboard-page' },
   '/functions': { template: '/pages/functions-page.html', component: 'functions-page', editor: true, private: true },
   '/editor': { template: '/pages/functions-page.html', component: 'functions-page', editor: true, private: true },
-  '/settings/provider': { template: '/pages/provider-settings-page.html', component: 'provider-settings-page', private: true },
 };
 const route = routes[location.pathname] || routes['/'];
 if (route.private) {

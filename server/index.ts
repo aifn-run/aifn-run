@@ -464,7 +464,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
       await auth.logout(req);
       return redirect(res, '/', { 'set-cookie': `${auth.sessionCookie}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0` });
     }
-    if (['/functions', '/editor', '/settings/provider'].includes(url.pathname) && !(await auth.session(req))) return redirect(res, `/auth/login?return_to=${encodeURIComponent(url.pathname)}`);
+    if (['/functions', '/editor'].includes(url.pathname) && !(await auth.session(req))) return redirect(res, `/auth/login?return_to=${encodeURIComponent(url.pathname)}`);
     if (req.method === 'OPTIONS') {
       res
         .writeHead(204, {
