@@ -11,6 +11,8 @@ import migrationFunctionVisibility from './migrations/003-function-visibility.js
 import migrationOidcSessions from './migrations/004-oidc-sessions.js';
 import migrationFunctionInputSchema from './migrations/005-function-input-schema.js';
 import migrationProviderSlug from './migrations/006-provider-slug.js';
+import migrationProviders from './migrations/007-providers.js';
+import { decrypt, encrypt } from './secrets.js';
 import type { Migration } from './migrations/types.js';
 
 type OutputMode = 'json' | 'text';
@@ -62,7 +64,7 @@ async function loadDatabase(): Promise<Database> {
 async function migrate() {
   await database.run(`CREATE TABLE IF NOT EXISTS schema_migrations (id TEXT PRIMARY KEY, applied_at TEXT NOT NULL)`);
   const applied = new Set((await database.all(`SELECT id FROM schema_migrations`)).map((row) => row.id));
-  const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility, migrationOidcSessions, migrationFunctionInputSchema, migrationProviderSlug];
+  const migrations: Migration[] = [migrationInitialSchema, migrationProviderEndpoint, migrationFunctionVisibility, migrationOidcSessions, migrationFunctionInputSchema, migrationProviderSlug, migrationProviders];
   for (const migration of migrations) {
     if (applied.has(migration.id)) continue;
     await migration.up(database);
@@ -223,11 +225,10 @@ async function complete(fn: FunctionVersion, input: unknown, req: IncomingMessag
   const accountEndpoint = (await auth.property(requestOf(req), 'aifn:provider:account:endpoint'))?.value || '';
   const accountKey = (await auth.property(requestOf(req), 'aifn:provider:account:key'))?.value || '';
   const functionKey = (await auth.property(requestOf(req), `aifn:provider:function:${fn.functionId}:key`))?.value || '';
-  const configured = (await auth.property(requestOf(req), 'aifn:providers'))?.value;
-  const providers = configured ? JSON.parse(configured) : [];
-  const provider = providers.find((item: any) => item.slug === fn.providerSlug);
+  const userId = await profileId(req);
+  const provider = userId && fn.providerSlug ? await database.get(`SELECT url, default_model, encrypted_key FROM providers WHERE user_id = ? AND slug = ?`, [userId, fn.providerSlug]) : null;
   const endpoint = fn.providerEndpoint || provider?.url || accountEndpoint || process.env.API_CHAT_URL || '';
-  const key = functionKey || provider?.key || accountKey || process.env.API_KEY || '';
+  const key = functionKey || (provider?.encrypted_key ? decrypt(provider.encrypted_key) : '') || accountKey || process.env.API_KEY || '';
   const messages = [
     {
       role: 'system',
@@ -241,7 +242,7 @@ async function complete(fn: FunctionVersion, input: unknown, req: IncomingMessag
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
     body: JSON.stringify({
-       model: fn.model || provider?.defaultModel || process.env.API_MODEL,
+       model: fn.model || provider?.default_model || process.env.API_MODEL,
       messages,
       response_format: json ? { type: 'json_object' } : undefined,
     }),
@@ -326,22 +327,18 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
   }
   if (parts[1] === 'providers') {
     if (!(await requireAuthentication(req, res))) return true;
-    const stored = (await auth.property(requestOf(req), 'aifn:providers'))?.value;
-    const providers = stored ? JSON.parse(stored) : [];
-    if (req.method === 'GET') return send(res, 200, providers.map((item: any) => ({ ...item, key: undefined, keyConfigured: Boolean(item.key) })));
+    const userId = await profileId(req);
+    if (req.method === 'GET') { const providers = await database.all(`SELECT slug, url, default_model, encrypted_key FROM providers WHERE user_id = ? ORDER BY slug`, [userId]); return send(res, 200, providers.map((item) => ({ slug: item.slug, url: item.url, defaultModel: item.default_model, keyConfigured: Boolean(item.encrypted_key) }))); }
     if (req.method === 'PUT') {
       let input: any;
       try { input = JSON.parse(await body(req)); } catch { return error(res, 400, 'INVALID_JSON', 'Request body must be JSON'); }
       if (!input.slug || !/^[a-z0-9-]+$/.test(input.slug) || !input.url) return error(res, 400, 'INVALID_PROVIDER', 'slug and url are required');
-      const next = providers.filter((item: any) => item.slug !== input.slug);
-      const current = providers.find((item: any) => item.slug === input.slug);
-      next.push({ slug: input.slug, url: String(input.url), key: input.key || current?.key || '', defaultModel: String(input.defaultModel || '') });
-      await auth.setProperty(requestOf(req), 'aifn:providers', JSON.stringify(next));
-      return send(res, 200, { slug: input.slug, url: input.url, defaultModel: input.defaultModel || '', keyConfigured: Boolean(input.key || current?.key) });
+      const current = await database.get(`SELECT encrypted_key FROM providers WHERE user_id = ? AND slug = ?`, [userId, input.slug]);
+      await database.run(`INSERT INTO providers (user_id, slug, url, default_model, encrypted_key, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(user_id, slug) DO UPDATE SET url = excluded.url, default_model = excluded.default_model, encrypted_key = excluded.encrypted_key, updated_at = excluded.updated_at`, [userId, input.slug, String(input.url), String(input.defaultModel || ''), input.key ? encrypt(String(input.key)) : current?.encrypted_key || '', new Date().toISOString(), new Date().toISOString()]);
+      return send(res, 200, { slug: input.slug, url: input.url, defaultModel: input.defaultModel || '', keyConfigured: Boolean(input.key || current?.encrypted_key) });
     }
     if (req.method === 'DELETE' && parts[2]) {
-      const next = providers.filter((item: any) => item.slug !== parts[2]);
-      await auth.setProperty(requestOf(req), 'aifn:providers', JSON.stringify(next));
+      await database.run(`DELETE FROM providers WHERE user_id = ? AND slug = ?`, [userId, parts[2]]);
       return res.writeHead(204).end();
     }
   }
