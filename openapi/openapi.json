@@ -153,7 +153,7 @@
       ],
       "get": {
         "operationId": "getLatestFunction",
-        "summary": "Get the latest function version",
+        "summary": "Get the latest function version (owner only)",
         "responses": {
           "200": {
             "description": "Latest function version",
@@ -253,7 +253,7 @@
       ],
       "get": {
         "operationId": "getFunctionVersion",
-        "summary": "Get an immutable function version",
+        "summary": "Get an immutable function version (owner only)",
         "responses": {
           "200": {
             "description": "Function version",
@@ -423,7 +423,7 @@
           "public": {
             "type": "boolean",
             "default": false,
-            "description": "Allow unauthenticated listing, reads, and execution."
+            "description": "Allow unauthenticated listing and execution; edits and function details remain owner-only."
           },
           "inputSchema": {
             "type": "array",

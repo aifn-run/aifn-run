@@ -473,16 +473,20 @@ export default async function (inputs) {
 `;
 }
 
-async function requireFunctionAccess(req: IncomingMessage, res: ServerResponse, fn: FunctionVersion) {
-  if (fn.public) {
-    return true;
-  }
+async function requireFunctionOwner(req: IncomingMessage, res: ServerResponse, fn: FunctionVersion) {
   const profile = await auth.session(requestOf(req));
   if (profile && profile.id === fn.ownerId) {
     return true;
   }
   error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
   return false;
+}
+
+async function requireFunctionAccess(req: IncomingMessage, res: ServerResponse, fn: FunctionVersion) {
+  if (fn.public) {
+    return true;
+  }
+  return requireFunctionOwner(req, res, fn);
 }
 
 async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
@@ -632,7 +636,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
       if (!found) {
         return error(res, 404, "VERSION_NOT_FOUND", "Function version not found");
       }
-      if (!(await requireFunctionAccess(req, res, found))) {
+      if (!(await requireFunctionOwner(req, res, found))) {
         return true;
       }
       return send(res, 200, found);
