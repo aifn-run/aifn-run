@@ -58,7 +58,7 @@
           {
             "name": "visibility",
             "in": "query",
-            "description": "Set to all to require authentication; otherwise visibility is session-aware.",
+            "description": "Set to all to require authentication and list only functions owned by the current account.",
             "schema": { "type": "string", "enum": ["all"] }
           }
         ],
