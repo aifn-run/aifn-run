@@ -12,7 +12,7 @@
       <h1 class="mt-5 text-lg font-bold">Browse functions</h1>
     </header>
     <template for="fn of functions">
-      <div class="border-b border-stone-800 py-2">
+      <div class="py-2">
         <button type="button" class="w-full text-left text-sm hover:underline" on-click="toggle(fn)">
           <span class="text-green-400">{{ fn.importName }}</span>(<span>{{ fn.inputSignature }}</span>)
         </button>
