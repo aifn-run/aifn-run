@@ -1,37 +1,44 @@
 <template component="search-page">
   <main class="mx-auto min-h-screen max-w-4xl px-6 py-10 font-mono text-stone-200">
-    <header class="mb-5 flex items-center justify-between">
-      <h1 class="text-lg font-bold"><span class="text-fuchsia-400">const</span> functions = [</h1>
-      <span class="text-xs text-stone-500">{{ total }} items</span>
+    <header class="mb-5">
+      <nav
+        class="flex items-center justify-between border-b border-stone-800 pb-4 text-xs text-stone-400"
+        aria-label="Browse navigation"
+      >
+        <a class="hover:text-lime-300" href="/">← Home</a>
+        <a class="hover:text-lime-300" href="/functions?view=list">Open editor ↗</a>
+      </nav>
+      <h1 class="mt-5 text-lg font-bold">Browse functions</h1>
     </header>
     <template for="fn of functions">
       <div class="border-b border-stone-800 py-2">
-        <button class="w-full text-left text-sm hover:underline" on-click="toggle(fn.functionId)">
-          <span class="text-green-400">{{ fn.importName }}</span>(<span>{{ fn.inputSignature }}</span>),
+        <button type="button" class="w-full text-left text-sm hover:underline" on-click="toggle(fn)">
+          <span class="text-green-400">{{ fn.importName }}</span>(<span>{{ fn.inputSignature }}</span>)
         </button>
-        <div class="ml-4 mt-3 border-l border-stone-700 py-2 pl-4" class-hidden="expandedId !== fn.functionId">
-          <div class="flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-400">
-            <span>output: <b class="text-cyan-300">{{ fn.output }}</b></span>
-            <span>model: <b class="text-amber-300">{{ fn.model || 'provider default' }}</b></span>
-            <span>provider: <b class="text-lime-300">{{ fn.provider || 'default' }}</b></span>
-            <span>{{ fn.public ? 'public' : 'private' }}</span>
-          </div>
-          <pre
-            class="mt-3 overflow-x-auto rounded border border-stone-800 bg-[#151815] p-4 text-xs leading-6"
-          ><code><span class="text-stone-500">// Browser: import directly from the public or same-origin URL</span>
+        <template if="expandedId === fn.functionId">
+          <div class="ml-4 mt-3 border-l border-stone-700 py-2 pl-4">
+            <div class="flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-400">
+              <span>output: <b class="text-cyan-300">{{ fn.output }}</b></span>
+              <span>model: <b class="text-amber-300">{{ fn.model || 'provider default' }}</b></span>
+              <span>provider: <b class="text-lime-300">{{ fn.provider || 'default' }}</b></span>
+              <span>{{ fn.public ? 'public' : 'private' }}</span>
+            </div>
+            <pre
+              class="mt-3 overflow-x-auto rounded border border-stone-800 bg-[#151815] p-4 text-xs leading-6"
+            ><code><span class="text-stone-500">// Browser: import directly from the public or same-origin URL</span>
 <span class="text-fuchsia-400">import</span> <span class="text-green-400">{{ fn.importName }}</span> <span class="text-fuchsia-400">from</span> <span class="text-amber-300">"https://aifn.run/fn/{{ fn.functionId }}.mjs"</span>;
 <span class="text-fuchsia-400">await</span> <span class="text-green-400">{{ fn.importName }}</span>({{ fn.inputExample }});
 
 <span class="text-stone-500">// Node.js (public functions): save the module above as "fn.mjs", then</span>
 <span class="text-fuchsia-400">import</span> <span class="text-green-400">{{ fn.importName }}</span> <span class="text-fuchsia-400">from</span> <span class="text-amber-300">"./fn.mjs"</span>;
 <span class="text-fuchsia-400">const</span> result = <span class="text-fuchsia-400">await</span> <span class="text-green-400">{{ fn.importName }}</span>({{ fn.inputExample }});</code></pre>
-        </div>
+          </div>
+        </template>
       </div>
     </template>
     <template if="!functions.length">
       <div class="py-4 pl-4 text-sm text-stone-500">// no functions on this page</div>
     </template>
-    <div>];</div>
     <footer class="mt-5 flex items-center justify-between border-t border-stone-800 pt-4 text-xs text-stone-400">
       <button
         class="rounded border border-stone-700 px-3 py-2 disabled:opacity-40"
@@ -153,8 +160,8 @@
         setHasNext(result.hasNext);
       }
 
-      function toggle(id) {
-        setExpandedId(expandedId.value === id ? "" : id);
+      function toggle(fn) {
+        setExpandedId(expandedId.value === fn.functionId ? "" : fn.functionId);
       }
 
       function go(pageNumber) {
