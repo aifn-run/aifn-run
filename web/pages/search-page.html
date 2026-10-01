@@ -13,10 +13,16 @@
     </header>
     <template for="fn of functions">
       <div class="py-2">
-        <button type="button" class="w-full text-left text-sm hover:underline" on-click="toggle(fn)">
-          <span class="text-green-400">{{ fn.importName }}</span>(<span>{{ fn.inputSignature }}</span>)
+        <button
+          type="button"
+          class="flex w-full items-center justify-between gap-4 text-left text-sm hover:underline"
+          on-click="toggle(fn)"
+          bind-aria-expanded="fn.expanded"
+        >
+          <span><span class="text-green-400">{{ fn.importName }}</span>(<span>{{ fn.inputSignature }}</span>)</span>
+          <span class="shrink-0 text-stone-500">{{ fn.expanded ? '−' : '+' }}</span>
         </button>
-        <template if="expandedId === fn.functionId">
+        <template if="fn.expanded">
           <div class="ml-4 mt-3 border-l border-stone-700 py-2 pl-4">
             <div class="flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-400">
               <span>output: <b class="text-cyan-300">{{ fn.output }}</b></span>
@@ -125,7 +131,6 @@
       const [functions, setFunctions] = hook([]);
       const [total, setTotal] = hook(0);
       const [hasNext, setHasNext] = hook(false);
-      const [expandedId, setExpandedId] = hook("");
 
       async function load(pageNumber = page.value) {
         const response = await fetch(`/api/fn?page=${pageNumber}&pageSize=50`, { credentials: "same-origin" });
@@ -141,6 +146,7 @@
             ...fn,
             importName: toImportName(fn.name, fn.functionId),
             inputSignature: signature(fn.inputSchema),
+            expanded: false,
           })),
         );
         setPage(result.page);
@@ -149,12 +155,16 @@
       }
 
       function toggle(fn) {
-        setExpandedId(expandedId.value === fn.functionId ? "" : fn.functionId);
+        setFunctions(
+          functions.value.map((item) => ({
+            ...item,
+            expanded: item.functionId === fn.functionId ? !item.expanded : false,
+          })),
+        );
       }
 
       function go(pageNumber) {
         setPage(pageNumber);
-        setExpandedId("");
         history.pushState({}, "", `/browse?page=${pageNumber}`);
         load(pageNumber);
       }
@@ -178,7 +188,7 @@
         window.addEventListener("popstate", onPopState);
       });
 
-      return { page, functions, total, hasNext, expandedId, toggle, previous, next };
+      return { page, functions, total, hasNext, toggle, previous, next };
     }
   </script>
 </template>
