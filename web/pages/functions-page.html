@@ -28,23 +28,38 @@
       <section class="mt-8 max-w-full overflow-x-auto text-base leading-8 text-gray-500">
         <div class="text-sm text-stone-500">// providers</div>
         <div><span class="text-fuchsia-400">const</span> providers = [</div>
-        <template for="provider of providers"
-          ><div class="pl-8">
-            <button
-              class="flex w-full items-center space-x-1 text-left hover:underline"
-              on-click="editProvider(provider)"
-            >
-              <span>{</span>
-              <span class="w-40 shrink-0 text-right">name:</span>
-              <span class="shrink-0 text-green-400">'<span>{{ provider.slug }}</span>',</span>
-              <span class="w-40 shrink-0 text-right">defaultModel:</span>
-              <span class="shrink-0 text-green-400">'<span>{{ provider.defaultModel }}</span>',</span>
-              <span class="w-40 shrink-0 text-right">url:</span>
-              <span class="min-w-0 break-all text-green-400">'<span>{{ provider.url }}</span>'</span>
-              <span class="shrink-0">},</span>
-            </button>
-          </div></template
-        >
+        <table class="min-w-[1100px] w-full table-fixed border-collapse text-left">
+          <colgroup>
+            <col class="w-[2ch]" />
+            <col class="w-[14ch]" />
+            <col />
+            <col class="w-[14ch]" />
+            <col />
+            <col class="w-[6ch]" />
+            <col />
+            <col class="w-[2ch]" />
+          </colgroup>
+          <tbody>
+            <template for="provider of providers">
+              <tr
+                class="cursor-pointer hover:bg-stone-900/40"
+                role="button"
+                tabindex="0"
+                on-click="editProvider(provider)"
+                on-keydown="editProviderOnKey($event, provider)"
+              >
+                <td class="px-1 align-top">{</td>
+                <td class="px-1 text-right align-top">name:</td>
+                <td class="break-all px-1 align-top text-green-400">'<span>{{ provider.slug }}</span>',</td>
+                <td class="px-1 text-right align-top">defaultModel:</td>
+                <td class="break-all px-1 align-top text-green-400">'<span>{{ provider.defaultModel }}</span>',</td>
+                <td class="px-1 text-right align-top">url:</td>
+                <td class="break-all px-1 align-top text-green-400">'<span>{{ provider.url }}</span>'</td>
+                <td class="px-1 align-top">},</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
         <template if="!providers.length"><div class="py-2 pl-8 text-stone-500">// no providers yet</div></template>
         <button
           class="ml-8 rounded border border-amber-500 p-1 text-sm text-amber-300 hover:border-amber-300"
@@ -202,6 +217,14 @@
         route("provider-editor", `&slug=${encodeURIComponent(p.slug)}`);
       }
 
+      function editProviderOnKey(event, provider) {
+        if (event.key !== "Enter" && event.key !== " ") {
+          return;
+        }
+        event.preventDefault();
+        editProvider(provider);
+      }
+
       function showList() {
         route("list");
         load();
@@ -263,6 +286,7 @@
         editFunction,
         newProvider,
         editProvider,
+        editProviderOnKey,
         showList,
         onFunctionSaved,
         saveProvider,
