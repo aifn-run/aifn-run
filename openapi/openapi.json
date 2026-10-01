@@ -15,29 +15,32 @@
       "get": {
         "operationId": "startLogin",
         "summary": "Start the OIDC authorization-code flow",
-        "parameters": [{"name": "return_to", "in": "query", "schema": {"type": "string"}}],
-        "responses": {"302": {"description": "Redirect to the configured OIDC provider"}}
+        "parameters": [{ "name": "return_to", "in": "query", "schema": { "type": "string" } }],
+        "responses": { "302": { "description": "Redirect to the configured OIDC provider" } }
       }
     },
     "/auth/callback": {
       "get": {
         "operationId": "completeLogin",
         "summary": "Complete the OIDC authorization-code flow",
-        "responses": {"302": {"description": "Redirect to the requested application page"}, "400": {"description": "Authentication failed"}}
+        "responses": {
+          "302": { "description": "Redirect to the requested application page" },
+          "400": { "description": "Authentication failed" }
+        }
       }
     },
     "/auth/session": {
       "get": {
         "operationId": "getSession",
         "summary": "Get the current application session",
-        "responses": {"200": {"description": "Current session or null profile"}}
+        "responses": { "200": { "description": "Current session or null profile" } }
       }
     },
     "/auth/logout": {
       "post": {
         "operationId": "logout",
         "summary": "End the current application session",
-        "responses": {"302": {"description": "Redirect to the landing page"}}
+        "responses": { "302": { "description": "Redirect to the landing page" } }
       }
     },
     "/api/fn": {
@@ -83,6 +86,41 @@
           "401": {
             "$ref": "#/components/responses/AuthenticationRequired"
           }
+        }
+      }
+    },
+    "/api/providers": {
+      "get": {
+        "operationId": "listProviders",
+        "summary": "List providers owned by the authenticated account",
+        "responses": {
+          "200": { "description": "Providers; secrets are redacted" },
+          "401": { "$ref": "#/components/responses/AuthenticationRequired" }
+        }
+      },
+      "put": {
+        "operationId": "saveProvider",
+        "summary": "Create or update a provider",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["slug", "url"],
+                "properties": {
+                  "slug": { "type": "string" },
+                  "url": { "type": "string", "format": "uri" },
+                  "defaultModel": { "type": "string" },
+                  "key": { "type": "string", "writeOnly": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Saved provider metadata without the secret" },
+          "401": { "$ref": "#/components/responses/AuthenticationRequired" }
         }
       }
     },
@@ -159,11 +197,11 @@
       "get": {
         "operationId": "getFunctionModule",
         "summary": "Get an ES module that calls a function UUID",
-        "parameters": [{"$ref": "#/components/parameters/FunctionId"}],
+        "parameters": [{ "$ref": "#/components/parameters/FunctionId" }],
         "responses": {
           "200": {
             "description": "JavaScript ES module",
-            "content": {"text/javascript": {"schema": {"type": "string"}}}
+            "content": { "text/javascript": { "schema": { "type": "string" } } }
           }
         }
       }
@@ -244,6 +282,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "502": {
+            "description": "Provider request failed; includes the upstream status and response body."
           }
         }
       }
@@ -317,9 +358,7 @@
     "schemas": {
       "FunctionInput": {
         "type": "object",
-        "required": [
-          "prompt"
-        ],
+        "required": ["prompt"],
         "properties": {
           "prompt": {
             "type": "string",
@@ -333,12 +372,13 @@
             "type": "string",
             "description": "OpenAI-compatible model name. Ollama model names are also supported."
           },
+          "providerSlug": {
+            "type": "string",
+            "description": "Select an account provider by its slug. Empty uses the server default."
+          },
           "format": {
             "type": "string",
-            "enum": [
-              "chat",
-              "prompt"
-            ],
+            "enum": ["chat", "prompt"],
             "default": "chat"
           },
           "output": {
@@ -355,8 +395,8 @@
               "type": "object",
               "required": ["name", "type"],
               "properties": {
-                "name": {"type": "string"},
-                "type": {"type": "string", "enum": ["string", "number", "boolean"]}
+                "name": { "type": "string" },
+                "type": { "type": "string", "enum": ["string", "number", "boolean"] }
               }
             }
           }
@@ -364,21 +404,13 @@
       },
       "OutputMode": {
         "type": "string",
-        "enum": [
-          "text",
-          "json"
-        ],
+        "enum": ["text", "json"],
         "default": "json",
         "description": "JSON asks the model for a JSON object and returns parsed JSON. Text returns the provider text unchanged."
       },
       "FunctionSummary": {
         "type": "object",
-        "required": [
-          "functionId",
-          "version",
-          "name",
-          "output"
-        ],
+        "required": ["functionId", "version", "name", "output"],
         "properties": {
           "functionId": {
             "type": "string",
@@ -403,8 +435,8 @@
               "type": "object",
               "required": ["name", "type"],
               "properties": {
-                "name": {"type": "string"},
-                "type": {"type": "string", "enum": ["string", "number", "boolean"]}
+                "name": { "type": "string" },
+                "type": { "type": "string", "enum": ["string", "number", "boolean"] }
               }
             }
           }
@@ -439,16 +471,11 @@
       },
       "Error": {
         "type": "object",
-        "required": [
-          "error"
-        ],
+        "required": ["error"],
         "properties": {
           "error": {
             "type": "object",
-            "required": [
-              "code",
-              "message"
-            ],
+            "required": ["code", "message"],
             "properties": {
               "code": {
                 "type": "string"

@@ -1,293 +1,493 @@
-<template component="functions-page"
-  ><main class="mx-auto max-w-[1880px] px-6 py-10">
-    <template if="!editing && !providerEditing"
-      ><section
-        class="overflow-hidden rounded-2xl border border-stone-700 bg-[#111411]"
-      >
-        <header
-          class="flex items-center justify-between border-b border-stone-700 px-4 py-3"
-        >
-          <h1 class="text-xl font-bold tracking-tight">AI functions</h1>
+<template component="functions-page">
+  <main class="mx-auto min-h-screen max-w-[1880px] px-6 py-8 font-mono text-stone-200">
+    <div class="space-y-6" class-hidden="view !== 'list'">
+      <section class="overflow-hidden rounded-xl border border-stone-700 bg-[#101310]">
+        <header class="flex items-center justify-between border-b border-stone-700 px-4 py-3">
+          <h1 class="text-lg font-bold">const functions = [</h1>
           <button
-            class="rounded border border-stone-600 bg-stone-500 px-3 py-1 text-lg leading-none text-white"
+            class="rounded bg-stone-500 px-3 py-1 text-xs text-white hover:bg-lime-300 hover:text-black"
             on-click="newFunction()"
           >
-            +
+            new()
           </button>
         </header>
         <div
-          class="grid grid-cols-[minmax(180px,1fr)_minmax(150px,1fr)_minmax(150px,1fr)_4rem] border-b border-stone-800 bg-stone-800/70 px-4 py-2 text-sm text-stone-400"
+          class="grid grid-cols-[minmax(180px,1fr)_minmax(100px,.8fr)_minmax(100px,.8fr)_4rem] border-b border-stone-800 bg-stone-800/70 px-4 py-2 text-sm text-stone-400"
         >
-          <span>functionName</span><span>provider</span><span>model</span
-          ><span></span>
+          <span>functionName</span><span>provider</span><span>model</span><span></span>
         </div>
-        <template for="item of functions"
-          ><div
-            class="grid grid-cols-[minmax(180px,1fr)_minmax(150px,1fr)_minmax(150px,1fr)_4rem] items-center border-b border-stone-800 px-4 py-2 text-sm"
+        <template for="fn of functions">
+          <div
+            class="grid grid-cols-[minmax(180px,1fr)_minmax(100px,.8fr)_minmax(100px,.8fr)_4rem] items-center border-b border-stone-800 px-4 py-2 text-sm"
           >
-            <button
-              class="text-left text-lime-300"
-              on-click="editFunction(item.functionId)"
-            >
-              {{ item.name || item.functionId }}</button
-            ><span class="text-stone-400">{{ item.provider || 'default' }}</span
-            ><span class="text-stone-400">{{ item.model || 'default' }}</span
+            <button class="text-left text-lime-300 hover:text-lime-200" on-click="editFunction(fn)">
+              {{ fn.name || 'functionName' }}(<template for="input of fn.inputSchema"
+                ><span>{{ input.name }}: {{ input.type }}, </span></template
+              >),
+            </button>
+            <span class="text-stone-400">{{ fn.provider || 'default' }}</span
+            ><span class="text-stone-400">{{ fn.model || 'default' }}</span
             ><button
-              class="rounded bg-stone-500 px-2 py-1 text-xs text-white"
-              on-click="editFunction(item.functionId)"
+              class="rounded bg-stone-600 px-2 py-1 text-xs text-white hover:bg-lime-300 hover:text-black"
+              on-click="editFunction(fn)"
             >
               edit
             </button>
-          </div></template
-        ><template if="!functions.length"
-          ><div class="px-4 py-10 text-center text-sm text-stone-500">
-            No functions yet. Use + to create one.
-          </div></template
-        >
-        <footer class="flex justify-end px-4 py-2 text-sm text-stone-300">
-          {{ functions.length }} items
-        </footer>
+          </div>
+        </template>
+        <div class="border-b border-stone-800 px-4 py-2 text-sm text-stone-500">];</div>
+        <footer class="flex justify-end px-4 py-2 text-xs text-stone-400">{{ functions.length }} items</footer>
       </section>
-      <section
-        class="mt-6 overflow-hidden rounded-2xl border border-stone-700 bg-[#111411]"
-      >
-        <header
-          class="flex items-center justify-between border-b border-stone-700 px-4 py-3"
-        >
-          <h2 class="text-xl font-bold tracking-tight">Providers</h2>
+      <section class="overflow-hidden rounded-xl border border-stone-700 bg-[#101310]">
+        <header class="flex items-center justify-between border-b border-stone-700 px-4 py-3">
+          <h2 class="text-lg font-bold">const providers = [</h2>
           <button
-            class="rounded border border-stone-600 bg-stone-500 px-3 py-1 text-lg leading-none text-white"
+            class="rounded bg-stone-500 px-3 py-1 text-xs text-white hover:bg-lime-300 hover:text-black"
             on-click="newProvider()"
           >
-            +
+            new()
           </button>
         </header>
         <div
-          class="grid grid-cols-[1fr_1.4fr_1fr_5rem] border-b border-stone-800 bg-stone-800/70 px-4 py-2 text-sm text-stone-400"
+          class="grid grid-cols-[minmax(100px,1fr)_minmax(150px,1.5fr)_minmax(100px,1fr)_4rem] border-b border-stone-800 bg-stone-800/70 px-4 py-2 text-sm text-stone-400"
         >
-          <span>slug</span><span>url</span><span>default model</span
-          ><span></span>
+          <span>name</span><span>url</span><span>defaultModel</span><span></span>
         </div>
         <template for="provider of providers"
           ><div
-            class="grid grid-cols-[1fr_1.4fr_1fr_5rem] items-center border-b border-stone-800 px-4 py-2 text-sm"
+            class="grid grid-cols-[minmax(100px,1fr)_minmax(150px,1.5fr)_minmax(100px,1fr)_4rem] items-center gap-2 border-b border-stone-800 px-4 py-2 text-sm"
           >
-            <span class="text-lime-300">{{ provider.slug }}</span
-            ><span class="truncate text-stone-400">{{ provider.url }}</span
-            ><span class="text-stone-400"
-              >{{ provider.defaultModel || '—' }}</span
+            <button class="text-left text-lime-300" on-click="editProvider(provider)">
+              <span>'</span>{{ provider.slug }}<span>'</span>,</button
+            ><span class="truncate text-stone-400"><span>'</span>{{ provider.url }}<span>'</span>,</span
+            ><span class="text-stone-400"><span>'</span>{{ provider.defaultModel }}<span>'</span>,</span
             ><button
-              class="rounded bg-stone-500 px-2 py-1 text-xs text-white"
+              class="rounded bg-stone-600 px-2 py-1 text-xs text-white hover:bg-lime-300 hover:text-black"
               on-click="editProvider(provider)"
             >
               edit
             </button>
           </div></template
-        ><template if="!providers.length"
-          ><div class="px-4 py-8 text-center text-sm text-stone-500">
-            No providers configured.
-          </div></template
         >
-      </section></template
-    ><template if="editing"
-      ><div class="mb-3 flex items-center gap-3 text-xs text-stone-400">
-        <button
-          class="rounded border border-stone-700 px-3 py-2"
-          on-click="showList()"
-        >
-          ← Functions</button
-        ><span>{{ selectedId ? 'Edit function' : 'New function' }}</span>
-      </div>
-      <function-editor
-        bind-function-id="selectedId"
-      ></function-editor></template
-    ><template if="providerEditing"
-      ><div class="mb-3 flex items-center gap-3 text-xs text-stone-400">
-        <button
-          class="rounded border border-stone-700 px-3 py-2"
-          on-click="showList()"
-        >
-          ← Providers</button
-        ><span>{{ providerSlug ? 'Edit provider' : 'New provider' }}</span>
-      </div>
-      <form
-        class="grid gap-4 rounded-lg border border-stone-700 bg-[#0d0f0d] p-5 shadow-2xl"
-        on-submit="saveProvider($event)"
-      >
-        <div
-          class="flex items-center justify-between border-b border-stone-700 pb-3"
-        >
-          <strong class="text-lime-300">aifn.run</strong
-          ><span class="text-xs text-stone-500">Provider editor</span>
+        <div class="border-b border-stone-800 px-4 py-2 text-sm text-stone-500">];</div>
+        <footer class="flex justify-end px-4 py-2 text-xs text-stone-400">{{ providers.length }} items</footer>
+      </section>
+    </div>
+
+    <section
+      class="overflow-hidden rounded-xl border border-stone-700 bg-[#101310]"
+      class-hidden="view !== 'function-editor'"
+    >
+      <header class="flex items-center gap-3 border-b border-stone-800 px-5 py-4">
+        <button class="text-stone-400 hover:text-white" on-click="showList()">←</button
+        ><span class="text-sm text-stone-500">const function</span
+        ><strong class="text-sm text-lime-300">{{ functionName || 'newFunction' }}</strong>
+      </header>
+      <div class="space-y-4 p-6 font-mono text-sm">
+        <div>
+          <span class="text-violet-300">const</span> name =
+          <input
+            class="w-64 border-0 bg-transparent p-0 text-lime-300 outline-none focus:ring-0"
+            bind-value="functionName"
+            on-input="setFunctionName($event.target.value)"
+            placeholder="functionName"
+          />;
         </div>
-        <div class="grid gap-2">
-          <label class="text-xs text-stone-400">Short name</label
-          ><input
-            class="rounded border border-stone-700 bg-[#0b0d0b] px-3 py-2 text-sm"
+        <div>
+          <span class="text-violet-300">const</span> provider =
+          <select
+            id="function-provider"
+            class="border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
             bind-value="providerSlug"
-            on-input="setProviderSlug($event.target.value)"
-            placeholder="openai"
-          />
+            on-input="onProviderChange($event)"
+          >
+            <option value="">default</option></select
+          >;
         </div>
-        <div class="grid gap-2">
-          <label class="text-xs text-stone-400">URL</label
-          ><input
-            class="rounded border border-stone-700 bg-[#0b0d0b] px-3 py-2 text-sm"
+        <div>
+          <span class="text-violet-300">const</span> model =
+          <input
+            class="w-56 border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+            bind-value="model"
+            on-input="setModel($event.target.value)"
+            placeholder="provider default"
+          />;
+        </div>
+        <div>
+          <span class="text-violet-300">const</span> output =
+          <select
+            class="border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+            bind-value="output"
+            on-input="setOutput($event.target.value)"
+          >
+            <option value="json">"json"</option>
+            <option value="text">"text"</option></select
+          >;
+        </div>
+        <div><span class="text-violet-300">const</span> inputs = [</div>
+        <div class="ml-6 space-y-2">
+          <template for="item of inputs"
+            ><div class="input-definition-row flex flex-wrap items-center gap-2">
+              <span class="text-stone-500">{ name:</span
+              ><input
+                class="w-40 border-0 bg-transparent p-0 text-lime-300 outline-none focus:ring-0"
+                bind-value="item.name"
+                on-input="updateInputFromEvent($event, 'name')"
+                placeholder="name"
+              /><span class="text-stone-500">, type:</span
+              ><select
+                class="border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+                bind-value="item.type"
+                on-input="updateInputFromEvent($event, 'type')"
+              >
+                <option value="string">"string"</option>
+                <option value="number">"number"</option>
+                <option value="boolean">"boolean"</option></select
+              ><span class="text-stone-500">},</span
+              ><button class="text-stone-500 hover:text-red-300" on-click="removeInputFromEvent($event)">×</button>
+            </div></template
+          >
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-stone-500">{ name:</span
+            ><input
+              class="w-40 border-0 bg-transparent p-0 text-lime-300 outline-none focus:ring-0"
+              bind-value="newInputName"
+              on-input="setNewInputName($event.target.value)"
+              placeholder="input name"
+            /><span class="text-stone-500">, type:</span
+            ><select
+              class="border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+              bind-value="newInputType"
+              on-input="setNewInputType($event.target.value)"
+            >
+              <option value="string">"string"</option>
+              <option value="number">"number"</option>
+              <option value="boolean">"boolean"</option></select
+            ><span class="text-stone-500">},</span
+            ><button
+              class="rounded bg-stone-600 px-2 text-white hover:bg-lime-300 hover:text-black"
+              on-click="addInput()"
+            >
+              +
+            </button>
+          </div>
+        </div>
+        <div>];</div>
+        <div><span class="text-violet-300">const</span> prompt = <span class="text-amber-300">`</span></div>
+        <textarea
+          class="ml-6 min-h-48 w-[min(100%-1.5rem,70rem)] resize-y border-0 border-l border-stone-700 bg-transparent py-2 pl-4 text-sm leading-7 text-stone-200 outline-none focus:ring-0"
+          bind-value="prompt"
+          on-input="setPrompt($event.target.value)"
+          placeholder="Write instructions. Interpolate with named inputs."
+        ></textarea>
+        <div><span class="text-amber-300">`</span>;</div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" bind-checked="isPublic" on-input="setPublic($event.target.checked)" /><span
+            >public</span
+          >
+        </div>
+        <div class="flex gap-3">
+          <button class="rounded bg-stone-700 px-4 py-2" on-click="showList()">cancel</button
+          ><button class="rounded bg-lime-300 px-4 py-2 font-bold text-black" on-click="saveFunction($event)">
+            {{ saving ? 'saving...' : 'save' }}</button
+          ><span class="self-center text-xs text-stone-500">{{ status }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="overflow-hidden rounded-xl border border-stone-700 bg-[#101310]"
+      class-hidden="view !== 'provider-editor'"
+    >
+      <header class="flex items-center gap-3 border-b border-stone-800 px-5 py-4">
+        <button class="text-stone-400 hover:text-white" on-click="showList()">←</button
+        ><span class="text-sm text-stone-500">const provider</span
+        ><strong class="text-sm text-lime-300">{{ providerName || 'newProvider' }}</strong>
+      </header>
+      <div class="space-y-4 p-6 font-mono text-sm">
+        <div>
+          <span class="text-violet-300">const</span> name =
+          <input
+            class="w-64 border-0 bg-transparent p-0 text-lime-300 outline-none focus:ring-0"
+            bind-value="providerName"
+            on-input="setProviderName($event.target.value)"
+            placeholder="ollama"
+          />;
+        </div>
+        <div>
+          <span class="text-violet-300">const</span> url =
+          <input
+            class="w-[min(100%,42rem)] border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
             bind-value="providerUrl"
             on-input="setProviderUrl($event.target.value)"
             placeholder="https://api.openai.com/v1/chat/completions"
-          />
+          />;
         </div>
-        <div class="grid gap-2">
-          <label class="text-xs text-stone-400">Default model</label
-          ><input
-            class="rounded border border-stone-700 bg-[#0b0d0b] px-3 py-2 text-sm"
+        <div>
+          <span class="text-violet-300">const</span> defaultModel =
+          <input
+            class="w-64 border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
             bind-value="providerModel"
             on-input="setProviderModel($event.target.value)"
-            placeholder="gpt-4o-mini"
-          />
+            placeholder="gpt5-nano"
+          />;
         </div>
-        <div class="grid gap-2">
-          <label class="text-xs text-stone-400">API key</label
-          ><input
-            class="rounded border border-stone-700 bg-[#0b0d0b] px-3 py-2 text-sm"
+        <div>
+          <span class="text-violet-300">const</span> apiKey =
+          <input
+            class="w-64 border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+            type="password"
             bind-value="providerKey"
             on-input="setProviderKey($event.target.value)"
-            type="password"
-            placeholder="Leave blank to keep current"
-          />
+            placeholder="optional key"
+          />;
         </div>
-        <div class="flex items-center gap-3">
-          <button
-            class="rounded bg-lime-300 px-4 py-2 font-bold text-stone-950"
-            type="submit"
-          >
-            Save provider</button
-          ><span class="text-xs text-stone-400">{{ status }}</span>
+        <div class="flex gap-3">
+          <button class="rounded bg-stone-700 px-4 py-2" on-click="showList()">cancel</button
+          ><button class="rounded bg-lime-300 px-4 py-2 font-bold text-black" on-click="saveProvider($event)">
+            {{ saving ? 'saving...' : 'save' }}</button
+          ><span class="self-center text-xs text-stone-500">{{ status }}</span>
         </div>
-      </form></template
-    >
+      </div>
+    </section>
   </main>
   <script setup>
     import { hook, onInit } from "@li3/web";
     export default function () {
-      const params = new URLSearchParams(location.search),
+      const params = new URLSearchParams(location.search);
+      const [view, setView] = hook(params.get("view") || "list"),
         [functions, setFunctions] = hook([]),
         [providers, setProviders] = hook([]),
-        [editing, setEditing] = hook(params.get("view") === "editor"),
-        [providerEditing, setProviderEditing] = hook(
-          params.get("view") === "provider",
-        ),
         [selectedId, setSelectedId] = hook(params.get("id") || ""),
-        [providerSlug, setProviderSlug] = hook(params.get("slug") || ""),
+        [functionName, setFunctionName] = hook(""),
+        [prompt, setPrompt] = hook(""),
+        [model, setModel] = hook(""),
+        [providerSlug, setProviderSlug] = hook(""),
+        [output, setOutput] = hook("json"),
+        [inputs, setInputs] = hook([]),
+        [newInputName, setNewInputName] = hook(""),
+        [newInputType, setNewInputType] = hook("string"),
+        [isPublic, setPublic] = hook(false),
+        [providerName, setProviderName] = hook(params.get("slug") || ""),
         [providerUrl, setProviderUrl] = hook(""),
         [providerModel, setProviderModel] = hook(""),
         [providerKey, setProviderKey] = hook(""),
-        [status, setStatus] = hook("");
-      function login() { location.href = `/auth/login?return_to=${encodeURIComponent(location.pathname + location.search)}`; }
+        [status, setStatus] = hook(""),
+        [saving, setSaving] = hook(false);
+      function syncProviderOptions() {
+        const select = document.getElementById("function-provider");
+        if (!select) return;
+        while (select.options.length > 1) select.remove(1);
+        for (const provider of providers.value) select.add(new Option(provider.slug, provider.slug));
+        select.value = providerSlug.value;
+      }
+      function onProviderChange(event) {
+        setProviderSlug(event.target.value);
+      }
       async function load() {
-        const f = await fetch("/api/fn?visibility=all", {
-          credentials: "include",
-        });
-        if (f.status === 401) return login();
+        const [f, p] = await Promise.all([
+          fetch("/api/fn?visibility=all", { credentials: "include" }),
+          fetch("/api/providers", { credentials: "include" }),
+        ]);
         if (f.ok) setFunctions(await f.json());
-        const p = await fetch("/api/providers", { credentials: "include" });
-        if (p.status === 401) return login();
         if (p.ok) {
           const list = await p.json();
           setProviders(list);
-          const selected = list.find(
-            (item) => item.slug === providerSlug.value,
-          );
-          if (selected) {
-            setProviderUrl(selected.url);
-            setProviderModel(selected.defaultModel);
+          const selectedProvider = list.find((item) => item.slug === providerName.value);
+          if (selectedProvider) {
+            setProviderUrl(selectedProvider.url);
+            setProviderModel(selectedProvider.defaultModel);
+          }
+          syncProviderOptions();
+        }
+        const id = selectedId.value;
+        if (id) {
+          const response = await fetch(`/api/fn/${id}`, { credentials: "include" });
+          if (response.ok) {
+            const data = await response.json();
+            setFunctionName(data.name || "");
+            setPrompt(data.prompt || "");
+            setModel(data.model || "");
+            setProviderSlug(data.providerSlug || "");
+            setOutput(data.output || "json");
+            setInputs(data.inputSchema || []);
+            setPublic(data.public);
+            syncProviderOptions();
           }
         }
       }
-      function newFunction() {
-        history.pushState({}, "", "/functions?view=editor");
-        setSelectedId("");
-        setEditing(true);
-        setProviderEditing(false);
+      function route(next, query = "") {
+        setView(next);
+        history.pushState({}, "", `/functions?view=${next}${query}`);
       }
-      function editFunction(id) {
-        history.pushState(
-          {},
-          "",
-          `/functions?view=editor&id=${encodeURIComponent(id)}`,
-        );
-        setSelectedId(id);
-        setEditing(true);
-        setProviderEditing(false);
+      function onPopState() {
+        const current = new URLSearchParams(location.search);
+        setView(current.get("view") || "list");
+        setSelectedId(current.get("id") || "");
+        setProviderName(current.get("slug") || "");
+        load();
+      }
+      function newFunction() {
+        setSelectedId("");
+        setFunctionName("");
+        setPrompt("");
+        setModel("");
+        setProviderSlug("");
+        setOutput("json");
+        setInputs([]);
+        setPublic(false);
+        route("function-editor");
+        syncProviderOptions();
+      }
+      async function editFunction(fn) {
+        setSelectedId(fn.functionId);
+        setFunctionName(fn.name || "");
+        setPrompt("");
+        setModel(fn.model || "");
+        setOutput(fn.output || "json");
+        setInputs(fn.inputSchema || []);
+        setPublic(fn.public);
+        route("function-editor", `&id=${encodeURIComponent(fn.functionId)}`);
+        const r = await fetch(`/api/fn/${fn.functionId}`, { credentials: "include" });
+        if (r.ok) {
+          const d = await r.json();
+          setPrompt(d.prompt || "");
+          setInputs(d.inputSchema || []);
+          setProviderSlug(d.providerSlug || "");
+          syncProviderOptions();
+        }
       }
       function newProvider() {
-        history.pushState({}, "", "/functions?view=provider");
-        setProviderSlug("");
+        setProviderName("");
         setProviderUrl("");
         setProviderModel("");
         setProviderKey("");
-        setEditing(false);
-        setProviderEditing(true);
+        route("provider-editor");
       }
       function editProvider(p) {
-        history.pushState(
-          {},
-          "",
-          `/functions?view=provider&slug=${encodeURIComponent(p.slug)}`,
-        );
-        setProviderSlug(p.slug);
+        setProviderName(p.slug);
         setProviderUrl(p.url);
-        setProviderModel(p.defaultModel);
+        setProviderModel(p.defaultModel || "");
         setProviderKey("");
-        setEditing(false);
-        setProviderEditing(true);
+        route("provider-editor", `&slug=${encodeURIComponent(p.slug)}`);
       }
       function showList() {
-        history.pushState({}, "", "/functions?view=list");
-        setEditing(false);
-        setProviderEditing(false);
+        route("list");
         load();
       }
-      async function saveProvider(event) {
-        event.preventDefault();
-        const response = await fetch("/api/providers", {
-          method: "PUT",
-          credentials: "include",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            slug: providerSlug.value,
-            url: providerUrl.value,
-            defaultModel: providerModel.value,
-            key: providerKey.value,
-          }),
-        });
-        if (response.status === 401) return login();
-        if (!response.ok) {
-          setStatus(
-            response.status === 401
-              ? "Authentication required"
-              : "Unable to save",
-          );
-          return;
-        }
-        setStatus("Saved");
-        setProviderKey("");
-        showList();
+      function addInput(e) {
+        e?.preventDefault();
+        const n = newInputName.value.trim();
+        if (!n) return;
+        setInputs([...inputs.value, { name: n, type: newInputType.value }]);
+        setNewInputName("");
+        setNewInputType("string");
       }
-      onInit(load);
+      function inputIndexFromEvent(event) {
+        return Array.from(document.querySelectorAll(".input-definition-row")).indexOf(
+          event.target.closest(".input-definition-row"),
+        );
+      }
+      function removeInputFromEvent(event) {
+        const index = inputIndexFromEvent(event);
+        if (index >= 0) setInputs(inputs.value.filter((_, i) => i !== index));
+      }
+      function updateInputFromEvent(event, key) {
+        const index = inputIndexFromEvent(event);
+        if (index < 0) return;
+        setInputs(inputs.value.map((item, i) => (i === index ? { ...item, [key]: event.target.value } : item)));
+      }
+      async function saveFunction(e) {
+        e.preventDefault();
+        setSaving(true);
+        try {
+          const id = selectedId.value;
+          const r = await fetch(id ? `/api/fn/${id}` : "/api/fn", {
+            method: id ? "PUT" : "POST",
+            credentials: "include",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              name: functionName.value,
+              prompt: prompt.value,
+              model: model.value,
+              providerSlug: providerSlug.value,
+              output: output.value,
+              public: isPublic.value,
+              inputSchema: inputs.value,
+            }),
+          });
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error?.message || r.status);
+          setSelectedId(d.functionId);
+          setStatus(`saved v${d.version}`);
+          await load();
+        } catch (e) {
+          setStatus(e.message);
+        } finally {
+          setSaving(false);
+        }
+      }
+      async function saveProvider(e) {
+        e.preventDefault();
+        setSaving(true);
+        try {
+          const r = await fetch("/api/providers", {
+            method: "PUT",
+            credentials: "include",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              slug: providerName.value,
+              url: providerUrl.value,
+              defaultModel: providerModel.value,
+              key: providerKey.value,
+            }),
+          });
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error?.message || r.status);
+          setStatus("provider saved");
+          setProviderKey("");
+          await load();
+          showList();
+        } catch (e) {
+          setStatus(e.message);
+        } finally {
+          setSaving(false);
+        }
+      }
+      onInit(() => {
+        load();
+        window.addEventListener("popstate", onPopState);
+      });
       return {
+        view,
         functions,
         providers,
-        editing,
-        providerEditing,
         selectedId,
+        functionName,
+        prompt,
+        model,
         providerSlug,
+        output,
+        inputs,
+        newInputName,
+        newInputType,
+        isPublic,
+        providerName,
         providerUrl,
         providerModel,
         providerKey,
         status,
+        saving,
+        setFunctionName,
+        setPrompt,
+        setModel,
         setProviderSlug,
+        onProviderChange,
+        setOutput,
+        setNewInputName,
+        setNewInputType,
+        setPublic,
+        setProviderName,
         setProviderUrl,
         setProviderModel,
         setProviderKey,
@@ -296,8 +496,12 @@
         newProvider,
         editProvider,
         showList,
+        addInput,
+        removeInputFromEvent,
+        updateInputFromEvent,
+        saveFunction,
         saveProvider,
       };
     }
-  </script></template
->
+  </script>
+</template>

@@ -16,85 +16,114 @@ paths:
           schema:
             type: string
       responses:
-        '302':
+        "302":
           description: Redirect to the configured OIDC provider
   /auth/callback:
     get:
       operationId: completeLogin
       summary: Complete the OIDC authorization-code flow
       responses:
-        '302':
+        "302":
           description: Redirect to the requested application page
-        '400':
+        "400":
           description: Authentication failed
   /auth/session:
     get:
       operationId: getSession
       summary: Get the current application session
       responses:
-        '200':
+        "200":
           description: Current session or null profile
   /auth/logout:
     post:
       operationId: logout
       summary: End the current application session
       responses:
-        '302':
+        "302":
           description: Redirect to the landing page
   /api/fn:
     get:
       operationId: listFunctions
       summary: List public functions
       responses:
-        '200':
+        "200":
           description: Functions visible to the current account
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FunctionSummary'
+                  $ref: "#/components/schemas/FunctionSummary"
     post:
       operationId: createFunction
       summary: Create a function at version 1
       requestBody:
-        $ref: '#/components/requestBodies/FunctionInput'
+        $ref: "#/components/requestBodies/FunctionInput"
       responses:
-        '201':
+        "201":
           description: Function created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FunctionVersion'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/AuthenticationRequired'
+                $ref: "#/components/schemas/FunctionVersion"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/AuthenticationRequired"
+  /api/providers:
+    get:
+      operationId: listProviders
+      summary: List providers owned by the authenticated account
+      responses:
+        "200":
+          description: Providers; secrets are redacted
+        "401":
+          $ref: "#/components/responses/AuthenticationRequired"
+    put:
+      operationId: saveProvider
+      summary: Create or update a provider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slug, url]
+              properties:
+                slug: { type: string }
+                url: { type: string, format: uri }
+                defaultModel: { type: string }
+                key: { type: string, writeOnly: true }
+      responses:
+        "200":
+          description: Saved provider metadata without the secret
+        "401":
+          $ref: "#/components/responses/AuthenticationRequired"
   /api/fn/{functionId}:
     parameters:
-      - $ref: '#/components/parameters/FunctionId'
+      - $ref: "#/components/parameters/FunctionId"
     get:
       operationId: getLatestFunction
       summary: Get the latest function version
       responses:
-        '200':
+        "200":
           description: Latest function version
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FunctionVersion'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '401':
-          $ref: '#/components/responses/AuthenticationRequired'
+                $ref: "#/components/schemas/FunctionVersion"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/AuthenticationRequired"
   /api/fn/{functionId}.js:
     get:
       operationId: getFunctionModule
       summary: Get an ES module that calls a function UUID
       parameters:
-        - $ref: '#/components/parameters/FunctionId'
+        - $ref: "#/components/parameters/FunctionId"
       responses:
-        '200':
+        "200":
           description: JavaScript ES module
           content:
             text/javascript:
@@ -104,56 +133,56 @@ paths:
       operationId: createFunctionVersion
       summary: Create the next function version
       requestBody:
-        $ref: '#/components/requestBodies/FunctionInput'
+        $ref: "#/components/requestBodies/FunctionInput"
       responses:
-        '201':
+        "201":
           description: New immutable function version
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FunctionVersion'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '401':
-          $ref: '#/components/responses/AuthenticationRequired'
+                $ref: "#/components/schemas/FunctionVersion"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/AuthenticationRequired"
       delete:
       operationId: deleteFunction
       summary: Delete a function and its versions
       responses:
-        '204':
+        "204":
           description: Function deleted
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '401':
-          $ref: '#/components/responses/AuthenticationRequired'
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "401":
+          $ref: "#/components/responses/AuthenticationRequired"
   /api/fn?visibility=all:
     get:
       operationId: listAllFunctions
       summary: List public and private functions for the authenticated dashboard
       responses:
-        '200':
+        "200":
           description: Functions available to the authenticated account
-        '401':
-          $ref: '#/components/responses/AuthenticationRequired'
+        "401":
+          $ref: "#/components/responses/AuthenticationRequired"
   /api/fn/{functionId}/{version}:
     parameters:
-      - $ref: '#/components/parameters/FunctionId'
-      - $ref: '#/components/parameters/Version'
+      - $ref: "#/components/parameters/FunctionId"
+      - $ref: "#/components/parameters/Version"
     get:
       operationId: getFunctionVersion
       summary: Get an immutable function version
       responses:
-        '200':
+        "200":
           description: Function version
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FunctionVersion'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/FunctionVersion"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /api/run/{functionId}:
     parameters:
-      - $ref: '#/components/parameters/FunctionId'
+      - $ref: "#/components/parameters/FunctionId"
       - name: version
         in: query
         description: Optional immutable version. Omit it to run the latest version.
@@ -168,20 +197,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RunInput'
+              $ref: "#/components/schemas/RunInput"
           text/plain:
             schema:
               type: string
       responses:
-        '200':
+        "200":
           description: Function result. JSON functions return application/json; text functions return text/plain.
           content:
             application/json: {}
             text/plain:
               schema:
                 type: string
-        '404':
-          $ref: '#/components/responses/NotFound'
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "502":
+          description: Provider request failed; includes the upstream status and response body.
 components:
   parameters:
     FunctionId:
@@ -204,20 +235,20 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/FunctionInput'
+            $ref: "#/components/schemas/FunctionInput"
   responses:
     BadRequest:
       description: Invalid request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
     NotFound:
       description: Function or version not found
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
   schemas:
     FunctionInput:
       type: object
@@ -233,12 +264,15 @@ components:
         model:
           type: string
           description: OpenAI-compatible model name. Ollama model names are also supported.
+        providerSlug:
+          type: string
+          description: Select an account provider by its slug. Empty uses the server default.
         format:
           type: string
           enum: [chat, prompt]
           default: chat
         output:
-          $ref: '#/components/schemas/OutputMode'
+          $ref: "#/components/schemas/OutputMode"
         public:
           type: boolean
           default: false
@@ -272,7 +306,7 @@ components:
         name:
           type: string
         output:
-          $ref: '#/components/schemas/OutputMode'
+          $ref: "#/components/schemas/OutputMode"
         public:
           type: boolean
         inputSchema:
@@ -288,8 +322,8 @@ components:
                 enum: [string, number, boolean]
     FunctionVersion:
       allOf:
-        - $ref: '#/components/schemas/FunctionSummary'
-        - $ref: '#/components/schemas/FunctionInput'
+        - $ref: "#/components/schemas/FunctionSummary"
+        - $ref: "#/components/schemas/FunctionInput"
     RunInput:
       type: object
       properties:
@@ -314,6 +348,6 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
             message:
               type: string
