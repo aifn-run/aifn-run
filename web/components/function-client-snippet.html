@@ -2,28 +2,7 @@
   <link rel="component" href="https://sodium.static.apphor.de/code-block.html" />
   <section class="mt-6 overflow-hidden rounded-lg border border-stone-800 bg-[#0d0f0d]">
     <header class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-800 px-3 py-2">
-      <div class="flex items-center gap-2" role="group" aria-label="Snippet language">
-        <button
-          class="rounded border border-stone-700 px-3 py-1 text-xs text-stone-300 hover:text-white"
-          class-border-lime-300="mode === 'node'"
-          class-text-lime-300="mode === 'node'"
-          bind-aria-pressed="mode === 'node'"
-          type="button"
-          on-click="selectMode('node')"
-        >
-          Node.js
-        </button>
-        <button
-          class="rounded border border-stone-700 px-3 py-1 text-xs text-stone-300 hover:text-white"
-          class-border-lime-300="mode === 'fetch'"
-          class-text-lime-300="mode === 'fetch'"
-          bind-aria-pressed="mode === 'fetch'"
-          type="button"
-          on-click="selectMode('fetch')"
-        >
-          Browser fetch()
-        </button>
-      </div>
+      <span class="text-xs text-stone-400">Node.js</span>
       <button
         class="rounded border border-stone-700 px-3 py-1 text-xs text-stone-300 hover:border-lime-300 hover:text-lime-300"
         type="button"
@@ -114,7 +93,6 @@
       const inputSchema = defineProp("inputSchema", { default: [] });
       const functionName = defineProp("functionName", { default: "" });
       const output = defineProp("output", { default: "json" });
-      const [mode, setMode] = hook("node");
       const [copyStatus, setCopyStatus] = hook("");
 
       const snippet = computed(() => {
@@ -124,30 +102,11 @@
           !safeName || /^\d/.test(safeName) || reservedNames.has(safeName) ? `fn_${id.slice(0, 8)}` : safeName;
         const outputName = output.value === "json" ? "json" : "text";
         const inputs = JSON.stringify(exampleInputs(inputSchema.value), null, 2);
-        if (mode.value === "fetch") {
-          return `const response = await fetch("https://aifn.run/api/run/${id}", {
-  method: "POST",
-  credentials: "same-origin",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ inputs: ${inputs} }),
-});
-if (!response.ok) throw new Error(response.status + ": " + await response.text());
-const ${outputName} = response.headers.get("content-type")?.includes("application/json")
-  ? await response.json()
-  : await response.text();
-`;
-        }
-
         const moduleUrl = `https://aifn.run/fn/${id}.mjs`;
         return `import ${importName} from "${moduleUrl}";
 
 const ${outputName} = await ${importName}(${inputs});`;
       });
-
-      function selectMode(nextMode) {
-        setMode(nextMode);
-        setCopyStatus("");
-      }
 
       async function copy() {
         try {
@@ -158,7 +117,7 @@ const ${outputName} = await ${importName}(${inputs});`;
         }
       }
 
-      return { mode, snippet, copyStatus, selectMode, copy };
+      return { snippet, copyStatus, copy };
     }
   </script>
 </template>
