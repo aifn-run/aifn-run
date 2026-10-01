@@ -1,0 +1,189 @@
+<template component="search-page">
+  <main class="mx-auto min-h-screen max-w-4xl px-6 py-10 font-mono text-stone-200">
+    <header class="mb-5 flex items-center justify-between">
+      <h1 class="text-lg font-bold"><span class="text-fuchsia-400">const</span> functions = [</h1>
+      <span class="text-xs text-stone-500">{{ total }} items</span>
+    </header>
+    <template for="fn of functions">
+      <div class="border-b border-stone-800 py-2">
+        <button class="w-full text-left text-sm hover:underline" on-click="toggle(fn.functionId)">
+          <span class="text-green-400">{{ fn.importName }}</span>(<span>{{ fn.inputSignature }}</span>),
+        </button>
+        <div class="ml-4 mt-3 border-l border-stone-700 py-2 pl-4" class-hidden="expandedId !== fn.functionId">
+          <div class="flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-400">
+            <span>output: <b class="text-cyan-300">{{ fn.output }}</b></span>
+            <span>model: <b class="text-amber-300">{{ fn.model || 'provider default' }}</b></span>
+            <span>provider: <b class="text-lime-300">{{ fn.provider || 'default' }}</b></span>
+            <span>{{ fn.public ? 'public' : 'private' }}</span>
+          </div>
+          <pre
+            class="mt-3 overflow-x-auto rounded border border-stone-800 bg-[#151815] p-4 text-xs leading-6"
+          ><code><span class="text-stone-500">// Browser: import directly from the public or same-origin URL</span>
+<span class="text-fuchsia-400">import</span> <span class="text-green-400">{{ fn.importName }}</span> <span class="text-fuchsia-400">from</span> <span class="text-amber-300">"https://aifn.run/fn/{{ fn.functionId }}.mjs"</span>;
+<span class="text-fuchsia-400">await</span> <span class="text-green-400">{{ fn.importName }}</span>({{ fn.inputExample }});
+
+<span class="text-stone-500">// Node.js (public functions): save the module above as "fn.mjs", then</span>
+<span class="text-fuchsia-400">import</span> <span class="text-green-400">{{ fn.importName }}</span> <span class="text-fuchsia-400">from</span> <span class="text-amber-300">"./fn.mjs"</span>;
+<span class="text-fuchsia-400">const</span> result = <span class="text-fuchsia-400">await</span> <span class="text-green-400">{{ fn.importName }}</span>({{ fn.inputExample }});</code></pre>
+        </div>
+      </div>
+    </template>
+    <template if="!functions.length">
+      <div class="py-4 pl-4 text-sm text-stone-500">// no functions on this page</div>
+    </template>
+    <div>];</div>
+    <footer class="mt-5 flex items-center justify-between border-t border-stone-800 pt-4 text-xs text-stone-400">
+      <button
+        class="rounded border border-stone-700 px-3 py-2 disabled:opacity-40"
+        on-click="previous()"
+        bind-disabled="page <= 1"
+      >
+        ← previous
+      </button>
+      <span>page {{ page }} · {{ total }} functions · 50 per page</span>
+      <button
+        class="rounded border border-stone-700 px-3 py-2 disabled:opacity-40"
+        on-click="next()"
+        bind-disabled="!hasNext"
+      >
+        next →
+      </button>
+    </footer>
+  </main>
+  <script setup>
+    import { hook, onInit } from "@li3/web";
+
+    const reservedIdentifiers = new Set([
+      "arguments",
+      "await",
+      "break",
+      "case",
+      "catch",
+      "class",
+      "const",
+      "continue",
+      "debugger",
+      "default",
+      "delete",
+      "do",
+      "else",
+      "enum",
+      "eval",
+      "export",
+      "extends",
+      "false",
+      "finally",
+      "for",
+      "function",
+      "if",
+      "implements",
+      "import",
+      "in",
+      "instanceof",
+      "interface",
+      "let",
+      "new",
+      "null",
+      "package",
+      "private",
+      "protected",
+      "public",
+      "return",
+      "static",
+      "super",
+      "switch",
+      "this",
+      "throw",
+      "true",
+      "try",
+      "typeof",
+      "var",
+      "void",
+      "while",
+      "with",
+      "yield",
+    ]);
+
+    function toImportName(name, id) {
+      const safeName = String(name || "").replace(/[^A-Za-z0-9_$]/g, "_");
+      return !safeName || /^\d/.test(safeName) || reservedIdentifiers.has(safeName) ? `fn_${id.slice(0, 8)}` : safeName;
+    }
+
+    function signature(schema = []) {
+      return schema.map((input) => `${input.name}: ${input.type}`).join(", ");
+    }
+
+    function example(schema = []) {
+      return `{ ${schema
+        .map(
+          (input) =>
+            `${JSON.stringify(input.name)}: ${input.type === "number" ? "0" : input.type === "boolean" ? "false" : '""'}`,
+        )
+        .join(", ")} }`;
+    }
+
+    export default function () {
+      const params = new URLSearchParams(location.search);
+      const initialPage = Math.max(1, Number(params.get("page") || 1));
+      const [page, setPage] = hook(initialPage);
+      const [functions, setFunctions] = hook([]);
+      const [total, setTotal] = hook(0);
+      const [hasNext, setHasNext] = hook(false);
+      const [expandedId, setExpandedId] = hook("");
+
+      async function load(pageNumber = page.value) {
+        const response = await fetch(`/api/fn?page=${pageNumber}&pageSize=50`, { credentials: "same-origin" });
+        if (!response.ok) {
+          setFunctions([]);
+          setTotal(0);
+          setHasNext(false);
+          return;
+        }
+        const result = await response.json();
+        setFunctions(
+          result.functions.map((fn) => ({
+            ...fn,
+            importName: toImportName(fn.name, fn.functionId),
+            inputSignature: signature(fn.inputSchema),
+            inputExample: example(fn.inputSchema),
+          })),
+        );
+        setPage(result.page);
+        setTotal(result.total);
+        setHasNext(result.hasNext);
+      }
+
+      function toggle(id) {
+        setExpandedId(expandedId.value === id ? "" : id);
+      }
+
+      function go(pageNumber) {
+        setPage(pageNumber);
+        setExpandedId("");
+        history.pushState({}, "", `/browse?page=${pageNumber}`);
+        load(pageNumber);
+      }
+
+      function previous() {
+        if (page.value > 1) go(page.value - 1);
+      }
+
+      function next() {
+        if (hasNext.value) go(page.value + 1);
+      }
+
+      function onPopState() {
+        const currentPage = Math.max(1, Number(new URLSearchParams(location.search).get("page") || 1));
+        setPage(currentPage);
+        load(currentPage);
+      }
+
+      onInit(() => {
+        load();
+        window.addEventListener("popstate", onPopState);
+      });
+
+      return { page, functions, total, hasNext, expandedId, toggle, previous, next };
+    }
+  </script>
+</template>

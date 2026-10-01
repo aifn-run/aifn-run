@@ -10,6 +10,7 @@ const routes = {
   "/": { template: "/pages/landing-page.html", component: "landing-page" },
   "/dashboard": { template: "/pages/dashboard-page.html", component: "dashboard-page" },
   "/functions": { template: "/pages/functions-page.html", component: "functions-page", private: true },
+  "/browse": { template: "/pages/search-page.html", component: "search-page" },
 };
 const route = routes[location.pathname] || routes["/"];
 if (route.private) {

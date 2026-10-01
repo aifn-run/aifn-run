@@ -44,16 +44,28 @@ paths:
   /api/fn:
     get:
       operationId: listFunctions
-      summary: List public functions
+      summary: List public functions and the authenticated account's private functions
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          description: Maximum page size is 50
+          schema: { type: integer, minimum: 1, maximum: 50, default: 50 }
+        - name: visibility
+          in: query
+          description: Set to all to require authentication; otherwise visibility is session-aware.
+          schema: { type: string, enum: [all] }
       responses:
         "200":
-          description: Functions visible to the current account
+          description: Paginated functions visible to the current account; owned private functions appear first.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/FunctionSummary"
+                $ref: "#/components/schemas/FunctionPage"
+        "401":
+          $ref: "#/components/responses/AuthenticationRequired"
     post:
       operationId: createFunction
       summary: Create a function at version 1
@@ -116,19 +128,6 @@ paths:
           $ref: "#/components/responses/NotFound"
         "401":
           $ref: "#/components/responses/AuthenticationRequired"
-  /api/fn/{functionId}.js:
-    get:
-      operationId: getFunctionModule
-      summary: Get an ES module that calls a function UUID
-      parameters:
-        - $ref: "#/components/parameters/FunctionId"
-      responses:
-        "200":
-          description: JavaScript ES module
-          content:
-            text/javascript:
-              schema:
-                type: string
     put:
       operationId: createFunctionVersion
       summary: Create the next function version
@@ -145,7 +144,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         "401":
           $ref: "#/components/responses/AuthenticationRequired"
-      delete:
+    delete:
       operationId: deleteFunction
       summary: Delete a function and its versions
       responses:
@@ -155,15 +154,34 @@ paths:
           $ref: "#/components/responses/NotFound"
         "401":
           $ref: "#/components/responses/AuthenticationRequired"
-  /api/fn?visibility=all:
+  /api/fn/{functionId}.js:
     get:
-      operationId: listAllFunctions
-      summary: List public and private functions for the authenticated dashboard
+      operationId: getFunctionModule
+      summary: Get an ES module that calls a function UUID
+      parameters:
+        - $ref: "#/components/parameters/FunctionId"
       responses:
         "200":
-          description: Functions available to the authenticated account
-        "401":
-          $ref: "#/components/responses/AuthenticationRequired"
+          description: JavaScript ES module
+          content:
+            text/javascript:
+              schema:
+                type: string
+  /fn/{functionId}.mjs:
+    get:
+      operationId: getPublicFunctionModule
+      summary: Get an ES module for a public function
+      description: Public modules are CORS-enabled and can be imported in browsers. Save the module locally to import it from Node.js.
+      parameters:
+        - $ref: "#/components/parameters/FunctionId"
+      responses:
+        "200":
+          description: JavaScript ES module
+          content:
+            text/javascript:
+              schema: { type: string }
+        "404":
+          $ref: "#/components/responses/NotFound"
   /api/fn/{functionId}/{version}:
     parameters:
       - $ref: "#/components/parameters/FunctionId"
@@ -305,6 +323,10 @@ components:
           minimum: 1
         name:
           type: string
+        model:
+          type: string
+        provider:
+          type: string
         output:
           $ref: "#/components/schemas/OutputMode"
         public:
@@ -320,6 +342,18 @@ components:
               type:
                 type: string
                 enum: [string, number, boolean]
+    FunctionPage:
+      type: object
+      required: [functions, page, pageSize, total, hasNext]
+      properties:
+        functions:
+          type: array
+          items:
+            $ref: "#/components/schemas/FunctionSummary"
+        page: { type: integer, minimum: 1 }
+        pageSize: { type: integer, minimum: 1, maximum: 50 }
+        total: { type: integer, minimum: 0 }
+        hasNext: { type: boolean }
     FunctionVersion:
       allOf:
         - $ref: "#/components/schemas/FunctionSummary"

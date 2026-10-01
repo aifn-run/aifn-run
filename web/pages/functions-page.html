@@ -54,7 +54,7 @@
             bind-value="functionName"
             on-input="setFunctionName($event.target.value)"
             placeholder="functionName"
-          />;
+          />
         </div>
         <div>
           <span class="text-violet-300">const</span> provider =
@@ -64,8 +64,8 @@
             bind-value="providerSlug"
             on-input="onProviderChange($event)"
           >
-            <option value="">default</option></select
-          >;
+            <option value="">default</option>
+          </select>
         </div>
         <div>
           <span class="text-violet-300">const</span> model =
@@ -74,7 +74,7 @@
             bind-value="model"
             on-input="setModel($event.target.value)"
             placeholder="provider default"
-          />;
+          />
         </div>
         <div>
           <span class="text-violet-300">const</span> output =
@@ -84,8 +84,8 @@
             on-input="setOutput($event.target.value)"
           >
             <option value="json">"json"</option>
-            <option value="text">"text"</option></select
-          >;
+            <option value="text">"text"</option>
+          </select>
         </div>
         <div><span class="text-violet-300">const</span> inputs = [</div>
         <div class="ml-6 space-y-2">
@@ -168,39 +168,39 @@
         <div>
           <span class="text-violet-300">const</span> name =
           <input
-            class="w-64 border-0 bg-transparent p-0 text-lime-300 outline-none focus:ring-0"
+            class="w-64 rounded-lg border border-stone-700 bg-transparent p-1 text-lime-300 outline-none focus:border-lime-300 focus:ring-0"
             bind-value="providerName"
             on-input="setProviderName($event.target.value)"
             placeholder="ollama"
-          />;
+          />
         </div>
         <div>
           <span class="text-violet-300">const</span> url =
           <input
-            class="w-[min(100%,42rem)] border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+            class="w-[min(100%,42rem)] rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
             bind-value="providerUrl"
             on-input="setProviderUrl($event.target.value)"
             placeholder="https://api.openai.com/v1/chat/completions"
-          />;
+          />
         </div>
         <div>
           <span class="text-violet-300">const</span> defaultModel =
           <input
-            class="w-64 border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+            class="w-64 rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
             bind-value="providerModel"
             on-input="setProviderModel($event.target.value)"
             placeholder="gpt5-nano"
-          />;
+          />
         </div>
         <div>
           <span class="text-violet-300">const</span> apiKey =
           <input
-            class="w-64 border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+            class="w-64 rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
             type="password"
             bind-value="providerKey"
             on-input="setProviderKey($event.target.value)"
             placeholder="optional key"
-          />;
+          />
         </div>
         <div class="flex gap-3 rounded-lg border border-stone-700 p-2">
           <button class="rounded bg-stone-700 px-4 py-2" on-click="showList()">cancel</button
@@ -250,9 +250,18 @@
           fetch("/api/providers", { credentials: "include" }),
         ]);
         if (f.ok) {
-          const rows = await f.json();
+          const firstPage = await f.json();
+          const allFunctions = [...firstPage.functions];
+          for (let page = 2; (page - 1) * firstPage.pageSize < firstPage.total; page += 1) {
+            const response = await fetch(`/api/fn?visibility=all&page=${page}&pageSize=${firstPage.pageSize}`, {
+              credentials: "include",
+            });
+            if (!response.ok) break;
+            const nextPage = await response.json();
+            allFunctions.push(...nextPage.functions);
+          }
           setFunctions(
-            rows.map((fn) => ({
+            allFunctions.map((fn) => ({
               ...fn,
               inputSignature: (fn.inputSchema || []).map((input) => `${input.name}: ${input.type}`).join(", "),
             })),

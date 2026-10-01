@@ -46,21 +46,34 @@
     "/api/fn": {
       "get": {
         "operationId": "listFunctions",
-        "summary": "List public functions",
+        "summary": "List public functions and the authenticated account's private functions",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Maximum page size is 50",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 50, "default": 50 }
+          },
+          {
+            "name": "visibility",
+            "in": "query",
+            "description": "Set to all to require authentication; otherwise visibility is session-aware.",
+            "schema": { "type": "string", "enum": ["all"] }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Functions visible to the current account",
+            "description": "Paginated functions visible to the current account; owned private functions appear first.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FunctionSummary"
-                  }
+                  "$ref": "#/components/schemas/FunctionPage"
                 }
               }
             }
-          }
+          },
+          "401": { "$ref": "#/components/responses/AuthenticationRequired" }
         }
       },
       "post": {
@@ -203,6 +216,21 @@
             "description": "JavaScript ES module",
             "content": { "text/javascript": { "schema": { "type": "string" } } }
           }
+        }
+      }
+    },
+    "/fn/{functionId}.mjs": {
+      "get": {
+        "operationId": "getPublicFunctionModule",
+        "summary": "Get an ES module for a public function",
+        "description": "Public modules are CORS-enabled and can be imported in browsers. Save the module locally to import it from Node.js.",
+        "parameters": [{ "$ref": "#/components/parameters/FunctionId" }],
+        "responses": {
+          "200": {
+            "description": "JavaScript ES module",
+            "content": { "text/javascript": { "schema": { "type": "string" } } }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
         }
       }
     },
@@ -423,6 +451,8 @@
           "name": {
             "type": "string"
           },
+          "model": { "type": "string" },
+          "provider": { "type": "string" },
           "output": {
             "$ref": "#/components/schemas/OutputMode"
           },
@@ -440,6 +470,17 @@
               }
             }
           }
+        }
+      },
+      "FunctionPage": {
+        "type": "object",
+        "required": ["functions", "page", "pageSize", "total", "hasNext"],
+        "properties": {
+          "functions": { "type": "array", "items": { "$ref": "#/components/schemas/FunctionSummary" } },
+          "page": { "type": "integer", "minimum": 1 },
+          "pageSize": { "type": "integer", "minimum": 1, "maximum": 50 },
+          "total": { "type": "integer", "minimum": 0 },
+          "hasNext": { "type": "boolean" }
         }
       },
       "FunctionVersion": {

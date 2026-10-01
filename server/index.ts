@@ -24,6 +24,7 @@ type Database = {
 };
 type FunctionVersion = {
   functionId: string;
+  ownerId: string | null;
   version: number;
   prompt: string;
   name: string;
@@ -155,6 +156,7 @@ async function requireAuthentication(req: IncomingMessage, res: ServerResponse) 
 function versionJSON(row: any): FunctionVersion {
   return {
     functionId: row.function_id,
+    ownerId: row.owner_id || null,
     version: Number(row.version),
     prompt: row.prompt,
     name: row.name,
@@ -172,11 +174,11 @@ function versionJSON(row: any): FunctionVersion {
 async function getVersion(id: string, version?: number) {
   const row = version
     ? await database.get(
-        `SELECT v.*, f.is_public, f.active_version = v.version AS active FROM function_versions v JOIN functions f ON f.id = v.function_id WHERE v.function_id = ? AND v.version = ?`,
+        `SELECT v.*, f.owner_id, f.is_public, f.active_version = v.version AS active FROM function_versions v JOIN functions f ON f.id = v.function_id WHERE v.function_id = ? AND v.version = ?`,
         [id, version],
       )
     : await database.get(
-        `SELECT v.*, f.is_public, 1 AS active FROM function_versions v JOIN functions f ON f.id = v.function_id WHERE v.function_id = ? AND v.version = f.active_version`,
+        `SELECT v.*, f.owner_id, f.is_public, 1 AS active FROM function_versions v JOIN functions f ON f.id = v.function_id WHERE v.function_id = ? AND v.version = f.active_version`,
         [id],
       );
   return row ? versionJSON(row) : null;
@@ -202,16 +204,19 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
     return error(res, 400, "INVALID_VISIBILITY", "public must be a boolean");
   }
   const functionId = id || randomUUID();
+  const ownerId = await profileId(req);
+  if (!ownerId) return error(res, 401, "AUTHENTICATION_REQUIRED", "Authentication required");
   const now = new Date().toISOString();
   const current = id ? await database.get(`SELECT * FROM functions WHERE id = ?`, [id]) : null;
   if (id && !current) {
     return error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
   }
+  if (current && current.owner_id !== ownerId) return error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
   const version = current ? Number(current.latest_version) + 1 : 1;
   if (!current) {
     await database.run(
       `INSERT INTO functions (id, owner_id, is_public, active_version, latest_version, created_at, updated_at) VALUES (?, ?, ?, 1, 1, ?, ?)`,
-      [functionId, null, input.public === true ? 1 : 0, now, now],
+      [functionId, ownerId, input.public === true ? 1 : 0, now, now],
     );
   } else {
     await database.run(
@@ -293,7 +298,7 @@ function interpolate(prompt: string, input: unknown) {
 async function complete(fn: FunctionVersion, input: unknown, req: IncomingMessage) {
   const content = interpolate(fn.prompt, input);
   const json = fn.output === "json";
-  const userId = await profileId(req);
+  const userId = fn.ownerId;
   const provider =
     userId && fn.providerSlug
       ? await database.get(`SELECT url, default_model, encrypted_key FROM providers WHERE user_id = ? AND slug = ?`, [
@@ -412,8 +417,29 @@ function redactSecret(value: string, secret: string) {
   return secret ? value.split(secret).join("[redacted]") : value;
 }
 
+function createFunctionModule(functionId: string) {
+  return `const functionId = '${functionId}';
+const moduleURL = new URL(import.meta.url);
+const baseURL = globalThis.aiBaseURL || (['http:', 'https:'].includes(moduleURL.protocol) ? moduleURL.origin : 'https://aifn.run');
+export default async function (inputs) {
+  const response = await fetch(new URL('/api/run/' + functionId, baseURL), {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ inputs }),
+  });
+  if (!response.ok) throw new Error(response.status + ': ' + await response.text());
+  return response.headers.get('content-type')?.includes('application/json') ? response.json() : response.text();
+}
+`;
+}
+
 async function requireFunctionAccess(req: IncomingMessage, res: ServerResponse, fn: FunctionVersion) {
-  if (fn.public || (await auth.session(requestOf(req)))) {
+  if (fn.public) {
+    return true;
+  }
+  const profile = await auth.session(requestOf(req));
+  if (profile && profile.id === fn.ownerId) {
     return true;
   }
   error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
@@ -444,10 +470,12 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
     if (!uuid.test(functionId)) {
       return error(res, 400, "INVALID_FUNCTION_ID", "Invalid function ID");
     }
-    const code = `import ai from 'https://aifn.run/client.mjs';\nexport default (inputs) => ai.call('${functionId}', inputs);\n`;
+    const fn = await getVersion(functionId);
+    if (!fn || !(await requireFunctionAccess(req, res, fn))) return true;
+    const code = createFunctionModule(functionId);
     return send(res, 200, code, "text/javascript; charset=utf-8", {
-      "access-control-allow-origin": "*",
-      "cache-control": cacheControl,
+      ...(fn.public ? { "access-control-allow-origin": "*" } : {}),
+      "cache-control": fn.public ? cacheControl : "no-store",
     });
   }
   if (parts[1] === "providers") {
@@ -509,36 +537,28 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
       return res.writeHead(204).end();
     }
   }
-  if (parts[1] === "fn" && parts.length === 2 && req.method === "GET" && url.searchParams.get("visibility") === "all") {
-    if (!(await requireAuthentication(req, res))) {
-      return true;
-    }
-    const rows = await database.all(
-      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_slug, v.provider_endpoint, v.input_schema, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version`,
-    );
-    return send(
-      res,
-      200,
-      rows.map((row) => ({
-        functionId: row.function_id,
-        version: Number(row.version),
-        name: row.name,
-        model: row.model,
-        provider: row.provider_slug || (row.provider_endpoint ? new URL(row.provider_endpoint).hostname : "default"),
-        inputSchema: JSON.parse(row.input_schema || "[]"),
-        output: row.output,
-        public: Boolean(row.is_public),
-      })),
-    );
-  }
   if (parts[1] === "fn" && parts.length === 2 && req.method === "GET") {
+    const profile = await auth.session(requestOf(req));
+    const visibility = url.searchParams.get("visibility");
+    if (visibility === "all" && !profile) return error(res, 401, "AUTHENTICATION_REQUIRED", "Authentication required");
+    const requestedPage = Number(url.searchParams.get("page") || 1);
+    const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+    const requestedPageSize = Number(url.searchParams.get("pageSize") || 50);
+    const pageSize =
+      Number.isInteger(requestedPageSize) && requestedPageSize > 0 ? Math.min(50, requestedPageSize) : 50;
+    const offset = (page - 1) * pageSize;
+    const where = profile ? "(f.is_public = 1 OR f.owner_id = ?)" : "f.is_public = 1";
+    const filters = profile ? [profile.id] : [];
+    const totalRow = await database.get(`SELECT COUNT(*) AS total FROM functions f WHERE ${where}`, filters);
+    const ordering = profile ? "CASE WHEN f.is_public = 0 AND f.owner_id = ? THEN 0 ELSE 1 END" : "0";
+    const orderingArgs = profile ? [profile.id] : [];
     const rows = await database.all(
-      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_slug, v.provider_endpoint, v.input_schema, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE f.is_public = 1`,
+      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_slug, v.provider_endpoint, v.input_schema, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE ${where} ORDER BY ${ordering}, v.name COLLATE NOCASE LIMIT ? OFFSET ?`,
+      [...filters, ...orderingArgs, pageSize, offset],
     );
-    return send(
-      res,
-      200,
-      rows.map((row) => ({
+    const total = Number(totalRow?.total || 0);
+    return send(res, 200, {
+      functions: rows.map((row) => ({
         functionId: row.function_id,
         version: Number(row.version),
         name: row.name,
@@ -548,7 +568,11 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
         output: row.output,
         public: Boolean(row.is_public),
       })),
-    );
+      page,
+      pageSize,
+      total,
+      hasNext: offset + rows.length < total,
+    });
   }
   if (parts[1] === "fn" && parts.length === 2 && req.method === "POST") {
     return saveFunction(req, res);
@@ -574,9 +598,11 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
       return saveFunction(req, res, id);
     }
     if (req.method === "DELETE" && versionValue === undefined) {
-      if (!(await requireAuthentication(req, res))) {
-        return true;
-      }
+      const owner = await profileId(req);
+      if (!owner) return error(res, 401, "AUTHENTICATION_REQUIRED", "Authentication required");
+      const functionOwner = await database.get(`SELECT owner_id FROM functions WHERE id = ?`, [id]);
+      if (!functionOwner || functionOwner.owner_id !== owner)
+        return error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
       const result = await database.run(`DELETE FROM functions WHERE id = ?`, [id]);
       return result ? res.writeHead(204).end() : error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
     }
@@ -601,7 +627,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
         input = normalizeInput(raw, fn.inputSchema);
       }
       const output = await complete(fn, input, req);
-      const userId = await profileId(req);
+      const userId = fn.ownerId;
       const configuredProvider =
         userId && fn.providerSlug
           ? await database.get(`SELECT url, encrypted_key FROM providers WHERE user_id = ? AND slug = ?`, [
@@ -624,6 +650,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
           "x-aifn-provider-url": safeProviderUrl(providerUrl),
           "x-aifn-key-used": String(providerKeyUsed),
           "cache-control": "no-store",
+          ...(fn.public ? { "access-control-allow-origin": "*" } : {}),
         },
       );
     } catch (cause) {
@@ -642,10 +669,25 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
             },
           },
           "application/json; charset=utf-8",
-          { "x-aifn-provider-url": cause.url, "x-aifn-key-used": String(cause.keyUsed) },
+          {
+            "x-aifn-provider-url": cause.url,
+            "x-aifn-key-used": String(cause.keyUsed),
+            ...(fn.public ? { "access-control-allow-origin": "*" } : {}),
+          },
         );
       }
-      return error(res, 502, "PROVIDER_ERROR", cause instanceof Error ? cause.message : "Provider request failed");
+      return send(
+        res,
+        502,
+        {
+          error: {
+            code: "PROVIDER_ERROR",
+            message: cause instanceof Error ? cause.message : "Provider request failed",
+          },
+        },
+        "application/json; charset=utf-8",
+        fn.public ? { "access-control-allow-origin": "*" } : {},
+      );
     }
   }
   return false;
@@ -667,6 +709,7 @@ async function staticFile(_req: IncomingMessage, res: ServerResponse, url: URL) 
     const mime: Record<string, string> = {
       ".html": "text/html; charset=utf-8",
       ".js": "text/javascript; charset=utf-8",
+      ".mjs": "text/javascript; charset=utf-8",
       ".css": "text/css; charset=utf-8",
       ".webmanifest": "application/manifest+json; charset=utf-8",
       ".svg": "image/svg+xml",
@@ -675,6 +718,7 @@ async function staticFile(_req: IncomingMessage, res: ServerResponse, url: URL) 
     res.writeHead(200, {
       "content-type": mime[extension] || "application/octet-stream",
       "cache-control": revalidateControl,
+      ...(extension === ".mjs" ? { "access-control-allow-origin": "*" } : {}),
     });
     createReadStream(file).pipe(res);
     return true;
@@ -722,6 +766,19 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
       await auth.logout(req);
       return redirect(res, "/", {
         "set-cookie": `${auth.sessionCookie}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+      });
+    }
+    const functionModule = url.pathname.match(/^\/fn\/([0-9a-f-]+)\.mjs$/i);
+    if (functionModule && req.method === "GET") {
+      const functionId = functionModule[1];
+      if (!uuid.test(functionId)) return error(res, 400, "INVALID_FUNCTION_ID", "Invalid function ID");
+      const fn = await getVersion(functionId);
+      if (!fn || !(await requireFunctionAccess(req, res, fn))) return true;
+      const code = createFunctionModule(functionId);
+      return send(res, 200, code, "text/javascript; charset=utf-8", {
+        ...(fn.public
+          ? { "access-control-allow-origin": "*", "cache-control": cacheControl }
+          : { "cache-control": "no-store" }),
       });
     }
     if (["/functions", "/editor"].includes(url.pathname) && !(await auth.session(req))) {
