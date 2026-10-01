@@ -85,28 +85,28 @@
         <div>
           <span class="text-violet-300">const</span> name =
           <input
-            class="w-64 bg-transparent text-lime-300 outline-none"
+            class="w-64 bg-transparent text-lime-300 outline-none placeholder:text-stone-500"
             bind-value="providerName"
             on-input="(setProviderName($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
-            placeholder="ollama"
+            placeholder="name"
           />
         </div>
         <div>
           <span class="text-violet-300">const</span> url =
           <input
-            class="w-56 max-w-[min(100%,42rem)] bg-transparent text-amber-300 outline-none"
+            class="w-[min(100%,42rem)] bg-transparent text-amber-300 outline-none placeholder:text-stone-500"
             bind-value="providerUrl"
             on-input="(setProviderUrl($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
-            placeholder="https://api.openai.com/v1/chat/completions"
+            placeholder="url"
           />
         </div>
         <div>
           <span class="text-violet-300">const</span> defaultModel =
           <input
-            class="w-56 bg-transparent text-amber-300 outline-none"
+            class="w-56 bg-transparent text-amber-300 outline-none placeholder:text-stone-500"
             bind-value="providerModel"
             on-input="(setProviderModel($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
-            placeholder="gpt5-nano"
+            placeholder="defaultModel"
           />
         </div>
         <div>
