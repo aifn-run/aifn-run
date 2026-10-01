@@ -8,15 +8,7 @@
       </header>
       <section class="max-w-full overflow-x-auto text-base leading-8 text-[#c5c8d0]">
         <div class="text-sm text-stone-500">// functions</div>
-        <div class="flex items-center justify-between">
-          <div><span class="text-fuchsia-400">const</span> functions = [</div>
-          <button
-            class="rounded bg-stone-500 px-2 py-0.5 text-sm text-white hover:bg-lime-300 hover:text-black"
-            on-click="newFunction()"
-          >
-            new()
-          </button>
-        </div>
+        <div><span class="text-fuchsia-400">const</span> functions = [</div>
         <template for="fn of functions"
           ><div class="whitespace-nowrap pl-8">
             <button class="text-left hover:underline" on-click="editFunction(fn)">
@@ -25,19 +17,17 @@
           </div></template
         >
         <template if="!functions.length"><div class="py-2 pl-8 text-stone-500">// no functions yet</div></template>
+        <button
+          class="ml-8 rounded border border-amber-500 p-1 text-sm text-amber-300 hover:border-amber-300"
+          on-click="newFunction()"
+        >
+          new()
+        </button>
         <div>];</div>
       </section>
       <section class="mt-8 max-w-full overflow-x-auto text-base leading-8 text-[#c5c8d0]">
         <div class="text-sm text-stone-500">// providers</div>
-        <div class="flex items-center justify-between">
-          <div><span class="text-fuchsia-400">const</span> providers = [</div>
-          <button
-            class="rounded bg-stone-500 px-2 py-0.5 text-sm text-white hover:bg-lime-300 hover:text-black"
-            on-click="newProvider()"
-          >
-            new()
-          </button>
-        </div>
+        <div><span class="text-fuchsia-400">const</span> providers = [</div>
         <template for="provider of providers"
           ><div class="whitespace-nowrap pl-8">
             <button class="text-left hover:underline" on-click="editProvider(provider)">
@@ -48,6 +38,12 @@
           </div></template
         >
         <template if="!providers.length"><div class="py-2 pl-8 text-stone-500">// no providers yet</div></template>
+        <button
+          class="ml-8 rounded border border-amber-500 p-1 text-sm text-amber-300 hover:border-amber-300"
+          on-click="newProvider()"
+        >
+          new()
+        </button>
         <div>];</div>
       </section>
     </div>
