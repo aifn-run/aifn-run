@@ -1,5 +1,29 @@
 <template component="functions-page">
   <main class="mx-auto min-h-screen max-w-[1880px] px-6 py-8 font-mono text-stone-200">
+    <div class="mb-5 flex justify-end">
+      <template if="profile">
+        <a
+          class="flex max-w-72 items-center gap-3 rounded-lg border border-stone-700 bg-[#151815] px-3 py-2 text-left hover:border-lime-300"
+          bind-href="profileUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open your account profile in a new tab"
+        >
+          <template if="profile.photo">
+            <img class="h-9 w-9 rounded-full object-cover" bind-src="profile.photo" alt="" />
+          </template>
+          <template if="!profile.photo">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-stone-700 text-sm text-stone-100">
+              {{ profileInitials }}
+            </span>
+          </template>
+          <span class="flex min-w-0 flex-col">
+            <strong class="truncate text-xs text-stone-100">{{ profile.name || 'Signed in' }}</strong>
+            <small class="truncate text-[10px] text-stone-400">{{ profile.email }}</small>
+          </span>
+        </a>
+      </template>
+    </div>
     <div class="space-y-6" class-hidden="view !== 'list'">
       <header class="mb-5">
         <nav class="border-b border-stone-800 pb-4 text-xs text-stone-400" aria-label="Functions navigation">
@@ -9,13 +33,32 @@
       <section class="max-w-full overflow-x-auto text-sm leading-8 text-[#c5c8d0]">
         <div class="text-sm text-stone-500">// functions</div>
         <div class="text-gray-500"><span class="text-fuchsia-400">const</span> functions = [</div>
-        <template for="fn of functions"
-          ><div class="whitespace-nowrap pl-8">
-            <button class="text-left hover:underline" on-click="editFunction(fn)">
-              <span class="text-green-400">{{ fn.name || 'functionName' }}</span>(<span>{{ fn.inputSignature }}</span>),
-            </button>
-          </div></template
-        >
+        <template for="fn of functions">
+          <div class="whitespace-nowrap pl-8">
+            <template if="fn.claimable">
+              <div class="flex items-center gap-4">
+                <span
+                  ><span class="text-green-400">{{ fn.name || 'functionName' }}</span>(<span
+                    >{{ fn.inputSignature }}</span
+                  >),</span
+                >
+                <button
+                  class="rounded border border-amber-500 px-2 py-0.5 text-amber-300 hover:border-amber-300"
+                  type="button"
+                  on-click="claimFunction(fn)"
+                >
+                  claim ownership
+                </button>
+              </div>
+            </template>
+            <template if="!fn.claimable">
+              <button class="text-left hover:underline" on-click="editFunction(fn)">
+                <span class="text-green-400">{{ fn.name || 'functionName' }}</span>(<span>{{ fn.inputSignature }}</span
+                >),
+              </button>
+            </template>
+          </div>
+        </template>
         <template if="!functions.length"><div class="py-2 pl-8 text-stone-500">// no functions yet</div></template>
         <button
           class="ml-8 rounded border border-amber-500 p-1 text-sm text-amber-300 hover:border-amber-300"
@@ -146,6 +189,9 @@
     export default function () {
       const params = new URLSearchParams(location.search);
       const [view, setView] = hook(params.get("view") || "list");
+      const [profile, setProfile] = hook(null);
+      const [profileUrl, setProfileUrl] = hook("");
+      const [profileInitials, setProfileInitials] = hook("U");
       const [functions, setFunctions] = hook([]);
       const [providers, setProviders] = hook([]);
       const [selectedId, setSelectedId] = hook(params.get("id") || "");
@@ -155,6 +201,35 @@
       const [providerKey, setProviderKey] = hook("");
       const [status, setStatus] = hook("");
       const [saving, setSaving] = hook(false);
+
+      async function loadProfile() {
+        try {
+          const [sessionResponse, providerResponse] = await Promise.all([
+            fetch("/auth/session", { credentials: "include" }),
+            fetch("/auth/provider"),
+          ]);
+          if (sessionResponse.ok) {
+            const session = await sessionResponse.json();
+            setProfile(session.profile);
+            const label = session.profile?.name || session.profile?.email || "User";
+            setProfileInitials(
+              label
+                .trim()
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((part) => part.charAt(0).toUpperCase())
+                .join(""),
+            );
+          }
+          if (providerResponse.ok) {
+            const provider = await providerResponse.json();
+            const issuer = String(provider.url || "").replace(/\/+$/, "");
+            if (issuer) setProfileUrl(`${issuer}/me`);
+          }
+        } catch (error) {
+          console.error("Unable to load account profile", error);
+        }
+      }
 
       async function load() {
         const [f, p] = await Promise.all([
@@ -211,6 +286,27 @@
       function editFunction(fn) {
         setSelectedId(fn.functionId);
         route("function-editor", `&id=${encodeURIComponent(fn.functionId)}`);
+      }
+
+      async function claimFunction(fn) {
+        const name = fn.name || fn.functionId;
+        if (!window.confirm(`Claim "${name}" for this account? Only this account will be able to edit it.`)) {
+          return;
+        }
+        try {
+          const response = await fetch(`/api/fn/${fn.functionId}/claim`, {
+            method: "POST",
+            credentials: "include",
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error?.message || `Claim failed (${response.status})`);
+          }
+          editFunction(fn);
+          load();
+        } catch (error) {
+          window.alert(error.message);
+        }
       }
 
       function newProvider() {
@@ -277,10 +373,14 @@
       }
       onInit(() => {
         load();
+        loadProfile();
         window.addEventListener("popstate", onPopState);
       });
       return {
         view,
+        profile,
+        profileUrl,
+        profileInitials,
         functions,
         providers,
         selectedId,
@@ -296,6 +396,7 @@
         setProviderKey,
         newFunction,
         editFunction,
+        claimFunction,
         newProvider,
         editProvider,
         editProviderOnKey,

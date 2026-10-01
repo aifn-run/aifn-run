@@ -58,7 +58,7 @@
           {
             "name": "visibility",
             "in": "query",
-            "description": "Set to all to require authentication and list only functions owned by the current account.",
+            "description": "Set to all to require authentication and list owned functions plus unclaimed legacy public functions.",
             "schema": { "type": "string", "enum": ["all"] }
           }
         ],
@@ -211,6 +211,22 @@
           "401": {
             "$ref": "#/components/responses/AuthenticationRequired"
           }
+        }
+      }
+    },
+    "/api/fn/{functionId}/claim": {
+      "post": {
+        "operationId": "claimLegacyPublicFunction",
+        "summary": "Claim an unowned legacy public function for the authenticated account",
+        "parameters": [{ "$ref": "#/components/parameters/FunctionId" }],
+        "responses": {
+          "200": {
+            "description": "Function ownership claimed",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FunctionReference" } } }
+          },
+          "401": { "$ref": "#/components/responses/AuthenticationRequired" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "description": "Another account already claimed this function" }
         }
       }
     },
@@ -471,6 +487,10 @@
           },
           "public": {
             "type": "boolean"
+          },
+          "claimable": {
+            "type": "boolean",
+            "description": "True only in authenticated owner listings for an unclaimed legacy public function."
           },
           "inputSchema": {
             "type": "array",
