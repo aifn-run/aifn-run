@@ -95,7 +95,7 @@
           >
             <option value="">default</option>
             <template for="provider of providers"
-              ><option value="{{ provider.slug }}">{{ provider.slug }}</option></template
+              ><option bind-value="provider.slug">{{ provider.slug }}</option></template
             >
           </select>
         </div>
