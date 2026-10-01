@@ -1,0 +1,111 @@
+<template component="function-client-snippet">
+  <link rel="component" href="https://sodium.static.apphor.de/code-block.html" />
+  <section class="mt-6 overflow-hidden rounded-lg border border-stone-800 bg-[#0d0f0d]">
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-800 px-3 py-2">
+      <div class="flex items-center gap-2" role="group" aria-label="Snippet language">
+        <button
+          class="rounded border border-stone-700 px-3 py-1 text-xs text-stone-300 hover:text-white"
+          class-border-lime-300="mode === 'node'"
+          class-text-lime-300="mode === 'node'"
+          bind-aria-pressed="mode === 'node'"
+          type="button"
+          on-click="selectMode('node')"
+        >
+          Node.js
+        </button>
+        <button
+          class="rounded border border-stone-700 px-3 py-1 text-xs text-stone-300 hover:text-white"
+          class-border-lime-300="mode === 'fetch'"
+          class-text-lime-300="mode === 'fetch'"
+          bind-aria-pressed="mode === 'fetch'"
+          type="button"
+          on-click="selectMode('fetch')"
+        >
+          Browser fetch()
+        </button>
+      </div>
+      <button
+        class="rounded border border-stone-700 px-3 py-1 text-xs text-stone-300 hover:border-lime-300 hover:text-lime-300"
+        type="button"
+        on-click="copy()"
+        aria-label="Copy code snippet"
+      >
+        {{ copyStatus || 'Copy' }}
+      </button>
+    </header>
+    <div class="overflow-x-auto p-4 text-xs leading-6">
+      <code-block
+        class="block max-w-full"
+        bind-source="snippet"
+        language="javascript"
+        theme="atom-one-dark"
+      ></code-block>
+    </div>
+    <p class="px-4 pb-3 text-[11px] leading-5 text-stone-500">
+      <template if="mode === 'node'">Node.js 18+; this example works with public functions.</template>
+      <template if="mode === 'fetch'">Private functions require a same-origin request while signed in.</template>
+    </p>
+  </section>
+  <script setup>
+    import { computed, defineProp, hook } from "@li3/web";
+
+    function exampleInputs(schema) {
+      return Object.fromEntries(
+        (Array.isArray(schema) ? schema : []).map((input) => [
+          input.name,
+          input.type === "number" ? 0 : input.type === "boolean" ? false : "",
+        ]),
+      );
+    }
+
+    export default function () {
+      const functionId = defineProp("functionId", { default: "" });
+      const inputSchema = defineProp("inputSchema", { default: [] });
+      const [mode, setMode] = hook("node");
+      const [copyStatus, setCopyStatus] = hook("");
+
+      const snippet = computed(() => {
+        const id = functionId.value;
+        const inputs = JSON.stringify(exampleInputs(inputSchema.value), null, 2);
+        if (mode.value === "fetch") {
+          return `const response = await fetch("https://aifn.run/api/run/${id}", {
+  method: "POST",
+  credentials: "same-origin",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ inputs: ${inputs} }),
+});
+if (!response.ok) throw new Error(response.status + ": " + await response.text());
+const result = response.headers.get("content-type")?.includes("application/json")
+  ? await response.json()
+  : await response.text();
+console.log(result);`;
+        }
+
+        const moduleUrl = `https://aifn.run/fn/${id}.mjs`;
+        return `const moduleResponse = await fetch("${moduleUrl}");
+if (!moduleResponse.ok) throw new Error(moduleResponse.status + ": " + await moduleResponse.text());
+const moduleSource = await moduleResponse.text();
+const moduleDataUrl = "data:text/javascript;base64," + Buffer.from(moduleSource).toString("base64");
+const { default: callFunction } = await import(moduleDataUrl);
+const result = await callFunction(${inputs});
+console.log(result);`;
+      });
+
+      function selectMode(nextMode) {
+        setMode(nextMode);
+        setCopyStatus("");
+      }
+
+      async function copy() {
+        try {
+          await navigator.clipboard.writeText(snippet.value);
+          setCopyStatus("Copied");
+        } catch {
+          setCopyStatus("Copy unavailable");
+        }
+      }
+
+      return { mode, snippet, copyStatus, selectMode, copy };
+    }
+  </script>
+</template>

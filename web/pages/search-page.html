@@ -1,4 +1,5 @@
 <template component="search-page">
+  <link rel="component" href="/components/function-client-snippet.html" />
   <main class="mx-auto min-h-screen max-w-4xl px-6 py-10 font-mono text-stone-200">
     <header class="mb-5">
       <nav
@@ -23,15 +24,10 @@
               <span>provider: <b class="text-lime-300">{{ fn.provider || 'default' }}</b></span>
               <span>{{ fn.public ? 'public' : 'private' }}</span>
             </div>
-            <pre
-              class="mt-3 overflow-x-auto rounded border border-stone-800 bg-[#151815] p-4 text-xs leading-6"
-            ><code><span class="text-stone-500">// Browser: import directly from the public or same-origin URL</span>
-<span class="text-fuchsia-400">import</span> <span class="text-green-400">{{ fn.importName }}</span> <span class="text-fuchsia-400">from</span> <span class="text-amber-300">"https://aifn.run/fn/{{ fn.functionId }}.mjs"</span>;
-<span class="text-fuchsia-400">await</span> <span class="text-green-400">{{ fn.importName }}</span>({{ fn.inputExample }});
-
-<span class="text-stone-500">// Node.js (public functions): save the module above as "fn.mjs", then</span>
-<span class="text-fuchsia-400">import</span> <span class="text-green-400">{{ fn.importName }}</span> <span class="text-fuchsia-400">from</span> <span class="text-amber-300">"./fn.mjs"</span>;
-<span class="text-fuchsia-400">const</span> result = <span class="text-fuchsia-400">await</span> <span class="text-green-400">{{ fn.importName }}</span>({{ fn.inputExample }});</code></pre>
+            <function-client-snippet
+              bind-function-id="fn.functionId"
+              bind-input-schema="fn.inputSchema"
+            ></function-client-snippet>
           </div>
         </template>
       </div>
@@ -120,15 +116,6 @@
       return schema.map((input) => `${input.name}: ${input.type}`).join(", ");
     }
 
-    function example(schema = []) {
-      return `{ ${schema
-        .map(
-          (input) =>
-            `${JSON.stringify(input.name)}: ${input.type === "number" ? "0" : input.type === "boolean" ? "false" : '""'}`,
-        )
-        .join(", ")} }`;
-    }
-
     export default function () {
       const params = new URLSearchParams(location.search);
       const initialPage = Math.max(1, Number(params.get("page") || 1));
@@ -152,7 +139,6 @@
             ...fn,
             importName: toImportName(fn.name, fn.functionId),
             inputSignature: signature(fn.inputSchema),
-            inputExample: example(fn.inputSchema),
           })),
         );
         setPage(result.page);

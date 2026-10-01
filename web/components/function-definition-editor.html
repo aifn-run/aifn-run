@@ -1,4 +1,5 @@
 <template component="function-definition-editor">
+  <link rel="component" href="/components/function-client-snippet.html" />
   <section class="mx-auto max-w-4xl font-mono text-sm leading-8 text-stone-200">
     <div class="overflow-x-auto rounded-lg border border-stone-800 bg-[#0d0f0d] p-5">
       <div class="whitespace-nowrap">
@@ -153,6 +154,9 @@
       </button>
       <span class="text-xs text-stone-500">{{ status }}</span>
     </footer>
+    <template if="activeId">
+      <function-client-snippet bind-function-id="activeId" bind-input-schema="inputs"></function-client-snippet>
+    </template>
   </section>
 
   <script setup>
@@ -269,6 +273,7 @@
         newInputType,
         isPublic,
         providers,
+        activeId,
         status,
         saving,
         setFunctionName,
