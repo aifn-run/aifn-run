@@ -239,10 +239,7 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
   if (id && !current) {
     return error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
   }
-  // Older public functions may not have an owner; retain their authenticated edit behavior.
-  if (current && current.owner_id !== ownerId && !(current.is_public && !current.owner_id)) {
-    return error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
-  }
+  if (current && current.owner_id !== ownerId) return error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
   const version = current ? Number(current.latest_version) + 1 : 1;
   if (!current) {
     try {
