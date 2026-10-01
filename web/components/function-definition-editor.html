@@ -1,0 +1,291 @@
+<template component="function-definition-editor">
+  <section class="mx-auto max-w-4xl font-mono text-sm leading-8 text-stone-200">
+    <div class="overflow-x-auto rounded-lg border border-stone-800 bg-[#0d0f0d] p-5">
+      <div class="whitespace-nowrap">
+        <span class="text-violet-300">function</span>
+        <input
+          class="w-56 rounded border border-stone-700 bg-transparent px-2 py-1 text-lime-300 outline-none focus:border-lime-300"
+          bind-value="functionName"
+          on-input="setFunctionName($event.target.value)"
+          placeholder="functionName"
+          aria-label="Function name"
+        />
+        <span>(</span>
+      </div>
+
+      <div class="ml-6 space-y-2">
+        <template for="item of inputs"
+          ><div class="flex flex-wrap items-center gap-2">
+            <input
+              class="w-40 rounded border border-stone-700 bg-transparent px-2 py-1 text-lime-300 outline-none focus:border-lime-300"
+              bind-value="item.name"
+              on-input="setInputName(item, $event.target.value)"
+              placeholder="inputName"
+              aria-label="Input name"
+            /><span>:</span
+            ><select
+              class="rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+              bind-value="item.type"
+              on-input="setInputType(item, $event.target.value)"
+              aria-label="Input type"
+            >
+              <option value="string">string</option>
+              <option value="number">number</option>
+              <option value="boolean">boolean</option></select
+            ><span>,</span
+            ><button
+              class="text-stone-500 hover:text-red-300"
+              type="button"
+              on-click="removeInput(item)"
+              aria-label="Remove input"
+            >
+              ×
+            </button>
+          </div></template
+        >
+        <div class="flex flex-wrap items-center gap-2 border-t border-dashed border-stone-800 pt-2">
+          <input
+            class="w-40 rounded border border-stone-700 bg-transparent px-2 py-1 text-lime-300 outline-none focus:border-lime-300"
+            bind-value="newInputName"
+            on-input="setNewInputName($event.target.value)"
+            placeholder="new input"
+            aria-label="New input name"
+          /><span>:</span
+          ><select
+            class="rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+            bind-value="newInputType"
+            on-input="setNewInputType($event.target.value)"
+            aria-label="New input type"
+          >
+            <option value="string">string</option>
+            <option value="number">number</option>
+            <option value="boolean">boolean</option></select
+          ><button
+            class="rounded border border-stone-700 px-2 leading-7 text-lime-300 hover:border-lime-300"
+            type="button"
+            on-click="addInput()"
+            aria-label="Add input"
+          >
+            +
+          </button>
+        </div>
+      </div>
+      <div>) {</div>
+
+      <div class="ml-6 space-y-3 py-3">
+        <div>
+          <span class="text-violet-300">const</span> output =
+          <select
+            class="rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+            bind-value="output"
+            on-input="setOutput($event.target.value)"
+            aria-label="Output format"
+          >
+            <option value="json">"json"</option>
+            <option value="text">"text"</option>
+          </select>
+        </div>
+        <div>
+          <span class="text-violet-300">const</span> provider =
+          <select
+            class="max-w-[min(100%,24rem)] rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+            bind-value="providerSlug"
+            on-input="setProviderSlug($event.target.value)"
+            aria-label="Provider"
+          >
+            <option value="">default</option>
+            <template for="provider of providers"
+              ><option value="{{ provider.slug }}">{{ provider.slug }}</option></template
+            >
+          </select>
+        </div>
+        <div>
+          <span class="text-violet-300">const</span> model =
+          <input
+            class="w-56 rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+            bind-value="model"
+            on-input="setModel($event.target.value)"
+            placeholder="provider default"
+            aria-label="Model"
+          />
+        </div>
+        <div>
+          <span class="text-violet-300">const</span> public =
+          <button
+            class="border-0 bg-transparent p-0 text-cyan-300 hover:underline"
+            type="button"
+            on-click="togglePublic()"
+            bind-aria-pressed="isPublic"
+          >
+            {{ isPublic ? 'true' : 'false' }}
+          </button>
+        </div>
+        <div>
+          <div><span class="text-violet-300">const</span> prompt = <span class="text-amber-300">`</span></div>
+          <textarea
+            class="ml-4 min-h-48 w-[min(100%-1rem,68rem)] resize-y rounded border border-stone-700 bg-transparent p-3 text-sm leading-7 text-stone-200 outline-none focus:border-lime-300"
+            bind-value="prompt"
+            on-input="setPrompt($event.target.value)"
+            placeholder="Write instructions. Interpolate with named inputs."
+            aria-label="Function prompt"
+          ></textarea>
+          <div class="ml-4 text-amber-300">`;</div>
+        </div>
+      </div>
+      <div>}</div>
+    </div>
+
+    <footer class="mt-4 flex flex-wrap items-center gap-3">
+      <button
+        class="rounded border border-stone-700 px-4 py-2 hover:border-stone-400"
+        type="button"
+        on-click="cancel()"
+      >
+        cancel
+      </button>
+      <button
+        class="rounded bg-lime-300 px-4 py-2 font-bold text-stone-950 hover:bg-lime-200 disabled:opacity-50"
+        type="button"
+        on-click="save()"
+        bind-disabled="saving"
+      >
+        {{ saving ? 'saving...' : 'save' }}
+      </button>
+      <span class="text-xs text-stone-500">{{ status }}</span>
+    </footer>
+  </section>
+
+  <script setup>
+    import { defineProp, hook, onInit } from "@li3/web";
+
+    export default function () {
+      const functionId = defineProp("functionId", { default: "" });
+      const onCancel = defineProp("onCancel", { default: () => {} });
+      const onSaved = defineProp("onSaved", { default: () => {} });
+      const [functionName, setFunctionName] = hook("");
+      const [prompt, setPrompt] = hook("");
+      const [model, setModel] = hook("");
+      const [providerSlug, setProviderSlug] = hook("");
+      const [output, setOutput] = hook("json");
+      const [inputs, setInputs] = hook([]);
+      const [newInputName, setNewInputName] = hook("");
+      const [newInputType, setNewInputType] = hook("string");
+      const [isPublic, setPublic] = hook(false);
+      const [providers, setProviders] = hook([]);
+      const [activeId, setActiveId] = hook(functionId.value || "");
+      const [status, setStatus] = hook("");
+      const [saving, setSaving] = hook(false);
+
+      function addInput() {
+        const name = newInputName.value.trim();
+        if (!name) return;
+        setInputs([...inputs.value, { name, type: newInputType.value }]);
+        setNewInputName("");
+        setNewInputType("string");
+      }
+
+      function removeInput(item) {
+        setInputs(inputs.value.filter((input) => input !== item));
+      }
+
+      function setInputName(item, name) {
+        setInputs(inputs.value.map((input) => (input === item ? { ...input, name } : input)));
+      }
+
+      function setInputType(item, type) {
+        setInputs(inputs.value.map((input) => (input === item ? { ...input, type } : input)));
+      }
+
+      function togglePublic() {
+        setPublic(!isPublic.value);
+      }
+
+      async function load() {
+        const providerResponse = await fetch("/api/providers", { credentials: "include" });
+        setProviders(providerResponse.ok ? await providerResponse.json() : []);
+        if (!functionId.value) return;
+
+        setActiveId(functionId.value);
+        const response = await fetch(`/api/fn/${functionId.value}`, { credentials: "include" });
+        if (!response.ok) {
+          setStatus("Unable to load function");
+          return;
+        }
+
+        const data = await response.json();
+        setFunctionName(data.name || "");
+        setPrompt(data.prompt || "");
+        setModel(data.model || "");
+        setProviderSlug(data.providerSlug || "");
+        setOutput(data.output || "json");
+        setInputs(data.inputSchema || []);
+        setPublic(data.public);
+      }
+
+      function cancel() {
+        onCancel.value();
+      }
+
+      async function save() {
+        setSaving(true);
+        setStatus("");
+        try {
+          const id = activeId.value || functionId.value;
+          const response = await fetch(id ? `/api/fn/${id}` : "/api/fn", {
+            method: id ? "PUT" : "POST",
+            credentials: "include",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              name: functionName.value,
+              prompt: prompt.value,
+              model: model.value,
+              providerSlug: providerSlug.value,
+              output: output.value,
+              public: isPublic.value,
+              inputSchema: inputs.value,
+            }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error?.message || response.status);
+          setActiveId(data.functionId);
+          setStatus(`saved v${data.version}`);
+          onSaved.value(data.functionId);
+        } catch (error) {
+          setStatus(error.message);
+        } finally {
+          setSaving(false);
+        }
+      }
+
+      onInit(load);
+      return {
+        functionName,
+        prompt,
+        model,
+        providerSlug,
+        output,
+        inputs,
+        newInputName,
+        newInputType,
+        isPublic,
+        providers,
+        status,
+        saving,
+        setFunctionName,
+        setPrompt,
+        setModel,
+        setProviderSlug,
+        setOutput,
+        setNewInputName,
+        setNewInputType,
+        addInput,
+        removeInput,
+        setInputName,
+        setInputType,
+        togglePublic,
+        cancel,
+        save,
+      };
+    }
+  </script>
+</template>
