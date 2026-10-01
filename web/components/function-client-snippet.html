@@ -1,7 +1,7 @@
 <template component="function-client-snippet">
   <link rel="component" href="https://sodium.static.apphor.de/code-block.html" />
-  <section class="mt-6 overflow-hidden rounded-lg border border-stone-800 bg-[#0d0f0d]">
-    <header class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-800 px-3 py-2">
+  <section class="mt-6 overflow-hidden rounded-lg bg-[#282c34]">
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-600 px-3 py-2">
       <span class="text-sm text-stone-400">How to use it:</span>
       <button
         class="rounded border border-stone-700 px-3 py-1 text-xs text-stone-300 hover:border-lime-300 hover:text-lime-300"
@@ -12,7 +12,7 @@
         {{ copyStatus || 'Copy' }}
       </button>
     </header>
-    <div class="overflow-x-auto text-xs leading-6">
+    <div class="overflow-x-auto p-1 text-xs leading-6">
       <code-block
         class="block max-w-full"
         bind-source="snippet"
