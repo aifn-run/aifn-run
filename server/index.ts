@@ -550,10 +550,12 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
     const where = profile ? "(f.is_public = 1 OR f.owner_id = ?)" : "f.is_public = 1";
     const filters = profile ? [profile.id] : [];
     const totalRow = await database.get(`SELECT COUNT(*) AS total FROM functions f WHERE ${where}`, filters);
-    const ordering = profile ? "CASE WHEN f.is_public = 0 AND f.owner_id = ? THEN 0 ELSE 1 END" : "0";
+    const ordering = profile
+      ? "CASE WHEN f.is_public = 0 AND f.owner_id = ? THEN 0 ELSE 1 END, v.name COLLATE NOCASE"
+      : "v.name COLLATE NOCASE";
     const orderingArgs = profile ? [profile.id] : [];
     const rows = await database.all(
-      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_slug, v.provider_endpoint, v.input_schema, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE ${where} ORDER BY ${ordering}, v.name COLLATE NOCASE LIMIT ? OFFSET ?`,
+      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_slug, v.provider_endpoint, v.input_schema, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE ${where} ORDER BY ${ordering} LIMIT ? OFFSET ?`,
       [...filters, ...orderingArgs, pageSize, offset],
     );
     const total = Number(totalRow?.total || 0);
