@@ -25,7 +25,7 @@
               aria-label="Input name"
             /><span>:</span
             ><select
-              class="rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+              class="bg-transparent px-2 py-1 text-amber-300 outline-none"
               bind-value="item.type"
               on-input="setInputType(item, $event.target.value)"
               aria-label="Input type"
@@ -53,7 +53,7 @@
             aria-label="New input name"
           /><span>:</span
           ><select
-            class="rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+            class="bg-transparent px-2 py-1 text-amber-300 outline-none"
             bind-value="newInputType"
             on-input="setNewInputType($event.target.value)"
             aria-label="New input type"
@@ -77,7 +77,7 @@
         <div>
           <span class="text-violet-300">const</span> output =
           <select
-            class="rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+            class="bg-transparent px-2 py-1 text-amber-300 outline-none"
             bind-value="output"
             on-input="setOutput($event.target.value)"
             aria-label="Output format"
@@ -89,7 +89,7 @@
         <div>
           <span class="text-violet-300">const</span> provider =
           <select
-            class="max-w-[min(100%,24rem)] rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+            class="max-w-[min(100%,24rem)] bg-transparent px-2 py-1 text-amber-300 outline-none"
             bind-value="providerSlug"
             on-input="setProviderSlug($event.target.value)"
             aria-label="Provider"
@@ -165,7 +165,12 @@
       <span class="text-xs text-stone-500">{{ status }}</span>
     </footer>
     <template if="activeId">
-      <function-client-snippet bind-function-id="activeId" bind-input-schema="inputs"></function-client-snippet>
+      <function-client-snippet
+        bind-function-id="activeId"
+        bind-input-schema="inputs"
+        bind-function-name="functionName"
+        bind-output="output"
+      ></function-client-snippet>
     </template>
   </section>
 
