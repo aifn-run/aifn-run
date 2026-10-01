@@ -144,6 +144,16 @@
       >
         cancel
       </button>
+      <template if="activeId">
+        <button
+          class="rounded border border-red-900 bg-red-950/30 px-4 py-2 text-red-300 hover:border-red-500 hover:bg-red-950/60 disabled:opacity-50"
+          type="button"
+          on-click="deleteFunction()"
+          bind-disabled="saving"
+        >
+          delete
+        </button>
+      </template>
       <button
         class="rounded bg-lime-300 px-4 py-2 font-bold text-stone-950 hover:bg-lime-200 disabled:opacity-50"
         type="button"
@@ -182,7 +192,9 @@
 
       function addInput() {
         const name = newInputName.value.trim();
-        if (!name) return;
+        if (!name) {
+          return;
+        }
         setInputs([...inputs.value, { name, type: newInputType.value }]);
         setNewInputName("");
         setNewInputType("string");
@@ -207,7 +219,9 @@
       async function load() {
         const providerResponse = await fetch("/api/providers", { credentials: "include" });
         setProviders(providerResponse.ok ? await providerResponse.json() : []);
-        if (!functionId.value) return;
+        if (!functionId.value) {
+          return;
+        }
 
         setActiveId(functionId.value);
         const response = await fetch(`/api/fn/${functionId.value}`, { credentials: "include" });
@@ -250,10 +264,34 @@
             }),
           });
           const data = await response.json();
-          if (!response.ok) throw new Error(data.error?.message || response.status);
+          if (!response.ok) {
+            throw new Error(data.error?.message || response.status);
+          }
           setActiveId(data.functionId);
           setStatus(`saved v${data.version}`);
           onSaved.value(data.functionId);
+        } catch (error) {
+          setStatus(error.message);
+        } finally {
+          setSaving(false);
+        }
+      }
+
+      async function deleteFunction() {
+        const id = activeId.value;
+        if (!id || !window.confirm(`Delete "${functionName.value || "this function"}" and all its versions?`)) {
+          return;
+        }
+
+        setSaving(true);
+        setStatus("");
+        try {
+          const response = await fetch(`/api/fn/${id}`, { method: "DELETE", credentials: "include" });
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error?.message || `Delete failed (${response.status})`);
+          }
+          onCancel.value();
         } catch (error) {
           setStatus(error.message);
         } finally {
@@ -290,6 +328,7 @@
         togglePublic,
         cancel,
         save,
+        deleteFunction,
       };
     }
   </script>
