@@ -45,15 +45,7 @@
       </section>
     </div>
 
-    <section
-      class="overflow-hidden rounded-xl border border-stone-700 bg-[#101310]"
-      class-hidden="view !== 'function-editor'"
-    >
-      <header class="flex items-center gap-3 border-b border-stone-800 px-5 py-4">
-        <button class="text-stone-400 hover:text-white" on-click="showList()">←</button
-        ><span class="text-sm text-stone-500">const function</span
-        ><strong class="text-sm text-lime-300">{{ functionName || 'newFunction' }}</strong>
-      </header>
+    <div class-hidden="view !== 'function-editor'">
       <div class="space-y-4 p-6 font-mono text-sm">
         <div>
           <span class="text-violet-300">const</span> name =
@@ -143,7 +135,7 @@
             </button>
           </div>
         </div>
-        <div>];</div>
+        <div>]</div>
         <div><span class="text-violet-300">const</span> prompt = <span class="text-amber-300">`</span></div>
         <textarea
           class="ml-6 min-h-48 w-[min(100%-1.5rem,70rem)] resize-y rounded-lg border border-stone-700 bg-transparent p-2 pl-4 text-sm leading-7 text-stone-200 outline-none focus:border-lime-300 focus:ring-0"
@@ -152,32 +144,26 @@
           placeholder="Write instructions. Interpolate with named inputs."
         ></textarea>
         <div><span class="text-amber-300">`</span>;</div>
-        <div class="flex items-center gap-2">
-          <input
-            class="h-4 w-4 rounded border border-stone-700 accent-lime-300"
-            type="checkbox"
-            bind-checked="isPublic"
-            on-input="setPublic($event.target.checked)"
-          /><span>public</span>
+        <div>
+          <span class="text-violet-300">const</span> public =
+          <button
+            class="border-0 bg-transparent p-0 text-cyan-300 hover:underline"
+            type="button"
+            on-click="togglePublic()"
+          >
+            {{ isPublic ? 'true' : 'false' }}</button
+          >;
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 rounded-lg border border-stone-700 p-2">
           <button class="rounded bg-stone-700 px-4 py-2" on-click="showList()">cancel</button
           ><button class="rounded bg-lime-300 px-4 py-2 font-bold text-black" on-click="saveFunction($event)">
             {{ saving ? 'saving...' : 'save' }}</button
           ><span class="self-center text-xs text-stone-500">{{ status }}</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section
-      class="overflow-hidden rounded-xl border border-stone-700 bg-[#101310]"
-      class-hidden="view !== 'provider-editor'"
-    >
-      <header class="flex items-center gap-3 border-b border-stone-800 px-5 py-4">
-        <button class="text-stone-400 hover:text-white" on-click="showList()">←</button
-        ><span class="text-sm text-stone-500">const provider</span
-        ><strong class="text-sm text-lime-300">{{ providerName || 'newProvider' }}</strong>
-      </header>
+    <div class-hidden="view !== 'provider-editor'">
       <div class="space-y-4 p-6 font-mono text-sm">
         <div>
           <span class="text-violet-300">const</span> name =
@@ -216,14 +202,14 @@
             placeholder="optional key"
           />;
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 rounded-lg border border-stone-700 p-2">
           <button class="rounded bg-stone-700 px-4 py-2" on-click="showList()">cancel</button
           ><button class="rounded bg-lime-300 px-4 py-2 font-bold text-black" on-click="saveProvider($event)">
             {{ saving ? 'saving...' : 'save' }}</button
           ><span class="self-center text-xs text-stone-500">{{ status }}</span>
         </div>
       </div>
-    </section>
+    </div>
   </main>
   <script setup>
     import { hook, onInit } from "@li3/web";
@@ -320,6 +306,9 @@
         setPublic(false);
         route("function-editor");
         syncProviderOptions();
+      }
+      function togglePublic() {
+        setPublic(!isPublic.value);
       }
       async function editFunction(fn) {
         setSelectedId(fn.functionId);
@@ -474,6 +463,7 @@
         setProviderModel,
         setProviderKey,
         newFunction,
+        togglePublic,
         editFunction,
         newProvider,
         editProvider,
