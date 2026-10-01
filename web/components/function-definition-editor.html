@@ -1,13 +1,13 @@
 <template component="function-definition-editor">
   <link rel="component" href="/components/function-client-snippet.html" />
-  <section class="mx-auto max-w-4xl font-mono text-sm leading-8 text-stone-200">
-    <div class="overflow-x-auto rounded-lg border border-stone-800 bg-[#0d0f0d] p-5">
+  <section class="mx-auto font-mono text-sm leading-8 text-stone-200">
+    <div class="overflow-x-auto rounded-lg bg-[#0d0f0d] p-5">
       <div class="whitespace-nowrap">
         <span class="text-violet-300">function</span>
         <input
-          class="w-56 rounded border border-stone-700 bg-transparent px-2 py-1 text-lime-300 outline-none focus:border-lime-300"
+          class="w-56 bg-transparent text-lime-300 outline-none"
           bind-value="functionName"
-          on-input="setFunctionName($event.target.value)"
+          on-input="(setFunctionName($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
           placeholder="functionName"
           aria-label="Function name"
         />
@@ -18,9 +18,9 @@
         <template for="item of inputs"
           ><div class="flex flex-wrap items-center gap-2">
             <input
-              class="w-40 rounded border border-stone-700 bg-transparent px-2 py-1 text-lime-300 outline-none focus:border-lime-300"
+              class="w-40 bg-transparent text-lime-300 outline-none"
               bind-value="item.name"
-              on-input="setInputName(item, $event.target.value)"
+              on-input="(setInputName(item, $event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
               placeholder="inputName"
               aria-label="Input name"
             /><span>:</span
@@ -46,10 +46,10 @@
         >
         <div class="flex flex-wrap items-center gap-2 border-t border-dashed border-stone-800 pt-2">
           <input
-            class="w-40 rounded border border-stone-700 bg-transparent px-2 py-1 text-lime-300 outline-none focus:border-lime-300"
+            class="w-40 bg-transparent text-lime-300 outline-none"
             bind-value="newInputName"
-            on-input="setNewInputName($event.target.value)"
-            placeholder="new input"
+            on-input="(setNewInputName($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
+            placeholder="inputName"
             aria-label="New input name"
           /><span>:</span
           ><select
@@ -103,9 +103,9 @@
         <div>
           <span class="text-violet-300">const</span> model =
           <input
-            class="w-56 rounded border border-stone-700 bg-transparent px-2 py-1 text-amber-300 outline-none focus:border-lime-300"
+            class="w-56 bg-transparent text-amber-300 outline-none"
             bind-value="model"
-            on-input="setModel($event.target.value)"
+            on-input="(setModel($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
             placeholder="provider default"
             aria-label="Model"
           />
