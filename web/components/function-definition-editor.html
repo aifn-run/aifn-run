@@ -7,7 +7,7 @@
         <input
           class="w-56 bg-transparent text-lime-300 outline-none"
           bind-value="functionName"
-          on-input="(setFunctionName($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 1)) + 'px')"
+          on-input="(setFunctionName($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 10)) + 'px')"
           placeholder="functionName"
           aria-label="Function name"
         />
@@ -20,7 +20,7 @@
             <input
               class="w-40 bg-transparent text-lime-300 outline-none"
               bind-value="item.name"
-              on-input="(setInputName(item, $event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 1)) + 'px')"
+              on-input="(setInputName(item, $event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 10)) + 'px')"
               placeholder="inputName"
               aria-label="Input name"
             /><span>:</span
@@ -48,7 +48,7 @@
           <input
             class="w-40 bg-transparent text-lime-300 outline-none"
             bind-value="newInputName"
-            on-input="(setNewInputName($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 1)) + 'px')"
+            on-input="(setNewInputName($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 10)) + 'px')"
             placeholder="inputName"
             aria-label="New input name"
           /><span>:</span
@@ -105,7 +105,7 @@
           <input
             class="w-56 bg-transparent text-amber-300 outline-none"
             bind-value="model"
-            on-input="(setModel($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 1)) + 'px')"
+            on-input="(setModel($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 10)) + 'px')"
             bind-placeholder="modelPlaceholder"
             aria-label="Model"
           />

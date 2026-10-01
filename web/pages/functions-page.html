@@ -6,7 +6,7 @@
           <a class="hover:text-lime-300" href="/">← Home</a>
         </nav>
       </header>
-      <section class="max-w-full overflow-x-auto text-base leading-8 text-[#c5c8d0]">
+      <section class="max-w-full overflow-x-auto text-sm leading-8 text-[#c5c8d0]">
         <div class="text-sm text-stone-500">// functions</div>
         <div class="text-gray-500"><span class="text-fuchsia-400">const</span> functions = [</div>
         <template for="fn of functions"
@@ -25,10 +25,10 @@
         </button>
         <div class="text-gray-500">];</div>
       </section>
-      <section class="mt-8 max-w-full overflow-x-auto text-base leading-8 text-gray-500">
+      <section class="mt-8 max-w-full overflow-x-auto text-sm leading-8 text-gray-500">
         <div class="text-sm text-stone-500">// providers</div>
         <div><span class="text-fuchsia-400">const</span> providers = [</div>
-        <table class="min-w-[1100px] w-full table-fixed border-collapse text-left">
+        <table class="min-w-[1100px] table-fixed border-collapse text-left">
           <colgroup>
             <col class="w-[2ch]" />
             <col class="w-[14ch]" />
@@ -87,7 +87,7 @@
           <input
             class="w-64 bg-transparent text-lime-300 outline-none placeholder:text-stone-500"
             bind-value="providerName"
-            on-input="(setProviderName($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 1)) + 'px')"
+            on-input="(setProviderName($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 10)) + 'px')"
             placeholder="name"
           />
         </div>
@@ -96,7 +96,7 @@
           <input
             class="w-[min(100%,42rem)] bg-transparent text-amber-300 outline-none placeholder:text-stone-500"
             bind-value="providerUrl"
-            on-input="(setProviderUrl($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 1)) + 'px')"
+            on-input="(setProviderUrl($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 10)) + 'px')"
             placeholder="url"
           />
         </div>
@@ -105,7 +105,7 @@
           <input
             class="w-56 bg-transparent text-amber-300 outline-none placeholder:text-stone-500"
             bind-value="providerModel"
-            on-input="(setProviderModel($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 1)) + 'px')"
+            on-input="(setProviderModel($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 10)) + 'px')"
             placeholder="defaultModel"
           />
         </div>
@@ -115,7 +115,7 @@
             class="w-56 bg-transparent text-amber-300 outline-none"
             type="password"
             bind-value="providerKey"
-            on-input="(setProviderKey($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 1)) + 'px')"
+            on-input="(setProviderKey($event.target.value), $event.target.style.width = (9 * ($event.target.value.length || 10)) + 'px')"
             placeholder="optional key"
           />
         </div>
