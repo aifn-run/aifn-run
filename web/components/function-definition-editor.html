@@ -14,7 +14,7 @@
         <span>(</span>
       </div>
 
-      <div class="ml-6 space-y-2">
+      <div class="ml-6 space-y-0">
         <template for="item of inputs"
           ><div class="flex flex-wrap items-center gap-2">
             <input
@@ -44,7 +44,7 @@
             </button>
           </div></template
         >
-        <div class="flex flex-wrap items-center gap-2 border-t border-dashed border-stone-800 pt-2">
+        <div class="flex flex-wrap items-center gap-2">
           <input
             class="w-40 bg-transparent text-lime-300 outline-none"
             bind-value="newInputName"
@@ -62,7 +62,7 @@
             <option value="number">number</option>
             <option value="boolean">boolean</option></select
           ><button
-            class="rounded border border-stone-700 px-2 leading-7 text-lime-300 hover:border-lime-300"
+            class="px-2 leading-7 text-lime-300 hover:text-lime-200"
             type="button"
             on-click="addInput()"
             aria-label="Add input"

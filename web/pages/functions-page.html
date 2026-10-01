@@ -81,49 +81,61 @@
     </template>
 
     <div class-hidden="view !== 'provider-editor'">
-      <div class="space-y-4 p-6 font-mono text-sm">
+      <div class="space-y-1 p-5 font-mono text-sm leading-8">
         <div>
           <span class="text-violet-300">const</span> name =
           <input
-            class="w-64 rounded-lg border border-stone-700 bg-transparent p-1 text-lime-300 outline-none focus:border-lime-300 focus:ring-0"
+            class="w-64 bg-transparent text-lime-300 outline-none"
             bind-value="providerName"
-            on-input="setProviderName($event.target.value)"
+            on-input="(setProviderName($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
             placeholder="ollama"
           />
         </div>
         <div>
           <span class="text-violet-300">const</span> url =
           <input
-            class="w-[min(100%,42rem)] rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
+            class="w-56 max-w-[min(100%,42rem)] bg-transparent text-amber-300 outline-none"
             bind-value="providerUrl"
-            on-input="setProviderUrl($event.target.value)"
+            on-input="(setProviderUrl($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
             placeholder="https://api.openai.com/v1/chat/completions"
           />
         </div>
         <div>
           <span class="text-violet-300">const</span> defaultModel =
           <input
-            class="w-64 rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
+            class="w-56 bg-transparent text-amber-300 outline-none"
             bind-value="providerModel"
-            on-input="setProviderModel($event.target.value)"
+            on-input="(setProviderModel($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
             placeholder="gpt5-nano"
           />
         </div>
         <div>
           <span class="text-violet-300">const</span> apiKey =
           <input
-            class="w-64 rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
+            class="w-56 bg-transparent text-amber-300 outline-none"
             type="password"
             bind-value="providerKey"
-            on-input="setProviderKey($event.target.value)"
+            on-input="(setProviderKey($event.target.value), $event.target.style.width = (9 * $event.target.value.length) + 'px')"
             placeholder="optional key"
           />
         </div>
-        <div class="flex gap-3 p-2">
-          <button class="rounded bg-stone-700 px-4 py-2" on-click="showList()">cancel</button
-          ><button class="rounded bg-lime-300 px-4 py-2 font-bold text-black" on-click="saveProvider($event)">
-            {{ saving ? 'saving...' : 'save' }}</button
-          ><span class="self-center text-xs text-stone-500">{{ status }}</span>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            class="rounded border border-stone-700 px-4 py-2 hover:border-stone-400"
+            type="button"
+            on-click="showList()"
+          >
+            cancel
+          </button>
+          <button
+            class="rounded bg-lime-300 px-4 py-2 font-bold text-stone-950 hover:bg-lime-200 disabled:opacity-50"
+            type="button"
+            on-click="saveProvider($event)"
+            bind-disabled="saving"
+          >
+            {{ saving ? 'saving...' : 'save' }}
+          </button>
+          <span class="text-xs text-stone-500">{{ status }}</span>
         </div>
       </div>
     </div>
