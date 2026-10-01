@@ -514,7 +514,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
       return true;
     }
     const rows = await database.all(
-      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_slug, v.provider_endpoint, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version`,
+      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_slug, v.provider_endpoint, v.input_schema, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version`,
     );
     return send(
       res,
@@ -525,6 +525,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
         name: row.name,
         model: row.model,
         provider: row.provider_slug || (row.provider_endpoint ? new URL(row.provider_endpoint).hostname : "default"),
+        inputSchema: JSON.parse(row.input_schema || "[]"),
         output: row.output,
         public: Boolean(row.is_public),
       })),
@@ -532,7 +533,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
   }
   if (parts[1] === "fn" && parts.length === 2 && req.method === "GET") {
     const rows = await database.all(
-      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_slug, v.provider_endpoint, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE f.is_public = 1`,
+      `SELECT f.id AS function_id, f.active_version AS version, v.name, v.model, v.provider_slug, v.provider_endpoint, v.input_schema, v.output, f.is_public FROM functions f JOIN function_versions v ON v.function_id = f.id AND v.version = f.active_version WHERE f.is_public = 1`,
     );
     return send(
       res,
@@ -543,6 +544,7 @@ async function api(req: IncomingMessage, res: ServerResponse, url: URL) {
         name: row.name,
         model: row.model,
         provider: row.provider_slug || (row.provider_endpoint ? new URL(row.provider_endpoint).hostname : "default"),
+        inputSchema: JSON.parse(row.input_schema || "[]"),
         output: row.output,
         public: Boolean(row.is_public),
       })),

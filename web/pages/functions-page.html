@@ -1,76 +1,47 @@
 <template component="functions-page">
   <main class="mx-auto min-h-screen max-w-[1880px] px-6 py-8 font-mono text-stone-200">
     <div class="space-y-6" class-hidden="view !== 'list'">
-      <section class="overflow-hidden rounded-xl border border-stone-700 bg-[#101310]">
-        <header class="flex items-center justify-between border-b border-stone-700 px-4 py-3">
-          <h1 class="text-lg font-bold">const functions = [</h1>
+      <section class="max-w-full overflow-x-auto text-base leading-8 text-[#c5c8d0]">
+        <div class="flex items-center justify-between">
+          <div><span class="text-fuchsia-400">const</span> functions = [</div>
           <button
-            class="rounded bg-stone-500 px-3 py-1 text-xs text-white hover:bg-lime-300 hover:text-black"
+            class="rounded bg-stone-500 px-2 py-0.5 text-sm text-white hover:bg-lime-300 hover:text-black"
             on-click="newFunction()"
           >
             new()
           </button>
-        </header>
-        <div
-          class="grid grid-cols-[minmax(180px,1fr)_minmax(100px,.8fr)_minmax(100px,.8fr)_4rem] border-b border-stone-800 bg-stone-800/70 px-4 py-2 text-sm text-stone-400"
-        >
-          <span>functionName</span><span>provider</span><span>model</span><span></span>
         </div>
-        <template for="fn of functions">
-          <div
-            class="grid grid-cols-[minmax(180px,1fr)_minmax(100px,.8fr)_minmax(100px,.8fr)_4rem] items-center border-b border-stone-800 px-4 py-2 text-sm"
-          >
-            <button class="text-left text-lime-300 hover:text-lime-200" on-click="editFunction(fn)">
-              {{ fn.name || 'functionName' }}(<template for="input of fn.inputSchema"
-                ><span>{{ input.name }}: {{ input.type }}, </span></template
-              >),
+        <template for="fn of functions"
+          ><div class="whitespace-nowrap pl-8">
+            <button class="text-left hover:underline" on-click="editFunction(fn)">
+              <span class="text-green-400">{{ fn.name || 'functionName' }}</span>(<span>{{ fn.inputSignature }}</span>),
             </button>
-            <span class="text-stone-400">{{ fn.provider || 'default' }}</span
-            ><span class="text-stone-400">{{ fn.model || 'default' }}</span
-            ><button
-              class="rounded bg-stone-600 px-2 py-1 text-xs text-white hover:bg-lime-300 hover:text-black"
-              on-click="editFunction(fn)"
-            >
-              edit
-            </button>
-          </div>
-        </template>
-        <div class="border-b border-stone-800 px-4 py-2 text-sm text-stone-500">];</div>
-        <footer class="flex justify-end px-4 py-2 text-xs text-stone-400">{{ functions.length }} items</footer>
+          </div></template
+        >
+        <template if="!functions.length"><div class="py-2 pl-8 text-stone-500">// no functions yet</div></template>
+        <div>];</div>
       </section>
-      <section class="overflow-hidden rounded-xl border border-stone-700 bg-[#101310]">
-        <header class="flex items-center justify-between border-b border-stone-700 px-4 py-3">
-          <h2 class="text-lg font-bold">const providers = [</h2>
+      <section class="mt-8 max-w-full overflow-x-auto text-base leading-8 text-[#c5c8d0]">
+        <div class="flex items-center justify-between">
+          <div><span class="text-fuchsia-400">const</span> providers = [</div>
           <button
-            class="rounded bg-stone-500 px-3 py-1 text-xs text-white hover:bg-lime-300 hover:text-black"
+            class="rounded bg-stone-500 px-2 py-0.5 text-sm text-white hover:bg-lime-300 hover:text-black"
             on-click="newProvider()"
           >
             new()
           </button>
-        </header>
-        <div
-          class="grid grid-cols-[minmax(100px,1fr)_minmax(150px,1.5fr)_minmax(100px,1fr)_4rem] border-b border-stone-800 bg-stone-800/70 px-4 py-2 text-sm text-stone-400"
-        >
-          <span>name</span><span>url</span><span>defaultModel</span><span></span>
         </div>
         <template for="provider of providers"
-          ><div
-            class="grid grid-cols-[minmax(100px,1fr)_minmax(150px,1.5fr)_minmax(100px,1fr)_4rem] items-center gap-2 border-b border-stone-800 px-4 py-2 text-sm"
-          >
-            <button class="text-left text-lime-300" on-click="editProvider(provider)">
-              <span>'</span>{{ provider.slug }}<span>'</span>,</button
-            ><span class="truncate text-stone-400"><span>'</span>{{ provider.url }}<span>'</span>,</span
-            ><span class="text-stone-400"><span>'</span>{{ provider.defaultModel }}<span>'</span>,</span
-            ><button
-              class="rounded bg-stone-600 px-2 py-1 text-xs text-white hover:bg-lime-300 hover:text-black"
-              on-click="editProvider(provider)"
-            >
-              edit
+          ><div class="whitespace-nowrap pl-8">
+            <button class="text-left hover:underline" on-click="editProvider(provider)">
+              &#123; name: <span class="text-green-400">'<span>{{ provider.slug }}</span>'</span>, defaultModel:
+              <span class="text-green-400">'<span>{{ provider.defaultModel }}</span>'</span>, url:
+              <span class="text-green-400">'<span>{{ provider.url }}</span>'</span> &#125;,
             </button>
           </div></template
         >
-        <div class="border-b border-stone-800 px-4 py-2 text-sm text-stone-500">];</div>
-        <footer class="flex justify-end px-4 py-2 text-xs text-stone-400">{{ providers.length }} items</footer>
+        <template if="!providers.length"><div class="py-2 pl-8 text-stone-500">// no providers yet</div></template>
+        <div>];</div>
       </section>
     </div>
 
@@ -87,7 +58,7 @@
         <div>
           <span class="text-violet-300">const</span> name =
           <input
-            class="w-64 border-0 bg-transparent p-0 text-lime-300 outline-none focus:ring-0"
+            class="w-64 rounded-lg border border-stone-700 bg-transparent p-1 text-lime-300 outline-none focus:border-lime-300 focus:ring-0"
             bind-value="functionName"
             on-input="setFunctionName($event.target.value)"
             placeholder="functionName"
@@ -97,7 +68,7 @@
           <span class="text-violet-300">const</span> provider =
           <select
             id="function-provider"
-            class="border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+            class="rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
             bind-value="providerSlug"
             on-input="onProviderChange($event)"
           >
@@ -107,7 +78,7 @@
         <div>
           <span class="text-violet-300">const</span> model =
           <input
-            class="w-56 border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+            class="w-56 rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
             bind-value="model"
             on-input="setModel($event.target.value)"
             placeholder="provider default"
@@ -116,7 +87,7 @@
         <div>
           <span class="text-violet-300">const</span> output =
           <select
-            class="border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+            class="rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
             bind-value="output"
             on-input="setOutput($event.target.value)"
           >
@@ -130,13 +101,13 @@
             ><div class="input-definition-row flex flex-wrap items-center gap-2">
               <span class="text-stone-500">{ name:</span
               ><input
-                class="w-40 border-0 bg-transparent p-0 text-lime-300 outline-none focus:ring-0"
+                class="w-40 rounded-lg border border-stone-700 bg-transparent p-1 text-lime-300 outline-none focus:border-lime-300 focus:ring-0"
                 bind-value="item.name"
                 on-input="updateInputFromEvent($event, 'name')"
                 placeholder="name"
               /><span class="text-stone-500">, type:</span
               ><select
-                class="border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+                class="rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
                 bind-value="item.type"
                 on-input="updateInputFromEvent($event, 'type')"
               >
@@ -150,13 +121,13 @@
           <div class="flex flex-wrap items-center gap-2">
             <span class="text-stone-500">{ name:</span
             ><input
-              class="w-40 border-0 bg-transparent p-0 text-lime-300 outline-none focus:ring-0"
+              class="w-40 rounded-lg border border-stone-700 bg-transparent p-1 text-lime-300 outline-none focus:border-lime-300 focus:ring-0"
               bind-value="newInputName"
               on-input="setNewInputName($event.target.value)"
               placeholder="input name"
             /><span class="text-stone-500">, type:</span
             ><select
-              class="border-0 bg-transparent p-0 text-amber-300 outline-none focus:ring-0"
+              class="rounded-lg border border-stone-700 bg-transparent p-1 text-amber-300 outline-none focus:border-lime-300 focus:ring-0"
               bind-value="newInputType"
               on-input="setNewInputType($event.target.value)"
             >
@@ -175,16 +146,19 @@
         <div>];</div>
         <div><span class="text-violet-300">const</span> prompt = <span class="text-amber-300">`</span></div>
         <textarea
-          class="ml-6 min-h-48 w-[min(100%-1.5rem,70rem)] resize-y border-0 border-l border-stone-700 bg-transparent py-2 pl-4 text-sm leading-7 text-stone-200 outline-none focus:ring-0"
+          class="ml-6 min-h-48 w-[min(100%-1.5rem,70rem)] resize-y rounded-lg border border-stone-700 bg-transparent p-2 pl-4 text-sm leading-7 text-stone-200 outline-none focus:border-lime-300 focus:ring-0"
           bind-value="prompt"
           on-input="setPrompt($event.target.value)"
           placeholder="Write instructions. Interpolate with named inputs."
         ></textarea>
         <div><span class="text-amber-300">`</span>;</div>
         <div class="flex items-center gap-2">
-          <input type="checkbox" bind-checked="isPublic" on-input="setPublic($event.target.checked)" /><span
-            >public</span
-          >
+          <input
+            class="h-4 w-4 rounded border border-stone-700 accent-lime-300"
+            type="checkbox"
+            bind-checked="isPublic"
+            on-input="setPublic($event.target.checked)"
+          /><span>public</span>
         </div>
         <div class="flex gap-3">
           <button class="rounded bg-stone-700 px-4 py-2" on-click="showList()">cancel</button
@@ -289,7 +263,15 @@
           fetch("/api/fn?visibility=all", { credentials: "include" }),
           fetch("/api/providers", { credentials: "include" }),
         ]);
-        if (f.ok) setFunctions(await f.json());
+        if (f.ok) {
+          const rows = await f.json();
+          setFunctions(
+            rows.map((fn) => ({
+              ...fn,
+              inputSignature: (fn.inputSchema || []).map((input) => `${input.name}: ${input.type}`).join(", "),
+            })),
+          );
+        }
         if (p.ok) {
           const list = await p.json();
           setProviders(list);

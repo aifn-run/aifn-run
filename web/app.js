@@ -1,5 +1,7 @@
 const app = document.querySelector("[data-app]");
-if (location.pathname === "/editor") {history.replaceState({}, "", "/functions?view=function-editor");}
+if (location.pathname === "/editor") {
+  history.replaceState({}, "", "/functions?view=function-editor");
+}
 const pageRoot = document.createElement("div");
 pageRoot.id = "page-root";
 app.append(pageRoot);
@@ -23,7 +25,9 @@ const sources = ["/components/app-shell.html", route.template];
 
 for (const source of sources) {
   const response = await fetch(source, { cache: "no-cache" });
-  if (!response.ok) {throw new Error(`Unable to load ${source}`);}
+  if (!response.ok) {
+    throw new Error(`Unable to load ${source}`);
+  }
   let html = await response.text();
   document.body.insertAdjacentHTML("afterbegin", html);
 }
