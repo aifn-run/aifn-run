@@ -13,9 +13,10 @@ async function request(path, options = {}) {
 }
 
 async function create(options) {
+  const deduplicatePrompt = typeof options === "string";
   const response = await request("/api/fn", {
     method: "POST",
-    body: JSON.stringify(typeof options === "string" ? { prompt: options } : options),
+    body: JSON.stringify(deduplicatePrompt ? { prompt: options, deduplicatePrompt: true } : options),
   });
   return (await response.json()).functionId;
 }

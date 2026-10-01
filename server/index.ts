@@ -3,7 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { createAuth } from "./auth.js";
 import migrationInitialSchema from "./migrations/001-initial-schema.js";
 import migrationProviderEndpoint from "./migrations/002-provider-endpoint.js";
@@ -12,6 +12,7 @@ import migrationOidcSessions from "./migrations/004-oidc-sessions.js";
 import migrationFunctionInputSchema from "./migrations/005-function-input-schema.js";
 import migrationProviderSlug from "./migrations/006-provider-slug.js";
 import migrationProviders from "./migrations/007-providers.js";
+import migrationPromptHash from "./migrations/008-function-prompt-hash.js";
 import { decrypt, encrypt } from "./secrets.js";
 import type { Migration } from "./migrations/types.js";
 
@@ -95,6 +96,7 @@ async function migrate() {
     migrationFunctionInputSchema,
     migrationProviderSlug,
     migrationProviders,
+    migrationPromptHash,
   ];
   for (const migration of migrations) {
     if (applied.has(migration.id)) {
@@ -171,6 +173,10 @@ function versionJSON(row: any): FunctionVersion {
   };
 }
 
+function hashPrompt(prompt: string) {
+  return createHash("sha256").update(prompt, "utf8").digest("hex");
+}
+
 async function getVersion(id: string, version?: number) {
   const row = version
     ? await database.get(
@@ -203,9 +209,31 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
   if (input.public !== undefined && typeof input.public !== "boolean") {
     return error(res, 400, "INVALID_VISIBILITY", "public must be a boolean");
   }
+  if (input.deduplicatePrompt !== undefined && typeof input.deduplicatePrompt !== "boolean") {
+    return error(res, 400, "INVALID_PROMPT_DEDUPLICATION", "deduplicatePrompt must be a boolean");
+  }
+  if (
+    input.deduplicatePrompt === true &&
+    (id || Object.keys(input).some((key) => key !== "prompt" && key !== "deduplicatePrompt"))
+  ) {
+    return error(
+      res,
+      400,
+      "INVALID_PROMPT_DEDUPLICATION",
+      "deduplicatePrompt only supports prompt-only function creation",
+    );
+  }
   const functionId = id || randomUUID();
   const ownerId = await profileId(req);
   if (!ownerId) return error(res, 401, "AUTHENTICATION_REQUIRED", "Authentication required");
+  const promptHash = input.deduplicatePrompt === true ? hashPrompt(input.prompt) : null;
+  if (promptHash) {
+    const existing = await database.get(`SELECT id FROM functions WHERE owner_id = ? AND prompt_hash = ?`, [
+      ownerId,
+      promptHash,
+    ]);
+    if (existing) return send(res, 200, { functionId: existing.id });
+  }
   const now = new Date().toISOString();
   const current = id ? await database.get(`SELECT * FROM functions WHERE id = ?`, [id]) : null;
   if (id && !current) {
@@ -214,13 +242,24 @@ async function saveFunction(req: IncomingMessage, res: ServerResponse, id?: stri
   if (current && current.owner_id !== ownerId) return error(res, 404, "FUNCTION_NOT_FOUND", "Function not found");
   const version = current ? Number(current.latest_version) + 1 : 1;
   if (!current) {
-    await database.run(
-      `INSERT INTO functions (id, owner_id, is_public, active_version, latest_version, created_at, updated_at) VALUES (?, ?, ?, 1, 1, ?, ?)`,
-      [functionId, ownerId, input.public === true ? 1 : 0, now, now],
-    );
+    try {
+      await database.run(
+        `INSERT INTO functions (id, owner_id, is_public, active_version, latest_version, created_at, updated_at, prompt_hash) VALUES (?, ?, ?, 1, 1, ?, ?, ?)`,
+        [functionId, ownerId, input.public === true ? 1 : 0, now, now, promptHash],
+      );
+    } catch (cause) {
+      if (promptHash) {
+        const existing = await database.get(`SELECT id FROM functions WHERE owner_id = ? AND prompt_hash = ?`, [
+          ownerId,
+          promptHash,
+        ]);
+        if (existing) return send(res, 200, { functionId: existing.id });
+      }
+      throw cause;
+    }
   } else {
     await database.run(
-      `UPDATE functions SET is_public = ?, latest_version = ?, active_version = ?, updated_at = ? WHERE id = ?`,
+      `UPDATE functions SET is_public = ?, latest_version = ?, active_version = ?, updated_at = ?, prompt_hash = NULL WHERE id = ?`,
       [
         input.public === undefined ? Number(current.is_public) : input.public === true ? 1 : 0,
         version,

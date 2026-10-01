@@ -72,6 +72,12 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/FunctionInput"
       responses:
+        "200":
+          description: Existing owned function reused for the same prompt hash
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FunctionReference"
         "201":
           description: Function created
           content:
@@ -306,6 +312,10 @@ components:
               type:
                 type: string
                 enum: [string, number, boolean]
+        deduplicatePrompt:
+          type: boolean
+          default: false
+          description: On prompt-only creation, reuse an existing function owned by this account with the same SHA-256 prompt hash.
     OutputMode:
       type: string
       enum: [text, json]
@@ -354,6 +364,13 @@ components:
         pageSize: { type: integer, minimum: 1, maximum: 50 }
         total: { type: integer, minimum: 0 }
         hasNext: { type: boolean }
+    FunctionReference:
+      type: object
+      required: [functionId]
+      properties:
+        functionId:
+          type: string
+          format: uuid
     FunctionVersion:
       allOf:
         - $ref: "#/components/schemas/FunctionSummary"
