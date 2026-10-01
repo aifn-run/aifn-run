@@ -73,7 +73,7 @@
       </div>
       <div>) {</div>
 
-      <div class="ml-6 space-y-3 py-3">
+      <div class="ml-6 space-y-1 py-3">
         <div>
           <span class="text-violet-300">const</span> output =
           <select
@@ -124,9 +124,11 @@
         <div>
           <div><span class="text-violet-300">const</span> prompt = <span class="text-amber-300">`</span></div>
           <textarea
-            class="ml-4 min-h-48 w-[min(100%-1rem,68rem)] resize-y rounded border border-stone-700 bg-transparent p-3 text-sm leading-7 text-stone-200 outline-none focus:border-lime-300"
+            id="function-prompt"
+            class="ml-4 w-[min(100%-1rem,68rem)] resize-none overflow-y-auto rounded bg-transparent p-3 text-sm leading-7 text-amber-300 outline-none"
+            rows="3"
             bind-value="prompt"
-            on-input="setPrompt($event.target.value)"
+            on-input="updatePrompt($event)"
             placeholder="Write instructions. Interpolate with named inputs."
             aria-label="Function prompt"
           ></textarea>
@@ -221,6 +223,21 @@
         setPublic(!isPublic.value);
       }
 
+      function resizePrompt(textarea) {
+        const lineHeight = Number.parseFloat(getComputedStyle(textarea).lineHeight) || 28;
+        const verticalPadding =
+          Number.parseFloat(getComputedStyle(textarea).paddingTop) +
+          Number.parseFloat(getComputedStyle(textarea).paddingBottom);
+        const maxHeight = lineHeight * 30 + verticalPadding;
+        textarea.style.height = "auto";
+        textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+      }
+
+      function updatePrompt(event) {
+        setPrompt(event.target.value);
+        resizePrompt(event.target);
+      }
+
       async function load() {
         const providerResponse = await fetch("/api/providers", { credentials: "include" });
         setProviders(providerResponse.ok ? await providerResponse.json() : []);
@@ -243,6 +260,12 @@
         setOutput(data.output || "json");
         setInputs(data.inputSchema || []);
         setPublic(data.public);
+        requestAnimationFrame(() => {
+          const textarea = document.getElementById("function-prompt");
+          if (textarea) {
+            resizePrompt(textarea);
+          }
+        });
       }
 
       function cancel() {
@@ -331,6 +354,7 @@
         setInputName,
         setInputType,
         togglePublic,
+        updatePrompt,
         cancel,
         save,
         deleteFunction,
